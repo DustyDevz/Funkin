@@ -17,4 +17,3 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${EXPORT_PATH})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${EXPORT_PATH})
 
 add_subdirectory(funkin)
-add_subdirectory(game)
