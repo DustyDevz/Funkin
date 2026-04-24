@@ -1,0 +1,41 @@
+﻿{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows-debug",
+      "displayName": "Windows Debug",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/.cmake/windows-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PLUS_BUILD_EDITOR": "ON",
+        "PLUS_BUILD_PLUSC": "ON"
+      }
+    },
+    {
+      "name": "windows-release",
+      "displayName": "Windows Release",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/.cmake/windows-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "PLUS_BUILD_EDITOR": "OFF",
+        "PLUS_BUILD_PLUSC": "OFF"
+      }
+    },
+    {
+      "name": "windows-editor",
+      "displayName": "Windows Editor",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/.cmake/windows-editor",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "PLUS_BUILD_EDITOR": "ON",
+        "PLUS_BUILD_PLUSC": "ON"
+      }
+    }
+  ]
+}
