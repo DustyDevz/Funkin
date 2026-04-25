@@ -26,15 +26,18 @@
       }
     },
     {
-      "name": "windows-editor",
-      "displayName": "Windows Editor",
-      "generator": "Visual Studio 18 2026",
-      "architecture": "x64",
-      "binaryDir": "${sourceDir}/.cmake/windows-editor",
+      "name": "linux-debug",
+      "displayName": "Linux Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/.cmake/linux-debug",
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [ "Linux" ]
+        }
+      },
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "PLUS_BUILD_EDITOR": "ON",
-        "PLUS_BUILD_PLUSC": "ON"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PLUS_BUILD_EDITOR": "ON"
       }
     }
   ]
