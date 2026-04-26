@@ -41,6 +41,8 @@ namespace Funkin::Platform {
 
         ShowWindow(m_hwnd, SW_SHOW);
         UpdateWindow(m_hwnd);
+
+        return true;
     }
 
     bool Win32_Window::pump() {
