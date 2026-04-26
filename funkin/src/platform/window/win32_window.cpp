@@ -1,4 +1,5 @@
-#pragma once
+#ifdef _WIN32
+
 #include "win32_window.hpp"
 #include "core/engine.hpp"
 #include <stdexcept>
@@ -75,3 +76,5 @@ namespace Funkin::Platform {
         return DefWindowProcW(hwnd, msg, wp, lp);
     }
 }
+
+#endif

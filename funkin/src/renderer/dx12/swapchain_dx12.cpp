@@ -1,5 +1,5 @@
 #include "swapchain_dx12.hpp"
-#include <platform/win32_window.hpp>
+#include <platform/window/win32_window.hpp>
 #include <stdexcept>
 
 namespace Funkin::Renderer::DX12 {

@@ -1,4 +1,5 @@
 #include "core/engine.hpp"
+#include <iostream>
 
 #ifdef _WIN32
     #include <Windows.h>
@@ -17,7 +18,7 @@
     cfg.title = "Funkin";
     cfg.width = 1280;
     cfg.height = 720;
-    cfg.vsync = false;
+    cfg.vsync = true;
 
     auto& engine = Funkin::Core::Engine::get();
     engine.init(cfg);
