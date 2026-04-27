@@ -1,6 +1,9 @@
-#pragma once
-#ifdef _WIN32
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
 
+#pragma once
+
+#ifdef _WIN32
 #include "window.hpp"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

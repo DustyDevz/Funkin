@@ -1,3 +1,6 @@
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
+
 #ifdef _WIN32
 
 #include "window_win32.hpp"

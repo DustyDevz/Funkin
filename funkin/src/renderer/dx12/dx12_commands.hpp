@@ -1,4 +1,8 @@
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
+
 #pragma once
+
 #include <d3d12.h>
 #include <wrl/client.h>
 #include <renderer/renderer_common.hpp>

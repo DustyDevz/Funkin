@@ -1,4 +1,8 @@
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
+
 #pragma once
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <d3d12.h>

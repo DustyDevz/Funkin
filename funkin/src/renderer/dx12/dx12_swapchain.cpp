@@ -1,3 +1,6 @@
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
+
 #include "dx12_swapchain.hpp"
 #include <platform/window/window_win32.hpp>
 #include <stdexcept>

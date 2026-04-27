@@ -1,3 +1,6 @@
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
+
 #include "dx12_renderer.hpp"
 
 #pragma comment(lib, "d3d12.lib")

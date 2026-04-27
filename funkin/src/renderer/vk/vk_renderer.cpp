@@ -1,3 +1,6 @@
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
+
 #include "vk_renderer.hpp"
 
 namespace Funkin::Renderer::VK {
