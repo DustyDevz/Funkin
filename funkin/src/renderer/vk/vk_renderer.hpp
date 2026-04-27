@@ -9,8 +9,7 @@
 #include "vk_sync.hpp"
 
 namespace Funkin::Renderer::VK {
-
-class VK_Renderer : public IRenderer {
+    class VK_Renderer : public IRenderer {
     public:
         static VK_Renderer& get();
 
@@ -31,5 +30,7 @@ class VK_Renderer : public IRenderer {
         VK_Sync      m_sync;
 
         uint32_t m_imageIndex = 0;
+        uint32_t m_currentFrame = 0;
+        const int MAX_FRAMES_IN_FLIGHT = 2;
     };
 }

@@ -1,19 +1,20 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <vector>
 
 namespace Funkin::Renderer::VK {
     class VK_Sync {
     public:
-        void init(VkDevice device);
+        void init(VkDevice device, int maxFramesInFlight);
         void shutdown(VkDevice device);
 
-        VkSemaphore imageAvailable() const { return m_imageAvailable; }
-        VkSemaphore renderFinished() const { return m_renderFinished; }
-        VkFence     inFlight()       const { return m_inFlight; }
+        VkSemaphore imageAvailable(uint32_t i) const { return m_imageAvailable[i]; }
+        VkSemaphore renderFinished(uint32_t i) const { return m_renderFinished[i]; }
+        VkFence     inFlight(uint32_t i)       const { return m_inFlight[i]; }
 
     private:
-        VkSemaphore m_imageAvailable = VK_NULL_HANDLE;
-        VkSemaphore m_renderFinished = VK_NULL_HANDLE;
-        VkFence     m_inFlight       = VK_NULL_HANDLE;
+        std::vector<VkSemaphore> m_imageAvailable;
+        std::vector<VkSemaphore> m_renderFinished;
+        std::vector<VkFence>     m_inFlight;
     };
 }

@@ -20,7 +20,7 @@ namespace Funkin::Renderer::VK {
 
     private:
         void pickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface);
-        void createLogicalDevice();
+        void createLogicalDevice(VkSurfaceKHR surface);
 
         VkPhysicalDevice m_physical      = VK_NULL_HANDLE;
         VkDevice         m_device        = VK_NULL_HANDLE;

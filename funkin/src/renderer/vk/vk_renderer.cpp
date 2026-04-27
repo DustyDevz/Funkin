@@ -12,16 +12,19 @@ namespace Funkin::Renderer::VK {
         m_device.init(m_instance.get(), m_surface.get());
         m_swapchain.init(m_device.physical(), m_device.logical(),
                         m_surface.get(), w, h, vsync);
+        
+        uint32_t imageCount = m_swapchain.imageCount();
+        
         m_commands.init(m_device.logical(),
                         m_device.families().graphics,
-                        m_swapchain.framebuffer(0) ? 2 : 2);
-        m_sync.init(m_device.logical());
+                        imageCount);
+        m_sync.init(m_device.logical(), MAX_FRAMES_IN_FLIGHT);
     }
 
     void VK_Renderer::beginFrame() {
         auto dev      = m_device.logical();
-        auto fence    = m_sync.inFlight();
-        auto imgAvail = m_sync.imageAvailable();
+        auto fence    = m_sync.inFlight(m_currentFrame);
+        auto imgAvail = m_sync.imageAvailable(m_currentFrame);
 
         vkWaitForFences(dev, 1, &fence, VK_TRUE, UINT64_MAX);
         vkResetFences(dev, 1, &fence);
@@ -48,9 +51,9 @@ namespace Funkin::Renderer::VK {
     void VK_Renderer::endFrame() {
         auto dev      = m_device.logical();
         auto cmd      = m_commands.buffer(m_imageIndex);
-        auto imgAvail = m_sync.imageAvailable();
-        auto renDone  = m_sync.renderFinished();
-        auto fence    = m_sync.inFlight();
+        auto imgAvail = m_sync.imageAvailable(m_currentFrame);
+        auto renDone  = m_sync.renderFinished(m_currentFrame);
+        auto fence    = m_sync.inFlight(m_currentFrame);
         auto sc       = m_swapchain.swapchain();
 
         vkCmdEndRenderPass(cmd);
@@ -79,6 +82,8 @@ namespace Funkin::Renderer::VK {
         pi.pImageIndices      = &m_imageIndex;
 
         vkQueuePresentKHR(m_device.present(), &pi);
+
+        m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
     void VK_Renderer::waitIdle() {
