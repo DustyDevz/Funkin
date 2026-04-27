@@ -7,9 +7,9 @@
 
 namespace Funkin::Platform {
 
-    class Win32_Window : public Window {
+    class Window_Win32 : public Window {
     public:
-        static Win32_Window& get();
+        static Window_Win32& get();
 
         bool init(const std::string& title, int w, int h) override;
         bool pump()     override;
@@ -19,7 +19,7 @@ namespace Funkin::Platform {
         HINSTANCE hinstance() const { return m_hinstance; }
 
     private:
-        Win32_Window() = default;
+        Window_Win32() = default;
         static LRESULT CALLBACK wndProc(HWND, UINT, WPARAM, LPARAM);
 
         HWND      m_hwnd = nullptr;

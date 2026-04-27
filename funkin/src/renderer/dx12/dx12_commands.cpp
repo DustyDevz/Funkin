@@ -1,4 +1,4 @@
-#include "commands_dx12.hpp"
+#include "dx12_commands.hpp"
 #include <stdexcept>
 
 namespace Funkin::Renderer::DX12 {

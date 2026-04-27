@@ -1,8 +1,8 @@
 #include "engine.hpp"
 
 #ifdef _WIN32
-    #include <platform/window/win32_window.hpp>
-    #include <renderer/dx12/renderer_dx12.hpp>
+    #include <platform/window/window_win32.hpp>
+    #include <renderer/dx12/dx12_renderer.hpp>
 #endif
 
 namespace Funkin::Core {
@@ -16,7 +16,7 @@ namespace Funkin::Core {
         m_running = true;
 
     #ifdef _WIN32
-        Platform::Win32_Window::get().init(cfg.title, cfg.width, cfg.height);
+        Platform::Window_Win32::get().init(cfg.title, cfg.width, cfg.height);
         Renderer::DX12::DX12Renderer::get().init(cfg.width, cfg.height, cfg.vsync);
     #endif
     }
@@ -24,7 +24,7 @@ namespace Funkin::Core {
     void Engine::run() {
         while (m_running) {
             #ifdef _WIN32
-                if (!Platform::Win32_Window::get().pump()) {
+                if (!Platform::Window_Win32::get().pump()) {
                     quit();
                     break;
                 }
@@ -39,7 +39,7 @@ namespace Funkin::Core {
         #ifdef _WIN32
             Renderer::DX12::DX12Renderer::get().waitIdle();
             Renderer::DX12::DX12Renderer::get().shutdown();
-            Platform::Win32_Window::get().shutdown();
+            Platform::Window_Win32::get().shutdown();
         #endif
     }
 }

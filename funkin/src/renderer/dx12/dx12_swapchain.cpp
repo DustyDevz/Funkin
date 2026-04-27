@@ -1,5 +1,5 @@
-#include "swapchain_dx12.hpp"
-#include <platform/window/win32_window.hpp>
+#include "dx12_swapchain.hpp"
+#include <platform/window/window_win32.hpp>
 #include <stdexcept>
 
 namespace Funkin::Renderer::DX12 {
@@ -18,11 +18,11 @@ namespace Funkin::Renderer::DX12 {
 
         ComPtr<IDXGISwapChain1> sc1;
         if (FAILED(factory->CreateSwapChainForHwnd(
-            queue, Funkin::Platform::Win32_Window::get().hwnd(),
+            queue, Funkin::Platform::Window_Win32::get().hwnd(),
             &desc, nullptr, nullptr, &sc1)))
             throw std::runtime_error("Failed to create swapchain");
 
-        factory->MakeWindowAssociation(Funkin::Platform::Win32_Window::get().hwnd(), DXGI_MWA_NO_ALT_ENTER);
+        factory->MakeWindowAssociation(Funkin::Platform::Window_Win32::get().hwnd(), DXGI_MWA_NO_ALT_ENTER);
         sc1.As(&m_swapchain);
         m_index = m_swapchain->GetCurrentBackBufferIndex();
 

@@ -1,8 +1,8 @@
 #pragma once
 #include <renderer/renderer.hpp>
-#include "device_dx12.hpp"
-#include "swapchain_dx12.hpp"
-#include "commands_dx12.hpp"
+#include "dx12_device.hpp"
+#include "dx12_swapchain.hpp"
+#include "dx12_commands.hpp"
 
 namespace Funkin::Renderer::DX12 {
     class DX12Renderer : public IRenderer {

@@ -1,4 +1,4 @@
-#include "renderer_dx12.hpp"
+#include "dx12_renderer.hpp"
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")

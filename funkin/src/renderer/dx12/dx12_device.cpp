@@ -1,4 +1,4 @@
-#include "device_dx12.hpp"
+#include "dx12_device.hpp"
 #include <stdexcept>
 
 namespace Funkin::Renderer::DX12 {

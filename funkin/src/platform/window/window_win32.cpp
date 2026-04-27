@@ -1,16 +1,16 @@
 #ifdef _WIN32
 
-#include "win32_window.hpp"
+#include "window_win32.hpp"
 #include "core/engine.hpp"
 #include <stdexcept>
 
 namespace Funkin::Platform {
-    Win32_Window& Win32_Window::get() {
-        static Win32_Window s;
+    Window_Win32& Window_Win32::get() {
+        static Window_Win32 s;
         return s;
     }
 
-    bool Win32_Window::init(const std::string& title, int w, int h) {
+    bool Window_Win32::init(const std::string& title, int w, int h) {
         m_hinstance = GetModuleHandle(nullptr);
 
         WNDCLASSEXW wc{};
@@ -46,7 +46,7 @@ namespace Funkin::Platform {
         return true;
     }
 
-    bool Win32_Window::pump() {
+    bool Window_Win32::pump() {
         MSG msg{};
         while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
             if (msg.message == WM_QUIT) return false;
@@ -56,7 +56,7 @@ namespace Funkin::Platform {
         return true;
     }
 
-    bool Win32_Window::shutdown() {
+    bool Window_Win32::shutdown() {
         if (m_hwnd) {
             DestroyWindow(m_hwnd);
             m_hwnd = nullptr;
@@ -65,7 +65,7 @@ namespace Funkin::Platform {
         return true;
     }
 
-    LRESULT CALLBACK Win32_Window::wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
+    LRESULT CALLBACK Window_Win32::wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         switch (msg) {
         case WM_CLOSE:
         case WM_DESTROY:
