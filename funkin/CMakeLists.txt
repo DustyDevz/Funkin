@@ -1,34 +1,29 @@
-file(GLOB_RECURSE Funkin_SOURCES CONFIGURE_DEPENDS
-    "src/*.cpp"
-)
+file(GLOB_RECURSE Funkin_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 
 if(WIN32)
     list(FILTER Funkin_SOURCES EXCLUDE REGEX ".*x11_window\\.cpp$")
+    set(PLATFORM_LIBS d3d12 dxgi dwmapi)
+    set(EXE_TYPE WIN32)
 elseif(UNIX AND NOT APPLE)
-    list(FILTER Funkin_SOURCES EXCLUDE REGEX ".*win32_window\\.cpp$")
-    list(FILTER Funkin_SOURCES EXCLUDE REGEX ".*dx12.*\\.cpp$")
+    list(FILTER Funkin_SOURCES EXCLUDE REGEX ".*win32_window\\.cpp$|.*dx12.*\\.cpp$")
+    set(PLATFORM_LIBS X11)
 endif()
 
-if(WIN32)
-    add_executable(Funkin WIN32 ${Funkin_SOURCES})
-else()
-    add_executable(Funkin ${Funkin_SOURCES})
-endif()
+add_executable(Funkin ${EXE_TYPE} ${Funkin_SOURCES})
 
 find_package(Vulkan REQUIRED)
 
-if(WIN32)
-    target_link_libraries(Funkin PRIVATE d3d12 dxgi dwmapi Vulkan::Vulkan)
-elseif(UNIX AND NOT APPLE)
-    target_link_libraries(Funkin PRIVATE Vulkan::Vulkan X11)
-endif()
+target_include_directories(Funkin 
+    PUBLIC  src
+    PRIVATE funkin/third_party/zstd/lib
+)
 
-target_include_directories(Funkin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-### zstd
-target_link_libraries(Funkin PRIVATE libzstd_static)
-target_include_directories(Funkin PRIVATE
-    ${CMAKE_SOURCE_DIR}/funkin/third_party/zstd/lib
+target_link_libraries(Funkin PRIVATE 
+    Vulkan::Vulkan
+    libzstd_static
+    Microsoft::DirectX-Headers
+    Microsoft::DirectX-Guids
+    ${PLATFORM_LIBS}
 )
 
 target_compile_definitions(Funkin PRIVATE

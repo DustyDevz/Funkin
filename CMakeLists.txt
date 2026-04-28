@@ -22,3 +22,4 @@ set(ZSTD_BUILD_SHARED   OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(funkin)
 add_subdirectory(funkin/third_party/zstd/build/cmake)
+add_subdirectory(funkin/third_party/directx)

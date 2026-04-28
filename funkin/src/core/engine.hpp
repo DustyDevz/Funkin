@@ -20,7 +20,7 @@ namespace Funkin::Core {
 		int             width    = 1280;
 		int             height   = 720;
 		bool            vsync    = false;
-		RendererBackend renderer = RendererBackend::Vulkan;
+		RendererBackend renderer = RendererBackend::DX12;
 	};
 
 	class Engine {

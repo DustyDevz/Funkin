@@ -19,6 +19,11 @@ namespace Funkin::Renderer::DX12 {
         void waitIdle()   override;
         void shutdown()   override;
 
+        ID3D12Device*              device()   const { return m_device.device(); }
+        ID3D12GraphicsCommandList* cmdList()  const { return m_commands.list(); }
+        D3D12_VIEWPORT             viewport() const { return { 0.0f, 0.0f, (float)m_width, (float)m_height, 0.0f, 1.0f }; }
+        D3D12_RECT                 scissor()  const { return { 0, 0, m_width, m_height }; }
+
     private:
         DX12Renderer() = default;
 

@@ -4,6 +4,8 @@
 #include "engine.hpp"
 #include "renderer/renderer.hpp"
 
+#include <renderer/shader/shader_loader.hpp>
+
 #ifdef _WIN32
     #include <platform/window/window_win32.hpp>
     #include <renderer/dx12/dx12_renderer.hpp>
@@ -33,6 +35,12 @@ namespace Funkin::Core {
     #endif
 
         m_renderer->init(cfg.width, cfg.height, cfg.vsync);
+
+        auto& shaders = Funkin::Renderer::Shader::ShaderLoader::get();
+        shaders.init(Funkin::Renderer::Shader::ShaderBackend::DX12);
+
+        auto* vs = shaders.get("test", Funkin::Renderer::Shader::ShaderStage::Vertex);
+        auto* ps = shaders.get("test", Funkin::Renderer::Shader::ShaderStage::Pixel);
     }
 
     void Engine::run() {
