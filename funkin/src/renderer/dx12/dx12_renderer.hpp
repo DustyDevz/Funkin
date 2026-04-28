@@ -25,5 +25,8 @@ namespace Funkin::Renderer::DX12 {
         DX12Device    m_device;
         DX12Swapchain m_swapchain;
         DX12Commands  m_commands;
+
+        int m_width = 0;
+        int m_height = 0;
     };
 }

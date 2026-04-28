@@ -13,6 +13,9 @@ namespace Funkin::Renderer::DX12 {
     }
 
     void DX12Renderer::init(int w, int h, bool vsync) {
+        m_width = w;
+        m_height = h;
+
         m_device.init();
         m_commands.init(m_device.device());
         m_swapchain.init(
@@ -29,6 +32,11 @@ namespace Funkin::Renderer::DX12 {
         auto* list = m_commands.list();
         auto* rt = m_swapchain.renderTarget(frame);
 
+        D3D12_VIEWPORT viewport = { 0.0f, 0.0f, (float)m_width, (float)m_height, 0.0f, 1.0f };
+        D3D12_RECT scissor = { 0, 0, m_width, m_height };
+        list->RSSetViewports(1, &viewport);
+        list->RSSetScissorRects(1, &scissor);
+
         D3D12_RESOURCE_BARRIER b{};
         b.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         b.Transition.pResource = rt;
@@ -38,7 +46,7 @@ namespace Funkin::Renderer::DX12 {
         list->ResourceBarrier(1, &b);
 
         auto rtv = m_swapchain.rtv(frame);
-        const float clear[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        const float clear[] = { 0.1f, 0.2f, 0.3f, 1.0f };
         list->ClearRenderTargetView(rtv, clear, 0, nullptr);
         list->OMSetRenderTargets(1, &rtv, FALSE, nullptr);
     }
