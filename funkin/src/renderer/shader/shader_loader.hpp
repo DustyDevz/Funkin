@@ -1,7 +1,7 @@
 // © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
 // Licensed under GNU GPL v3.0
 
-#pragma ONCE
+#pragma once
 
 #include "shader_types.hpp"
 #include "shader_cache.hpp"
