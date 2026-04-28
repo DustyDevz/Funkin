@@ -25,6 +25,12 @@ endif()
 
 target_include_directories(Funkin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+### zstd
+target_link_libraries(Funkin PRIVATE libzstd_static)
+target_include_directories(Funkin PRIVATE
+    ${CMAKE_SOURCE_DIR}/funkin/third_party/zstd/lib
+)
+
 target_compile_definitions(Funkin PRIVATE
     $<$<CONFIG:Debug>:FUNKIN_DEBUG>
     $<$<CONFIG:Release>:FUNKIN_RELEASE>
