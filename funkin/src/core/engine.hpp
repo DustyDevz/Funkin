@@ -27,10 +27,12 @@ namespace Funkin::Core {
 	public:
 		static Engine& get();
 
-		void init(const EngineConfig& cfg);
+		bool init(const EngineConfig& cfg);
 		void run();
 		void shutdown();
 		void quit() { m_running = false; }
+		void beginFrame();
+		void endFrame();
 
 		const EngineConfig& config()    const { return m_cfg; }
 		bool                isRunning() const { return m_running; }

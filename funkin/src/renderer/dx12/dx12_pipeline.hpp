@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <d3d12.h>
+#include <directx/d3d12.h>
 #include <wrl/client.h>
 #include <cstdint>
 #include <cstddef>

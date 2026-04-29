@@ -3,15 +3,15 @@
 
 #include "engine.hpp"
 #include "renderer/renderer.hpp"
-
-#include <renderer/shader/shader_loader.hpp>
+#include <renderer/vk/vk_renderer.hpp>
 
 #ifdef _WIN32
     #include <platform/window/window_win32.hpp>
     #include <renderer/dx12/dx12_renderer.hpp>
-    #include <renderer/vk/vk_renderer.hpp>
     using PlatformWindow = Funkin::Platform::Window_Win32;
-#endif
+    #elif __linux__
+    using PlatformWindow = Funkin::Platform::X11_Window;
+    #endif
 
 namespace Funkin::Core {
     Engine& Engine::get() {
@@ -19,7 +19,7 @@ namespace Funkin::Core {
         return s;
     }
 
-    void Engine::init(const EngineConfig& cfg) {
+    bool Engine::init(const EngineConfig& cfg) {
         m_cfg     = cfg;
         m_running = true;
 
@@ -30,27 +30,27 @@ namespace Funkin::Core {
             m_renderer = &Renderer::DX12::DX12Renderer::get();
         else
             m_renderer = &Renderer::VK::VK_Renderer::get();
-    #elif __linux__
-        m_renderer = &Renderer::VK::VK_Renderer::get();
-    #endif
+        #elif __linux__
+            m_renderer = &Renderer::VK::VK_Renderer::get();
+        #endif
 
         m_renderer->init(cfg.width, cfg.height, cfg.vsync);
+        return true;
+    }
 
-        auto& shaders = Funkin::Renderer::Shader::ShaderLoader::get();
-        shaders.init(Funkin::Renderer::Shader::ShaderBackend::DX12);
+    void Engine::beginFrame() {
+        PlatformWindow::get().pump() ? void() : quit();
+        m_renderer->beginFrame();
+    }
 
-        auto* vs = shaders.get("test", Funkin::Renderer::Shader::ShaderStage::Vertex);
-        auto* ps = shaders.get("test", Funkin::Renderer::Shader::ShaderStage::Pixel);
+    void Engine::endFrame() {
+        m_renderer->endFrame();
     }
 
     void Engine::run() {
         while (m_running) {
-            if (!PlatformWindow::get().pump()) {
-                quit();
-                break;
-            }
-            m_renderer->beginFrame();
-            m_renderer->endFrame();
+            beginFrame();
+            endFrame();
         }
         m_renderer->waitIdle();
     }

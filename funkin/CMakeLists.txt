@@ -14,19 +14,21 @@ add_executable(Funkin ${EXE_TYPE} ${Funkin_SOURCES})
 find_package(Vulkan REQUIRED)
 
 target_include_directories(Funkin 
-    PUBLIC  src
-    PRIVATE funkin/third_party/zstd/lib
+    PUBLIC src
+    PRIVATE 
+        funkin/third_party/zstd/lib
 )
 
 target_link_libraries(Funkin PRIVATE 
     Vulkan::Vulkan
     libzstd_static
-    Microsoft::DirectX-Headers
-    Microsoft::DirectX-Guids
+    DirectX-Headers
+    DirectX-Guids
     ${PLATFORM_LIBS}
 )
 
 target_compile_definitions(Funkin PRIVATE
     $<$<CONFIG:Debug>:FUNKIN_DEBUG>
     $<$<CONFIG:Release>:FUNKIN_RELEASE>
+    D3D12_IGNORE_SDK_VERSION
 )

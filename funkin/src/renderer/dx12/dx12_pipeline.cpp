@@ -2,9 +2,13 @@
 // Licensed under GNU GPL v3.0
 
 #include "dx12_pipeline.hpp"
-#include <d3d12.h>
-#include <d3dx12.h>
 #include <stdexcept>
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+#include <directx/d3d12.h>
+#include <directx/d3dx12.h>
 
 namespace Funkin::Renderer::DX12 {
     void DX12_Pipeline::init(ID3D12Device* device, DXGI_FORMAT rtvFormat,
