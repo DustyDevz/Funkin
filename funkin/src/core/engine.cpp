@@ -11,7 +11,7 @@
     using PlatformWindow = Funkin::Platform::Window_Win32;
     #elif __linux__
     using PlatformWindow = Funkin::Platform::X11_Window;
-    #endif
+#endif
 
 namespace Funkin::Core {
     Engine& Engine::get() {
