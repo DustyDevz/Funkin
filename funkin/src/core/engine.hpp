@@ -4,44 +4,53 @@
 #pragma once
 
 #include <string>
+#include <functional>
 #include <renderer/renderer.hpp>
 
 namespace Funkin::Core {
-	enum class RendererBackend {
-		Vulkan,
 
+    enum class RendererBackend {
+        Vulkan,
 		#ifdef _WIN32
-			DX12,
+        DX12,
 		#endif
-	};
+    };
 
-	struct EngineConfig {
-		std::string     title    = "Funkin";
-		int             width    = 1280;
-		int             height   = 720;
-		bool            vsync    = false;
-		RendererBackend renderer = RendererBackend::DX12;
-	};
+    struct EngineConfig {
+        std::string     title    = "Funkin";
+        int             width    = 1280;
+        int             height   = 720;
+        bool            vsync    = false;
+        RendererBackend renderer = RendererBackend::DX12;
+    };
 
-	class Engine {
-	public:
-		static Engine& get();
+    using FrameCallback = std::function<void()>;
 
-		bool init(const EngineConfig& cfg);
-		void run();
-		void shutdown();
-		void quit() { m_running = false; }
-		void beginFrame();
-		void endFrame();
+    class Engine {
+    public:
+        static Engine& get();
 
-		const EngineConfig& config()    const { return m_cfg; }
-		bool                isRunning() const { return m_running; }
+        bool init(const EngineConfig& cfg);
+        void run();
+        void shutdown();
+        void quit() { m_running = false; }
 
-	private:
-		Engine() = default;
+        bool processEvents();
+        void tickFrame();
 
-		EngineConfig      			m_cfg;
-		bool              			m_running  = false;
-		Renderer::IRenderer*        m_renderer = nullptr;
-	};
+        void resize(int w, int h);
+        void setFrameCallback(FrameCallback cb) { m_frameCallback = std::move(cb); }
+
+        const EngineConfig& config()    const { return m_cfg; }
+        bool                isRunning() const { return m_running; }
+
+    private:
+        Engine() = default;
+
+        EngineConfig         m_cfg;
+        bool                 m_running      = false;
+        Renderer::IRenderer* m_renderer     = nullptr;
+        FrameCallback        m_frameCallback;
+    };
+
 }

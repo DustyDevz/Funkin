@@ -57,11 +57,14 @@ static int run() {
     Funkin::Scene::Components::Test test;
     test.init(renderer.device());
 
+    engine.setFrameCallback([&]() {
+        test.draw(renderer.cmdList(), pipeline, renderer.viewport(), renderer.scissor());
+    });
+
     LOG_INFO("engine: running");
     while (engine.isRunning()) {
-        engine.beginFrame();
-        test.draw(renderer.cmdList(), pipeline, renderer.viewport(), renderer.scissor());
-        engine.endFrame();
+        if (!engine.processEvents()) break;
+        engine.tickFrame();
     }
 
     test.shutdown();
