@@ -19,7 +19,7 @@ namespace Funkin::Renderer::DX12 {
                 throw std::runtime_error("Failed to create command allocator");
             m_fenceValues[i] = 1;
         }
-
+        
         if (FAILED(device->CreateCommandList(
             0, D3D12_COMMAND_LIST_TYPE_DIRECT,
             m_alloc[0].Get(), nullptr, IID_PPV_ARGS(&m_list))))
