@@ -2,11 +2,6 @@
 // Licensed under GNU GPL v3.0
 
 #include "component_test.hpp"
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <directx/d3d12.h>
-#include <directx/d3dx12.h>
-#include <stdexcept>
 
 namespace Funkin::Scene::Components {
     void Test::init(ID3D12Device* device) {
@@ -37,7 +32,7 @@ namespace Funkin::Scene::Components {
     }
 
     void Test::draw(ID3D12GraphicsCommandList* cmd,
-                    const Funkin::Renderer::DX12::DX12_Pipeline& pipeline,
+                    const Funkin::Renderer::DX12::DX12Pipeline& pipeline,
                     D3D12_VIEWPORT viewport,
                     D3D12_RECT scissor) {
         cmd->SetGraphicsRootSignature(pipeline.rootSignature());

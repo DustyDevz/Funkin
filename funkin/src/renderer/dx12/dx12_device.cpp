@@ -2,7 +2,6 @@
 // Licensed under GNU GPL v3.0
 
 #include "dx12_device.hpp"
-#include <stdexcept>
 
 namespace Funkin::Renderer::DX12 {
     void DX12Device::init() {

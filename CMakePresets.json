@@ -35,9 +35,11 @@
           "hostOS": [ "Linux" ]
         }
       },
-      "cacheVariables": {
+     "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "PLUS_BUILD_EDITOR": "ON"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "PLUS_BUILD_EDITOR": "ON",
+        "PLUS_BUILD_PLUSC": "ON"
       }
     }
   ]

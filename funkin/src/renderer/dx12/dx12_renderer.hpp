@@ -14,10 +14,11 @@ namespace Funkin::Renderer::DX12 {
         static DX12Renderer& get();
 
         void init(int width, int height, bool vsync) override;
-        void beginFrame() override;
-        void endFrame()   override;
-        void waitIdle()   override;
-        void shutdown()   override;
+        void resize(int width, int height)            override;
+        void beginFrame()                             override;
+        void endFrame()                               override;
+        void waitIdle()                               override;
+        void shutdown()                               override;
 
         ID3D12Device*              device()   const { return m_device.device(); }
         ID3D12GraphicsCommandList* cmdList()  const { return m_commands.list(); }
@@ -27,11 +28,16 @@ namespace Funkin::Renderer::DX12 {
     private:
         DX12Renderer() = default;
 
+        static D3D12_RESOURCE_BARRIER transitionBarrier(
+            ID3D12Resource*       resource,
+            D3D12_RESOURCE_STATES before,
+            D3D12_RESOURCE_STATES after);
+
         DX12Device    m_device;
         DX12Swapchain m_swapchain;
         DX12Commands  m_commands;
 
-        int m_width = 0;
+        int m_width  = 0;
         int m_height = 0;
     };
 }

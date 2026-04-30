@@ -3,11 +3,8 @@
 
 #pragma once
 
-#include <directx/d3d12.h>
-#include <wrl/client.h>
 #include <renderer/renderer_common.hpp>
 
-using Microsoft::WRL::ComPtr;
 namespace Funkin::Renderer::DX12 {
     class DX12Commands {
     public:
@@ -17,11 +14,12 @@ namespace Funkin::Renderer::DX12 {
         void reset(int frame);
         void close();
         void execute();
+        void signal(int frame);
         void waitForFrame(int frame);
         void waitIdle();
 
-        ID3D12CommandQueue* queue() const { return m_queue.Get(); }
-        ID3D12GraphicsCommandList* list()  const { return m_list.Get(); }
+        ID3D12CommandQueue*        queue() const { return m_queue.Get(); }
+        ID3D12GraphicsCommandList* list()  const { return m_list.Get();  }
 
     private:
         ComPtr<ID3D12CommandQueue>        m_queue;
@@ -29,7 +27,8 @@ namespace Funkin::Renderer::DX12 {
         ComPtr<ID3D12GraphicsCommandList> m_list;
         ComPtr<ID3D12Fence>               m_fence;
 
-        HANDLE m_fenceEvent = nullptr;
-        UINT64 m_fenceValues[FRAME_COUNT] = {};
+        HANDLE m_fenceEvent                    = nullptr;
+        UINT64 m_fenceValue                    = 0;
+        UINT64 m_frameFenceValues[FRAME_COUNT] = {};
     };
 }

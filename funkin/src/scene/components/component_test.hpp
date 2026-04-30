@@ -3,11 +3,8 @@
 
 #pragma once
 
-#include <directx/d3d12.h>
-#include <wrl/client.h>
 #include <renderer/dx12/dx12_pipeline.hpp>
 
-using Microsoft::WRL::ComPtr;
 namespace Funkin::Scene::Components {
     struct Vertex {
         float position[3];
@@ -18,10 +15,9 @@ namespace Funkin::Scene::Components {
     public:
         void init(ID3D12Device* device);
         void draw(ID3D12GraphicsCommandList* cmd,
-                  const Funkin::Renderer::DX12::DX12_Pipeline& pipeline,
+                  const Funkin::Renderer::DX12::DX12Pipeline& pipeline,
                   D3D12_VIEWPORT viewport,
                   D3D12_RECT scissor);
-
         void shutdown();
 
     private:

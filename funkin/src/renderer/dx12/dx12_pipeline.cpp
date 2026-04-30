@@ -2,43 +2,29 @@
 // Licensed under GNU GPL v3.0
 
 #include "dx12_pipeline.hpp"
-#include <stdexcept>
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-#include <directx/d3d12.h>
-#include <directx/d3dx12.h>
 
 namespace Funkin::Renderer::DX12 {
-    void DX12_Pipeline::init(ID3D12Device* device, DXGI_FORMAT rtvFormat,
-                            ShaderBlob vs, ShaderBlob ps) {
+    void DX12Pipeline::init(ID3D12Device* device, DXGI_FORMAT rtvFormat, ShaderBlob vs, ShaderBlob ps) {
         createRootSignature(device);
         createPSO(device, rtvFormat, vs, ps);
     }
 
-    void DX12_Pipeline::createRootSignature(ID3D12Device* device) {
+    void DX12Pipeline::createRootSignature(ID3D12Device* device) {
         D3D12_ROOT_SIGNATURE_DESC desc{};
         desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
         ComPtr<ID3DBlob> blob, error;
-        if (FAILED(D3D12SerializeRootSignature(
-                &desc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, &error)))
+        if (FAILED(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, &error)))
             throw std::runtime_error("Failed to serialize root signature");
 
-        if (FAILED(device->CreateRootSignature(
-                0, blob->GetBufferPointer(), blob->GetBufferSize(),
-                IID_PPV_ARGS(&m_rootSig))))
+        if (FAILED(device->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(&m_rootSig))))
             throw std::runtime_error("Failed to create root signature");
     }
 
-    void DX12_Pipeline::createPSO(ID3D12Device* device, DXGI_FORMAT rtvFormat,
-                                  ShaderBlob vs, ShaderBlob ps) {
+    void DX12Pipeline::createPSO(ID3D12Device* device, DXGI_FORMAT rtvFormat, ShaderBlob vs, ShaderBlob ps) {
         D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
-            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0,  0,
-            D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-            { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
-            D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+            { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
         };
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC desc{};
@@ -60,7 +46,7 @@ namespace Funkin::Renderer::DX12 {
             throw std::runtime_error("Failed to create PSO");
     }
 
-    void DX12_Pipeline::shutdown() {
+    void DX12Pipeline::shutdown() {
         m_pso.Reset();
         m_rootSig.Reset();
     }

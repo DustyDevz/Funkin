@@ -29,48 +29,48 @@ static int run() {
         return -1;
     }
 
-#ifdef _WIN32
-    auto& renderer    = Funkin::Renderer::DX12::DX12Renderer::get();
-    auto& shaderLoader = Funkin::Renderer::Shader::ShaderLoader::get();
+    #ifdef _WIN32
+        auto& renderer    = Funkin::Renderer::DX12::DX12Renderer::get();
+        auto& shaderLoader = Funkin::Renderer::Shader::ShaderLoader::get();
 
-    LOG_REND("init: shaders");
-    shaderLoader.init(Funkin::Renderer::Shader::ShaderBackend::DX12);
+        LOG_REND("init: shaders");
+        shaderLoader.init(Funkin::Renderer::Shader::ShaderBackend::DX12);
 
-    auto* vs = shaderLoader.get("test", Funkin::Renderer::Shader::ShaderStage::Vertex);
-    auto* ps = shaderLoader.get("test", Funkin::Renderer::Shader::ShaderStage::Pixel);
+        auto* vs = shaderLoader.get("test", Funkin::Renderer::Shader::ShaderStage::Vertex);
+        auto* ps = shaderLoader.get("test", Funkin::Renderer::Shader::ShaderStage::Pixel);
 
-    if (!vs || !ps) {
-        LOG_ERR("fail: loading shader 'test'");
-        return -1;
-    }
+        if (!vs || !ps) {
+            LOG_ERR("fail: loading shader 'test'");
+            return -1;
+        }
 
-    LOG_REND("init: dx12 pipeline");
-    Funkin::Renderer::DX12::DX12_Pipeline pipeline;
-    pipeline.init(
-        renderer.device(),
-        DXGI_FORMAT_R8G8B8A8_UNORM,
-        { vs->bytecode.data(), vs->bytecode.size() },
-        { ps->bytecode.data(), ps->bytecode.size() }
-    );
+        LOG_REND("init: dx12 pipeline");
+        Funkin::Renderer::DX12::DX12Pipeline pipeline;
+        pipeline.init(
+            renderer.device(),
+            DXGI_FORMAT_R8G8B8A8_UNORM,
+            { vs->bytecode.data(), vs->bytecode.size() },
+            { ps->bytecode.data(), ps->bytecode.size() }
+        );
 
-    LOG_REND("init: test component");
-    Funkin::Scene::Components::Test test;
-    test.init(renderer.device());
+        LOG_REND("init: test component");
+        Funkin::Scene::Components::Test test;
+        test.init(renderer.device());
 
-    engine.setFrameCallback([&]() {
-        test.draw(renderer.cmdList(), pipeline, renderer.viewport(), renderer.scissor());
-    });
+        engine.setFrameCallback([&]() {
+            test.draw(renderer.cmdList(), pipeline, renderer.viewport(), renderer.scissor());
+        });
 
-    LOG_INFO("engine: running");
-    while (engine.isRunning()) {
-        if (!engine.processEvents()) break;
-        engine.tickFrame();
-    }
+        LOG_INFO("engine: running");
+        while (engine.isRunning()) {
+            if (!engine.processEvents()) break;
+            engine.tickFrame();
+        }
 
-    test.shutdown();
-#else
-    engine.run();
-#endif
+        test.shutdown();
+    #else
+        engine.run();
+    #endif
 
     engine.shutdown();
     LOG_INFO("engine: shutdown");
