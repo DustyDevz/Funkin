@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include <renderer/dx12/dx12_pipeline.hpp>
+#include <renderer/gal/idal.hpp>
 
 namespace Funkin::Scene::Components {
+
     struct Vertex {
         float position[3];
         float color[4];
@@ -13,15 +14,15 @@ namespace Funkin::Scene::Components {
 
     class Test {
     public:
-        void init(ID3D12Device* device);
-        void draw(ID3D12GraphicsCommandList* cmd,
-                  const Funkin::Renderer::DX12::DX12Pipeline& pipeline,
-                  D3D12_VIEWPORT viewport,
-                  D3D12_RECT scissor);
-        void shutdown();
+        void init(Renderer::GAL::IDAL*       gal,
+                  Renderer::GAL::ShaderHandle vs,
+                  Renderer::GAL::ShaderHandle ps);
+        void draw(Renderer::GAL::IDAL* gal);
+        void shutdown(Renderer::GAL::IDAL* gal);
 
     private:
-        ComPtr<ID3D12Resource>   m_vertexBuffer;
-        D3D12_VERTEX_BUFFER_VIEW m_vbView;
+        Renderer::GAL::BufferHandle   m_vertexBuffer;
+        Renderer::GAL::PipelineHandle m_pipeline;
     };
+
 }

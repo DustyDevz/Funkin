@@ -2,17 +2,18 @@
 // Licensed under GNU GPL v3.0
 
 #include "engine.hpp"
-#include <renderer/vk/vk_renderer.hpp>
+#include <renderer/gal/vk/vk_gal.hpp>
 
 #ifdef _WIN32
     #include <platform/window/window_win32.hpp>
-    #include <renderer/dx12/dx12_renderer.hpp>
+    #include <renderer/gal/dx12/dx12_gal.hpp>
     using PlatformWindow = Funkin::Platform::Window_Win32;
 #elif __linux__
     using PlatformWindow = Funkin::Platform::X11_Window;
 #endif
 
 namespace Funkin::Core {
+
     Engine& Engine::get() {
         static Engine s;
         return s;
@@ -24,16 +25,27 @@ namespace Funkin::Core {
 
         PlatformWindow::get().init(cfg.title, cfg.width, cfg.height);
 
-        #ifdef _WIN32
-            if (cfg.renderer == RendererBackend::DX12)
-                m_renderer = &Renderer::DX12::DX12Renderer::get();
+#ifdef _WIN32
+        if (cfg.renderer == RendererBackend::DX12)
+            m_galOwner = std::make_unique<Renderer::GAL::DX12Gal>();
         else
-            m_renderer = &Renderer::VK::VK_Renderer::get();
-        #elif __linux__
-            m_renderer = &Renderer::VK::VK_Renderer::get();
-        #endif
+            m_galOwner = std::make_unique<Renderer::GAL::VKGal>();
+#elif __linux__
+        m_galOwner = std::make_unique<Renderer::GAL::VKGal>();
+#endif
 
-        m_renderer->init(cfg.width, cfg.height, cfg.vsync);
+        m_renderer = m_galOwner.get();
+
+        Renderer::GAL::GALDesc galDesc{};
+        galDesc.width  = static_cast<uint32_t>(cfg.width);
+        galDesc.height = static_cast<uint32_t>(cfg.height);
+        galDesc.vsync  = cfg.vsync;
+
+#ifdef _WIN32
+        galDesc.windowHandle = static_cast<void*>(PlatformWindow::get().hwnd());
+#endif
+
+        m_renderer->init(galDesc);
         return true;
     }
 
@@ -64,11 +76,16 @@ namespace Funkin::Core {
         if (w <= 0 || h <= 0 || !m_renderer) return;
         m_cfg.width  = w;
         m_cfg.height = h;
-        m_renderer->resize(w, h);
+        m_renderer->resize(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
     }
 
     void Engine::shutdown() {
-        m_renderer->shutdown();
+        if (m_renderer) {
+            m_renderer->shutdown();
+            m_renderer = nullptr;
+        }
+        m_galOwner.reset();
         PlatformWindow::get().shutdown();
     }
+
 }

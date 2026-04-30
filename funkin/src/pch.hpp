@@ -6,11 +6,20 @@
 #include <stdexcept>
 #include <cstdint>
 #include <cstddef>
+#include <cmath>
+#include <algorithm>
 #include <format>
 #include <chrono>
 #include <iostream>
 #include <vector>
 #include <array>
+
+#include <math/vec2.hpp>
+#include <math/vec3.hpp>
+#include <math/vec4.hpp>
+#include <math/color.hpp>
+#include <math/rect.hpp>
+#include <math/mat4.hpp>
 
 #include <vulkan/vulkan.h>
 
