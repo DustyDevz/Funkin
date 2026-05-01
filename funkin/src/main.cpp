@@ -2,23 +2,18 @@
 #include "core/log.hpp"
 #include "renderer/shader/shader_loader.hpp"
 #include "renderer/shader/shader_types.hpp"
+#include "scene/components/component_test.hpp"
+#include "ui/ui_renderer.hpp"
 
-#ifdef _WIN32
-    #define WIN32_LEAN_AND_MEAN
-    #include <Windows.h>
-    #include <cstdio>
-    #include "renderer/dx12/dx12_renderer.hpp"
-    #include "renderer/dx12/dx12_pipeline.hpp"
-    #include "scene/components/component_test.hpp"
-#endif
+namespace GAL    = Funkin::Renderer::GAL;
+namespace Shader = Funkin::Renderer::Shader;
 
 static int run() {
     Funkin::Core::EngineConfig cfg {
-        .title = "Funkin",
-        .width = 1280,
+        .title  = "Funkin",
+        .width  = 1280,
         .height = 720,
-        .vsync = false,
-        .renderer = Funkin::Core::RendererBackend::DX12
+        .vsync  = false,
     };
 
     auto& engine = Funkin::Core::Engine::get();
@@ -29,48 +24,43 @@ static int run() {
         return -1;
     }
 
-    #ifdef _WIN32
-        auto& renderer    = Funkin::Renderer::DX12::DX12Renderer::get();
-        auto& shaderLoader = Funkin::Renderer::Shader::ShaderLoader::get();
+    auto* gal = engine.gal();
 
-        LOG_REND("init: shaders");
-        shaderLoader.init(Funkin::Renderer::Shader::ShaderBackend::DX12);
+    LOG_INFO("init: shaders");
+    auto& shaderLoader = Shader::ShaderLoader::get();
+    shaderLoader.init(Shader::ShaderBackend::DX12);
 
-        auto* vs = shaderLoader.get("test", Funkin::Renderer::Shader::ShaderStage::Vertex);
-        auto* ps = shaderLoader.get("test", Funkin::Renderer::Shader::ShaderStage::Pixel);
+    LOG_INFO("init: ui renderer");
+    auto& ui = Funkin::UI::UIRenderer::get();
+    ui.init(gal, cfg.width, cfg.height);
 
-        if (!vs || !ps) {
-            LOG_ERR("fail: loading shader 'test'");
-            return -1;
-        }
+    engine.setFrameCallback([&]() {
+        GAL::ColorAttachment color{};
+        color.clearColor = { 0.1f, 0.2f, 0.3f, 1.0f };
+        color.loadOp     = GAL::LoadOp::Clear;
+        color.storeOp    = GAL::StoreOp::Store;
 
-        LOG_REND("init: dx12 pipeline");
-        Funkin::Renderer::DX12::DX12Pipeline pipeline;
-        pipeline.init(
-            renderer.device(),
-            DXGI_FORMAT_R8G8B8A8_UNORM,
-            { vs->bytecode.data(), vs->bytecode.size() },
-            { ps->bytecode.data(), ps->bytecode.size() }
-        );
+        GAL::RenderPassDesc rp{};
+        rp.useSwapchainTarget  = true;
+        rp.colorAttachments    = &color;
+        rp.colorCount          = 1;
 
-        LOG_REND("init: test component");
-        Funkin::Scene::Components::Test test;
-        test.init(renderer.device());
+        gal->beginRenderPass(rp);
 
-        engine.setFrameCallback([&]() {
-            test.draw(renderer.cmdList(), pipeline, renderer.viewport(), renderer.scissor());
-        });
+        auto size = gal->swapchainSize();
+        gal->setViewport({ 0.0f, 0.0f, size.x, size.y });
+        gal->setScissor ({ 0.0f, 0.0f, size.x, size.y });
 
-        LOG_INFO("engine: running");
-        while (engine.isRunning()) {
-            if (!engine.processEvents()) break;
-            engine.tickFrame();
-        }
+        gal->endRenderPass();
+    });
 
-        test.shutdown();
-    #else
-        engine.run();
-    #endif
+    LOG_INFO("engine: running");
+    while (engine.isRunning()) {
+        if (!engine.processEvents()) break;
+        engine.tickFrame();
+    }
+
+    gal->waitIdle();
 
     engine.shutdown();
     LOG_INFO("engine: shutdown");

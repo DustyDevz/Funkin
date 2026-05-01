@@ -4,47 +4,63 @@
 #include "component_test.hpp"
 
 namespace Funkin::Scene::Components {
-    void Test::init(ID3D12Device* device) {
+
+    void Test::init(Renderer::GAL::IDAL*       gal,
+                    Renderer::GAL::ShaderHandle vs,
+                    Renderer::GAL::ShaderHandle ps)
+    {
         Vertex vertices[] = {
             { {  0.0f,  0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
             { {  0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
             { { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
         };
 
-        const UINT size = sizeof(vertices);
-        CD3DX12_HEAP_PROPERTIES heap(D3D12_HEAP_TYPE_UPLOAD);
-        CD3DX12_RESOURCE_DESC   buf = CD3DX12_RESOURCE_DESC::Buffer(size);
+        Renderer::GAL::BufferDesc vbDesc{};
+        vbDesc.size   = sizeof(vertices);
+        vbDesc.usage  = Renderer::GAL::BufferUsage::Vertex;
+        vbDesc.memory = Renderer::GAL::MemoryHint::CPUWrite;
 
-        if (FAILED(device->CreateCommittedResource(
-            &heap, D3D12_HEAP_FLAG_NONE, &buf,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr, IID_PPV_ARGS(&m_vertexBuffer))))
-        throw std::runtime_error("Failed to create vertex buffer");
+        m_vertexBuffer = gal->createBuffer(vbDesc);
 
-        void* mapped = nullptr;
-        m_vertexBuffer->Map(0, nullptr, &mapped);
-        memcpy(mapped, vertices, size);
-        m_vertexBuffer->Unmap(0, nullptr);
+        void* mapped = gal->mapBuffer(m_vertexBuffer);
+        std::memcpy(mapped, vertices, sizeof(vertices));
+        gal->unmapBuffer(m_vertexBuffer);
 
-        m_vbView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-        m_vbView.StrideInBytes  = sizeof(Vertex);
-        m_vbView.SizeInBytes    = size;
+        Renderer::GAL::VertexAttribute attrs[] = {
+            { "POSITION", 0, Renderer::GAL::PixelFormat::RGB32_Float,  0  },
+            { "COLOR",    0, Renderer::GAL::PixelFormat::RGBA32_Float, 12  },
+        };
+
+        Renderer::GAL::VertexLayout layout{};
+        layout.attributes = attrs;
+        layout.count      = 2;
+        layout.stride     = sizeof(Vertex);
+
+        Renderer::GAL::PipelineDesc pd{};
+        pd.vs              = vs;
+        pd.ps              = ps;
+        pd.vertexLayout    = layout;
+        pd.blend           = Renderer::GAL::BlendMode::None;
+        pd.topology        = Renderer::GAL::PrimitiveTopology::TriangleList;
+        pd.renderTargetFmt = Renderer::GAL::PixelFormat::BGRA8_Unorm;
+        pd.raster.cullMode = Renderer::GAL::CullMode::None;
+
+        m_pipeline = gal->createPipeline(pd);
     }
 
-    void Test::draw(ID3D12GraphicsCommandList* cmd,
-                    const Funkin::Renderer::DX12::DX12Pipeline& pipeline,
-                    D3D12_VIEWPORT viewport,
-                    D3D12_RECT scissor) {
-        cmd->SetGraphicsRootSignature(pipeline.rootSignature());
-        cmd->SetPipelineState(pipeline.pso());
-        cmd->RSSetViewports(1, &viewport);
-        cmd->RSSetScissorRects(1, &scissor);
-        cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        cmd->IASetVertexBuffers(0, 1, &m_vbView);
-        cmd->DrawInstanced(3, 1, 0, 0);
+    void Test::draw(Renderer::GAL::IDAL* gal)
+    {
+        gal->setPipeline(m_pipeline);
+        gal->setVertexBuffer(m_vertexBuffer);
+        gal->draw({ 3, 1, 0, 0 });
     }
 
-    void Test::shutdown() {
-        m_vertexBuffer.Reset();
+    void Test::shutdown(Renderer::GAL::IDAL* gal)
+    {
+        gal->destroyPipeline(m_pipeline);
+        gal->destroyBuffer(m_vertexBuffer);
+        m_pipeline      = {};
+        m_vertexBuffer  = {};
     }
+
 }

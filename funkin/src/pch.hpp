@@ -1,11 +1,17 @@
 #pragma once
 
+#ifndef NOMINMAX
+    #define NOMINMAX
+#endif
+
 #include <string>
 #include <string_view>
 #include <functional>
 #include <stdexcept>
 #include <cstdint>
 #include <cstddef>
+#include <cmath>
+#include <algorithm>
 #include <format>
 #include <chrono>
 #include <iostream>
