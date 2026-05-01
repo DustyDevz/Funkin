@@ -13,7 +13,6 @@
 #endif
 
 namespace Funkin::Core {
-
     Engine& Engine::get() {
         static Engine s;
         return s;
@@ -25,14 +24,14 @@ namespace Funkin::Core {
 
         PlatformWindow::get().init(cfg.title, cfg.width, cfg.height);
 
-#ifdef _WIN32
-        if (cfg.renderer == RendererBackend::DX12)
-            m_galOwner = std::make_unique<Renderer::GAL::DX12Gal>();
+        #ifdef _WIN32
+            if (cfg.renderer == RendererBackend::DX12)
+                m_galOwner = std::make_unique<Renderer::GAL::DX12Gal>();
         else
             m_galOwner = std::make_unique<Renderer::GAL::VKGal>();
-#elif __linux__
-        m_galOwner = std::make_unique<Renderer::GAL::VKGal>();
-#endif
+        #elif __linux__
+            m_galOwner = std::make_unique<Renderer::GAL::VKGal>();
+        #endif
 
         m_renderer = m_galOwner.get();
 
@@ -41,9 +40,9 @@ namespace Funkin::Core {
         galDesc.height = static_cast<uint32_t>(cfg.height);
         galDesc.vsync  = cfg.vsync;
 
-#ifdef _WIN32
-        galDesc.windowHandle = static_cast<void*>(PlatformWindow::get().hwnd());
-#endif
+        #ifdef _WIN32
+            galDesc.windowHandle = static_cast<void*>(PlatformWindow::get().hwnd());
+        #endif
 
         m_renderer->init(galDesc);
         return true;
@@ -87,5 +86,4 @@ namespace Funkin::Core {
         m_galOwner.reset();
         PlatformWindow::get().shutdown();
     }
-
 }
