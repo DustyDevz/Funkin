@@ -18,7 +18,7 @@ jobs:
           submodules: recursive
 
       - name: Setup Vulkan SDK
-        uses: humbletim/setup-vulkan-sdk@v1.2.0
+        uses: humbletim/setup-vulkan-sdk@v1.2.1
         with:
           vulkan-query-version: latest
           vulkan-components: 'Vulkan-Headers, Vulkan-Loader'
@@ -43,4 +43,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Funkin-Windows
-          path: export/release/FNFCPP.exe
+          path: export/release/Funkin.exe
