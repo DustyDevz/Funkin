@@ -4,6 +4,7 @@
 #include "renderer/shader/shader_types.hpp"
 #include "scene/components/component_test.hpp"
 #include "ui/ui_renderer.hpp"
+#include <input/input.hpp>
 
 namespace GAL    = Funkin::Renderer::GAL;
 namespace Shader = Funkin::Renderer::Shader;
@@ -54,10 +55,18 @@ static int run() {
         gal->endRenderPass();
     });
 
+    LOG_INFO("input: test binded");
+    auto& input = Funkin::Input::Input::get();
+    input.bind("test", Funkin::Input::KeyCode::W);
+
     LOG_INFO("engine: running");
     while (engine.isRunning()) {
         if (!engine.processEvents()) break;
         engine.tickFrame();
+
+        if (input.isDown("test")) {
+            LOG_INFO("input: test hit!");
+        }
     }
 
     gal->waitIdle();

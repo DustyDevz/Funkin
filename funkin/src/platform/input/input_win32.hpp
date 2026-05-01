@@ -1,0 +1,31 @@
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
+
+#pragma once
+
+#ifdef _WIN32
+    #include <input/input_types.hpp>
+    #include <input/input_ring_buffer.hpp>
+    #include <functional>
+
+    #define WIN32_LEAN_AND_MEAN
+    #include <Windows.h>
+    #include <Xinput.h>
+
+    using namespace Funkin::Input;
+    namespace Funkin::Platform::Input {
+        KeyCode vkToKeyCode(WPARAM vk, LPARAM flags);
+
+        void handleRawInput(HRAWINPUT hRaw,
+                            InputRingBuffer<4096>& ring,
+                            uint64_t startTime);
+
+        void registerRawInput(HWND hwnd);
+        void pollXInput(InputRingBuffer<4096>& ring,
+                        uint64_t startTime,
+                        XINPUT_STATE lastState[4],
+                        bool connected[4]);
+                        
+        uint64_t nanoTime();
+    }
+#endif

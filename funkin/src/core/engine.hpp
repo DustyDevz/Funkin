@@ -11,9 +11,9 @@ namespace Funkin::Core {
 
     enum class RendererBackend {
         Vulkan,
-#ifdef _WIN32
+        #ifdef _WIN32
         DX12,
-#endif
+        #endif
     };
 
     struct EngineConfig {
@@ -21,11 +21,11 @@ namespace Funkin::Core {
         int             width    = 1280;
         int             height   = 720;
         bool            vsync    = false;
-#ifdef _WIN32
-        RendererBackend renderer = RendererBackend::DX12;
-#else
-        RendererBackend renderer = RendererBackend::Vulkan;
-#endif
+        #ifdef _WIN32
+            RendererBackend renderer = RendererBackend::DX12;
+        #else
+            RendererBackend renderer = RendererBackend::Vulkan;
+        #endif
     };
 
     using FrameCallback = std::function<void()>;

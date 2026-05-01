@@ -5,6 +5,8 @@
 
 #include "window_win32.hpp"
 #include "core/engine.hpp"
+#include <input/input.hpp>
+#include <platform/input/input_win32.hpp>
 #include <stdexcept>
 
 namespace Funkin::Platform {
@@ -70,6 +72,16 @@ namespace Funkin::Platform {
 
     LRESULT CALLBACK Window_Win32::wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         switch (msg) {
+        case WM_INPUT: {
+            Funkin::Platform::Input::handleRawInput(
+                (HRAWINPUT)lp,
+                Funkin::Input::Input::get().ring(),
+                Funkin::Input::Input::get().startTime()
+            );
+
+            return 0;
+        }
+
         case WM_CLOSE:
         case WM_DESTROY:
             Core::Engine::get().quit();

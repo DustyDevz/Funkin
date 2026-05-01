@@ -3,6 +3,7 @@
 
 #include "engine.hpp"
 #include <renderer/gal/vk/vk_gal.hpp>
+#include <input/input.hpp>
 
 #ifdef _WIN32
     #include <platform/window/window_win32.hpp>
@@ -23,6 +24,7 @@ namespace Funkin::Core {
         m_running = true;
 
         PlatformWindow::get().init(cfg.title, cfg.width, cfg.height);
+        Input::Input::get().init();
 
         #ifdef _WIN32
             if (cfg.renderer == RendererBackend::DX12)
@@ -53,6 +55,7 @@ namespace Funkin::Core {
             quit();
             return false;
         }
+        Input::Input::get().update();
         return m_running;
     }
 
@@ -84,6 +87,7 @@ namespace Funkin::Core {
             m_renderer = nullptr;
         }
         m_galOwner.reset();
+        Input::Input::get().shutdown();
         PlatformWindow::get().shutdown();
     }
 }

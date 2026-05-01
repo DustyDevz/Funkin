@@ -19,6 +19,10 @@ target_include_directories(Funkin
         funkin/third_party/zstd/lib
 )
 
+if(WIN32)
+    target_link_libraries(Funkin PRIVATE XInput)
+endif()
+
 target_link_libraries(Funkin PRIVATE
     Vulkan::Vulkan
     libzstd_static
