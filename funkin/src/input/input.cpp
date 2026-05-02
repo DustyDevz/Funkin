@@ -5,6 +5,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cstring>
+#include <timeapi.h>
 
 #ifdef _WIN32
     #include <platform/input/input_win32.hpp>
@@ -12,6 +13,8 @@
     
     static XINPUT_STATE s_xiState[4]{};
     static bool         s_xiConnected[4]{};
+
+    #pragma comment(lib, "winmm.lib")
 #elif __linux
 
 #endif
@@ -35,12 +38,14 @@ namespace Funkin::Input {
 
             m_threadRunning = true;
             m_inputThread = std::thread([this]() {
+                timeBeginPeriod(1); 
                 SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
                 while (m_threadRunning) {
                     Platform::Input::pollXInput(m_ring, m_startTime, s_xiState, s_xiConnected);
-                    Sleep(1);
+                    std::this_thread::yield(); 
                 }
+                timeEndPeriod(1);
             });
         #elif __linux
 
@@ -64,6 +69,25 @@ namespace Funkin::Input {
 
     DeadZone Input::deadZone(ControllerAxis axis) const {
         return m_deadZones[(size_t)axis];
+    }
+
+    uint64_t Input::getNow() const {
+        return Platform::Input::nanoTime() - m_startTime;
+    }
+
+    uint64_t Input::getLastTimestamp(const std::string& action) const {
+        auto it = m_bindings.find(action);
+        if (it == m_bindings.end()) return 0;
+        
+        KeyCode targetKey = it->second.key;
+        uint64_t latest = 0;
+
+        for (const auto& e : m_state.frameEvents) {
+            if (e.type == InputEventType::KeyDown && e.key.key == targetKey) {
+                latest = e.time;
+            }
+        }
+        return latest;
     }
 
     float Input::axis(uint8_t controller, ControllerAxis a) const {

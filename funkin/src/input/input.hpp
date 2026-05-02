@@ -94,6 +94,9 @@ namespace Funkin::Input {
         InputRingBuffer<4096>& ring()            { return m_ring; }
         uint64_t               startTime() const { return m_startTime; }
 
+        uint64_t getNow() const;
+        uint64_t getLastTimestamp(const std::string& action) const;
+
     private:
         Input() = default;
 

@@ -5,6 +5,7 @@
 #include "scene/components/component_test.hpp"
 #include "ui/ui_renderer.hpp"
 #include <input/input.hpp>
+#include <platform/input/input_win32.hpp>
 
 namespace GAL    = Funkin::Renderer::GAL;
 namespace Shader = Funkin::Renderer::Shader;
@@ -64,8 +65,11 @@ static int run() {
         if (!engine.processEvents()) break;
         engine.tickFrame();
 
-        if (input.isDown("test")) {
-            LOG_INFO("input: test hit!");
+        if (Input::get().justDown("test")) {
+            uint64_t eventTime = Input::get().getLastTimestamp("test");
+            uint64_t now = Input::get().getNow();
+            double latencyMs = (now >= eventTime) ? (double)(now - eventTime) / 1'000'000.0 : 0.0;
+            LOG_INFO("Now: {} | Event: {} | Latency: {:.4f} ms", now, eventTime, latencyMs);
         }
     }
 

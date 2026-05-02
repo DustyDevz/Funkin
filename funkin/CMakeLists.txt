@@ -28,6 +28,7 @@ target_link_libraries(Funkin PRIVATE
     libzstd_static
     DirectX-Headers
     DirectX-Guids
+    winmm
     ${PLATFORM_LIBS}
 )
 
