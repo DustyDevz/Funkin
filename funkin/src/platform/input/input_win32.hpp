@@ -18,7 +18,8 @@
 
         void handleRawInput(HRAWINPUT hRaw,
                             InputRingBuffer<4096>& ring,
-                            uint64_t startTime);
+                            uint64_t startTime,
+                            uint64_t capturedNow);
 
         void registerRawInput(HWND hwnd);
         void pollXInput(InputRingBuffer<4096>& ring,

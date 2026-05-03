@@ -121,7 +121,8 @@ namespace Funkin::Platform::Input {
 
     void handleRawInput(HRAWINPUT hRaw,
                         InputRingBuffer<4096>& ring,
-                        uint64_t startTime) {
+                        uint64_t startTime,
+                        uint64_t capturedNow) {
         UINT size = 0;
         GetRawInputData(hRaw, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER));
 
@@ -130,7 +131,7 @@ namespace Funkin::Platform::Input {
         GetRawInputData(hRaw, RID_INPUT, buf, &size, sizeof(RAWINPUTHEADER));
 
         RAWINPUT* raw = (RAWINPUT*)buf;
-        uint64_t  now = nanoTime() - startTime;
+        uint64_t  now = capturedNow - startTime;
 
         if (raw->header.dwType == RIM_TYPEKEYBOARD) {
             auto& kb  = raw->data.keyboard;

@@ -40,6 +40,7 @@ namespace Funkin::Input {
             m_inputThread = std::thread([this]() {
                 timeBeginPeriod(1); 
                 SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+                SetThreadAffinityMask(m_inputThread.native_handle(), 1 << 2);
 
                 while (m_threadRunning) {
                     Platform::Input::pollXInput(m_ring, m_startTime, s_xiState, s_xiConnected);

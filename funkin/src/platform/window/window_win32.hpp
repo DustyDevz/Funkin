@@ -7,9 +7,9 @@
 #include "window.hpp"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <thread>
 
 namespace Funkin::Platform {
-
     class Window_Win32 : public Window {
     public:
         static Window_Win32& get();
@@ -25,10 +25,9 @@ namespace Funkin::Platform {
         Window_Win32() = default;
         static LRESULT CALLBACK wndProc(HWND, UINT, WPARAM, LPARAM);
 
-        HWND      m_hwnd = nullptr;
+        HWND      m_hwnd      = nullptr;
         HINSTANCE m_hinstance = nullptr;
     };
-
 }
 
 #endif
