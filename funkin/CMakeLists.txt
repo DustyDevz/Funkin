@@ -37,5 +37,6 @@ target_precompile_headers(Funkin PRIVATE src/pch.hpp)
 target_compile_definitions(Funkin PRIVATE
     $<$<CONFIG:Debug>:FUNKIN_DEBUG>
     $<$<CONFIG:Release>:FUNKIN_RELEASE>
+    $<$<BOOL:${FORCE_PRINT_ON_RELEASE}>:FORCE_PRINT_ON_RELEASE>
     D3D12_IGNORE_SDK_VERSION
 )

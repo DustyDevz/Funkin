@@ -1,6 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.26)
 project(FNFCPP VERSION 0.1.0 LANGUAGES CXX)
 
+option(FORCE_PRINT_ON_RELEASE "Enable logging on release" ON) # don't leave this true when given to public !!!
 option(PLUS_BUILD_EDITOR "Build editor" ON)
 option(PLUS_BUILD_PLUSC  "Build asset compiler" ON)
 
@@ -9,6 +10,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+
+if(FORCE_PRINT_ON_RELEASE)
+    add_compile_definitions(FORCE_PRINT_ON_RELEASE)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
