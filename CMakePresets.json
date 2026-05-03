@@ -8,7 +8,6 @@
       "architecture": "x64",
       "binaryDir": "${sourceDir}/.cmake/windows-debug",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
         "PLUS_BUILD_EDITOR": "ON",
         "PLUS_BUILD_PLUSC": "ON"
       }
@@ -20,7 +19,6 @@
       "architecture": "x64",
       "binaryDir": "${sourceDir}/.cmake/windows-release",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
         "PLUS_BUILD_EDITOR": "OFF",
         "PLUS_BUILD_PLUSC": "OFF"
       }
@@ -35,12 +33,28 @@
           "hostOS": [ "Linux" ]
         }
       },
-     "cacheVariables": {
+      "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "PLUS_BUILD_EDITOR": "ON",
         "PLUS_BUILD_PLUSC": "ON"
       }
     }
-  ]
+  ],
+  "buildPresets": [
+    {
+        "name": "windows-debug",
+        "configurePreset": "windows-debug",
+        "configuration": "Debug"
+    },
+    {
+        "name": "windows-release",
+        "configurePreset": "windows-release",
+        "configuration": "Release"
+    },
+    {
+        "name": "linux-debug",
+        "configurePreset": "linux-debug"
+    }
+  ] 
 }

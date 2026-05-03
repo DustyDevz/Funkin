@@ -76,7 +76,7 @@ namespace Funkin::Core {
 
 }
 
-#ifdef FUNKIN_DEBUG
+#ifdef FUNKIN_DEBUG 
     #define LOG_INFO(fmt, ...)  ::Funkin::Core::LogMessage(::Funkin::Core::LogLevel::Info,     __FILE__, __LINE__, fmt, ##__VA_ARGS__)
     #define LOG_WARN(fmt, ...)  ::Funkin::Core::LogMessage(::Funkin::Core::LogLevel::Warning,  __FILE__, __LINE__, fmt, ##__VA_ARGS__)
     #define LOG_ERR(fmt, ...)   ::Funkin::Core::LogMessage(::Funkin::Core::LogLevel::Error,    __FILE__, __LINE__, fmt, ##__VA_ARGS__)
