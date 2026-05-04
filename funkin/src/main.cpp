@@ -82,16 +82,16 @@ static int run() {
 }
 
 #ifdef _WIN32
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-    AllocConsole();
-    FILE* fDummy;
-    freopen_s(&fDummy, "CONOUT$", "w", stdout);
-    freopen_s(&fDummy, "CONOUT$", "w", stderr);
-    freopen_s(&fDummy, "CONIN$", "r", stdin);
-    return run();
-}
+    int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+        AllocConsole();
+        FILE* fDummy;
+        freopen_s(&fDummy, "CONOUT$", "w", stdout);
+        freopen_s(&fDummy, "CONOUT$", "w", stderr);
+        freopen_s(&fDummy, "CONIN$", "r", stdin);
+        return run();
+    }
 #else
-int main() {
-    return run();
-}
+    int main() {
+        return run();
+    }
 #endif
