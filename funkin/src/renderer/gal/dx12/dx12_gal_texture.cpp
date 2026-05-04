@@ -46,12 +46,15 @@ namespace Funkin::Renderer::GAL {
             throw std::runtime_error("Failed to create texture resource");
 
         if (desc.usage & TextureUsage::Sampled) {
-            tex.srv = m_srvHeap.allocateCPU();
+            //tex.srv = m_srvHeap.allocateCPU();
+            tex.srv = m_srvStaging.allocateCPU();
+
             D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
             srvDesc.Format                  = fmt;
             srvDesc.ViewDimension           = D3D12_SRV_DIMENSION_TEXTURE2D;
             srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
             srvDesc.Texture2D.MipLevels     = desc.mips;
+            
             m_device->CreateShaderResourceView(tex.resource.Get(), &srvDesc, tex.srv);
         }
 

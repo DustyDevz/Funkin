@@ -271,7 +271,8 @@ namespace Funkin::Renderer::GAL {
         samplerDesc.BorderColor[3] = desc.borderColor.a;
 
         DX12GalSampler sampler = {};
-        sampler.handle = m_samplerHeap.allocateCPU();
+        //sampler.handle = m_samplerHeap.allocateCPU();
+        sampler.handle = m_samplerStaging.allocateCPU();
         m_device->CreateSampler(&samplerDesc, sampler.handle);
 
         SamplerHandle h;

@@ -86,7 +86,9 @@ class DX12Gal : public IDAL {
         DX12DescriptorHeap           m_rtvHeap;
         DX12DescriptorHeap           m_dsvHeap;
         DX12DescriptorHeap           m_srvHeap;
+        DX12DescriptorHeap           m_srvStaging;
         DX12DescriptorHeap           m_samplerHeap;
+        DX12DescriptorHeap           m_samplerStaging;
         D3D12_CPU_DESCRIPTOR_HANDLE  m_swapRTVs[FRAME_COUNT] = {};
 
         ResourcePool<DX12GalTexture>  m_textures;
