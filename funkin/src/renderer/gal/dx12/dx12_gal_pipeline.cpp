@@ -264,7 +264,7 @@ namespace Funkin::Renderer::GAL {
         samplerDesc.MinLOD         = desc.minLod;
         samplerDesc.MaxLOD         = desc.maxLod;
         samplerDesc.MipLODBias     = 0.0f;
-        samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+        samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
         samplerDesc.BorderColor[0] = desc.borderColor.r;
         samplerDesc.BorderColor[1] = desc.borderColor.g;
         samplerDesc.BorderColor[2] = desc.borderColor.b;
