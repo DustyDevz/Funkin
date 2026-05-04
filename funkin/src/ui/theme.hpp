@@ -8,15 +8,15 @@
 namespace Funkin::UI {
     struct Theme {
         // backgrounds
-        Color bgBase        = { 0.10f, 0.10f, 0.11f, 1.0f };
-        Color bgPanel       = { 0.14f, 0.14f, 0.16f, 1.0f };
-        Color bgItem        = { 0.18f, 0.18f, 0.20f, 1.0f };
-        Color bgItemHover   = { 0.24f, 0.24f, 0.27f, 1.0f };
-        Color bgItemSelect  = { 0.27f, 0.42f, 0.65f, 1.0f };
+        Color bgBase       = { 0.10f, 0.10f, 0.11f, 1.0f };
+        Color bgPanel      = { 0.14f, 0.14f, 0.16f, 1.0f };
+        Color bgItem       = { 0.18f, 0.18f, 0.20f, 1.0f };
+        Color bgItemHover  = { 0.24f, 0.24f, 0.27f, 1.0f };
+        Color bgItemSelect = { 0.27f, 0.42f, 0.65f, 1.0f };
 
         // borders
-        Color border        = { 0.25f, 0.25f, 0.28f, 1.0f };
-        Color borderFocus   = { 0.40f, 0.60f, 0.90f, 1.0f };
+        Color border      = { 0.25f, 0.25f, 0.28f, 1.0f };
+        Color borderFocus = { 0.40f, 0.60f, 0.90f, 1.0f };
 
         // text
         Color textPrimary   = { 0.92f, 0.92f, 0.92f, 1.0f };
@@ -32,13 +32,13 @@ namespace Funkin::UI {
         Color btnBgPrimaryH = { 0.25f, 0.52f, 0.90f, 1.0f };
 
         // accent
-        Color accent        = { 0.30f, 0.60f, 1.00f, 1.0f };
+        Color accent = { 0.30f, 0.60f, 1.00f, 1.0f };
 
         // spacing
-        float paddingXS  = 4.0f;
-        float paddingSM  = 8.0f;
-        float paddingMD  = 16.0f;
-        float paddingLG  = 24.0f;
+        float paddingXS = 4.0f;
+        float paddingSM = 8.0f;
+        float paddingMD = 16.0f;
+        float paddingLG = 24.0f;
 
         // font sizes
         float fontSizeSM = 11.0f;
@@ -47,8 +47,8 @@ namespace Funkin::UI {
         float fontSizeXL = 22.0f;
 
         // font
-        std::string fontPath = "fonts/Inter-Regular.ttf";
-        std::string fontBold = "fonts/Inter-Bold.ttf";
+        std::string fontRegular = "fonts/Inter-Regular.ttf";
+        std::string fontBold    = "fonts/Inter-Bold.ttf";
 
         // radii
         float radiusSM = 3.0f;

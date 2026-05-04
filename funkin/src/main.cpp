@@ -6,15 +6,17 @@
 #include "ui/ui_renderer.hpp"
 #include <input/input.hpp>
 #include <platform/input/input_win32.hpp>
+#include <ui/screens/screen_project.hpp>
+#include <math/vec2.hpp>
 
 namespace GAL    = Funkin::Renderer::GAL;
 namespace Shader = Funkin::Renderer::Shader;
 
 static int run() {
     Funkin::Core::EngineConfig cfg {
-        .title  = "Funkin",
-        .width  = 1280,
-        .height = 720,
+        .title  = "Funkin Project",
+        .width  = 900,
+        .height = 600,
         .vsync  = false,
     };
 
@@ -36,9 +38,30 @@ static int run() {
     auto& ui = Funkin::UI::UIRenderer::get();
     ui.init(gal, cfg.width, cfg.height);
 
+    LOG_INFO("init: project manager");
+    Funkin::UI::ProjectUI ProjectUI;
+    ProjectUI.init();
+
+    {
+        auto size = gal->swapchainSize();
+        ui.resize((uint32_t)size.x, (uint32_t)size.y);
+        ProjectUI.onResize((uint32_t)size.x, (uint32_t)size.y);
+    }
+
+    engine.setResizeCallback([&](uint32_t w, uint32_t h) {
+        ui.resize(w, h);
+        ProjectUI.onResize(w, h);
+    });
+
     engine.setFrameCallback([&]() {
+        auto& input   = Funkin::Input::Input::get();
+        Funkin::Vec2 mouse = { input.state().mouseX, input.state().mouseY };
+        bool clicked = input.state().mouseButtons[(size_t)Funkin::Input::MouseButton::Left];
+
+        ProjectUI.update(mouse, clicked);
+
         GAL::ColorAttachment color{};
-        color.clearColor = { 0.1f, 0.2f, 0.3f, 1.0f };
+        color.clearColor = { .07f, .07f, .07f, 1.0f };
         color.loadOp     = GAL::LoadOp::Clear;
         color.storeOp    = GAL::StoreOp::Store;
 
@@ -48,10 +71,14 @@ static int run() {
         rp.colorCount          = 1;
 
         gal->beginRenderPass(rp);
-
+        
         auto size = gal->swapchainSize();
         gal->setViewport({ 0.0f, 0.0f, size.x, size.y });
         gal->setScissor ({ 0.0f, 0.0f, size.x, size.y });
+
+        ui.beginFrame();
+        ProjectUI.draw();
+        ui.flush();
 
         gal->endRenderPass();
     });
@@ -65,9 +92,9 @@ static int run() {
         if (!engine.processEvents()) break;
         engine.tickFrame();
 
-        if (Input::get().justDown("test")) {
-            uint64_t eventTime = Input::get().getLastTimestamp("test");
-            uint64_t now = Input::get().getNow();
+        if (input.justDown("test")) {
+            uint64_t eventTime = input.getLastTimestamp("test");
+            uint64_t now = input.getNow();
             double latencyMs = (now >= eventTime) ? (double)(now - eventTime) / 1'000'000.0 : 0.0;
             LOG_INFO("Now: {} | Event: {} | Latency: {:.4f} ms", now, eventTime, latencyMs);
         }
@@ -75,9 +102,12 @@ static int run() {
 
     gal->waitIdle();
 
+    ProjectUI.shutdown();
+    ui.shutdown();
+    shaderLoader.shutdown();
     engine.shutdown();
-    LOG_INFO("engine: shutdown");
 
+    LOG_INFO("engine: shutdown");
     return 0;
 }
 

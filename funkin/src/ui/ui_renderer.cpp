@@ -36,7 +36,7 @@ namespace Funkin::UI {
         });
 
         m_cbuffer = m_gal->createBuffer({
-            16 * sizeof(float),
+            256,
             Renderer::GAL::BufferUsage::Uniform,
             Renderer::GAL::MemoryHint::CPUWrite
         });
@@ -215,34 +215,22 @@ namespace Funkin::UI {
         float w = (float)m_width;
         float h = (float)m_height;
         float ortho[16] = {
-            2.0f/w,  0.0f,    0.0f, 0.0f,
-            0.0f,   -2.0f/h,  0.0f, 0.0f,
-            0.0f,    0.0f,    1.0f, 0.0f,
-            -1.0f,    1.0f,    0.0f, 1.0f,
+            2.0f/w,  0.0f,    0.0f,  0.0f,
+            0.0f,   -2.0f/h,  0.0f,  0.0f,
+            0.0f,    0.0f,    1.0f,  0.0f,
+           -1.0f,    1.0f,    0.0f,  1.0f
         };
 
         void* cbData = m_gal->mapBuffer(m_cbuffer);
         memcpy(cbData, ortho, sizeof(ortho));
         m_gal->unmapBuffer(m_cbuffer);
-
-        Renderer::GAL::RenderPassDesc rp{};
-        rp.useSwapchainTarget = true;
-        m_gal->beginRenderPass(rp);
-
-        Renderer::GAL::Viewport vp{};
-        vp.width  = w;
-        vp.height = h;
-        m_gal->setViewport(vp);
-        m_gal->setScissor({ 0.0f, 0.0f, w, h });
-
         m_gal->setPipeline(m_pipeline);
         m_gal->setUniformBuffer(m_cbuffer, 0);
         m_gal->setSampler(m_sampler, 0);
 
         for (auto& batch : m_batches)
             flushBatch(batch);
-
-        m_gal->endRenderPass();
+            
         m_batches.clear();
     }
 

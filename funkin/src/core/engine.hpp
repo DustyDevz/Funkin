@@ -5,6 +5,7 @@
 
 #include <string>
 #include <functional>
+#include <memory>
 #include <renderer/gal/idal.hpp>
 
 namespace Funkin::Core {
@@ -29,6 +30,7 @@ namespace Funkin::Core {
     };
 
     using FrameCallback = std::function<void()>;
+    using ResizeCallback = std::function<void(uint32_t, uint32_t)>;
 
     class Engine {
     public:
@@ -44,10 +46,11 @@ namespace Funkin::Core {
         void resize(int w, int h);
 
         void setFrameCallback(FrameCallback cb) { m_frameCallback = std::move(cb); }
+        void setResizeCallback(ResizeCallback cb) { m_resizeCallback = std::move(cb); }
 
         Renderer::GAL::IDAL* gal()          const { return m_renderer; }
-        const EngineConfig&  config()        const { return m_cfg; }
-        bool                 isRunning()     const { return m_running; }
+        const EngineConfig&  config()       const { return m_cfg; }
+        bool                 isRunning()    const { return m_running; }
 
     private:
         Engine() = default;
@@ -57,6 +60,7 @@ namespace Funkin::Core {
         std::unique_ptr<Renderer::GAL::IDAL>   m_galOwner;
         Renderer::GAL::IDAL*                   m_renderer     = nullptr;
         FrameCallback                          m_frameCallback;
+        ResizeCallback                         m_resizeCallback;
     };
 
 }

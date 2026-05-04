@@ -76,9 +76,14 @@ namespace Funkin::Core {
 
     void Engine::resize(int w, int h) {
         if (w <= 0 || h <= 0 || !m_renderer) return;
+        
         m_cfg.width  = w;
         m_cfg.height = h;
         m_renderer->resize(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
+        
+        if (m_resizeCallback) {
+            m_resizeCallback(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
+        }
     }
 
     void Engine::shutdown() {
