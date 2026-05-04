@@ -33,13 +33,5 @@ set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_SHARED   OFF CACHE BOOL "" FORCE)
 
-include(FetchContent)
-FetchContent_Declare(
-    DirectX-Headers
-    GIT_REPOSITORY https://github.com/microsoft/DirectX-Headers.git
-    GIT_TAG main
-)
-FetchContent_MakeAvailable(DirectX-Headers)
-
 add_subdirectory(funkin/third_party/zstd/build/cmake)
 add_subdirectory(funkin)

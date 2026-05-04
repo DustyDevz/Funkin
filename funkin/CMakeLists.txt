@@ -16,20 +16,18 @@ find_package(Vulkan REQUIRED)
 target_include_directories(Funkin
     PUBLIC src
     PRIVATE
-        funkin/third_party/zstd/lib
+        third_party/directx/include
+        third_party/zstd/lib
+        third_party/stb
 )
 
 if(WIN32)
-    target_link_libraries(Funkin PRIVATE XInput)
+    target_link_libraries(Funkin PRIVATE XInput winmm ${PLATFORM_LIBS})
 endif()
 
 target_link_libraries(Funkin PRIVATE
     Vulkan::Vulkan
     libzstd_static
-    DirectX-Headers
-    DirectX-Guids
-    winmm
-    ${PLATFORM_LIBS}
 )
 
 target_precompile_headers(Funkin PRIVATE src/pch.hpp)
