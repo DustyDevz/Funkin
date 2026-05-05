@@ -17,7 +17,7 @@ static int run() {
         .title  = "Funkin Project",
         .width  = 900,
         .height = 600,
-        .vsync  = false,
+        .vsync  = true,
     };
 
     auto& engine = Funkin::Core::Engine::get();
@@ -38,6 +38,10 @@ static int run() {
     auto& ui = Funkin::UI::UIRenderer::get();
     ui.init(gal, cfg.width, cfg.height);
 
+    LOG_INFO("input: test binded");
+    auto& input = Funkin::Input::Input::get();
+    input.bind("test", Funkin::Input::KeyCode::W);
+
     LOG_INFO("init: project manager");
     Funkin::UI::ProjectUI ProjectUI;
     ProjectUI.init();
@@ -55,6 +59,8 @@ static int run() {
 
     engine.setFrameCallback([&]() {
         auto& input   = Funkin::Input::Input::get();
+        input.syncMousePosition();
+
         Funkin::Vec2 mouse = { input.state().mouseX, input.state().mouseY };
         bool clicked = input.state().mouseButtons[(size_t)Funkin::Input::MouseButton::Left];
 
@@ -82,10 +88,6 @@ static int run() {
 
         gal->endRenderPass();
     });
-
-    LOG_INFO("input: test binded");
-    auto& input = Funkin::Input::Input::get();
-    input.bind("test", Funkin::Input::KeyCode::W);
 
     LOG_INFO("engine: running");
     while (engine.isRunning()) {

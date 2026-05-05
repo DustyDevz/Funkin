@@ -36,7 +36,7 @@ namespace Funkin::UI {
         switch (m_style) {
             case ButtonStyle::Primary:
                 bg = m_state == ElementState::Hover   ? t.btnBgPrimaryH :
-                    m_state == ElementState::Pressed ? t.btnBgPress     : t.btnBgPrimary;
+                    m_state == ElementState::Pressed ? t.btnBgPress    : t.btnBgPrimary;
                 break;
             case ButtonStyle::Ghost:
                 bg = { 0, 0, 0, 0 };
@@ -47,7 +47,32 @@ namespace Funkin::UI {
                 break;
         }
 
-        r.drawRect(m_rect, bg, t.border, t.radiusMD);
+        r.drawRoundedRect(m_rect, bg, t.radiusMD);
+        
+        if (m_focused || m_state == ElementState::Hover) {
+            float fw = t.focusWidth;
+            r.drawLine(
+                { m_rect.x - fw,           m_rect.y - fw },
+                { m_rect.x + m_rect.w + fw, m_rect.y - fw },
+                m_focused ? t.focusRing : Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
+                fw);
+            r.drawLine(
+                { m_rect.x + m_rect.w + fw, m_rect.y - fw },
+                { m_rect.x + m_rect.w + fw, m_rect.y + m_rect.h + fw },
+                m_focused ? t.focusRing : Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
+                fw);
+            r.drawLine(
+                { m_rect.x + m_rect.w + fw, m_rect.y + m_rect.h + fw },
+                { m_rect.x - fw,             m_rect.y + m_rect.h + fw },
+                m_focused ? t.focusRing : Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
+                fw);
+            r.drawLine(
+                { m_rect.x - fw, m_rect.y + m_rect.h + fw },
+                { m_rect.x - fw, m_rect.y - fw },
+                m_focused ? t.focusRing : Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
+                fw);
+        }
+
         r.drawText(m_label, m_rect, t.textPrimary, t.fontSizeMD, TextAlign::Center);
     }
 }

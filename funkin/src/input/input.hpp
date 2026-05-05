@@ -68,6 +68,7 @@ namespace Funkin::Input {
         void init();
         void shutdown();
         void update();
+        void syncMousePosition();
 
         const InputState& state() const { return m_state; }
 

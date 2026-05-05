@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 #include "dx12_gal.hpp"
+#include <assert.h>
 
 namespace Funkin::Renderer::GAL {
     void DX12Gal::beginRenderPass(const RenderPassDesc& desc) {
@@ -190,7 +191,10 @@ namespace Funkin::Renderer::GAL {
         auto* t = m_textures.get(tex.id);
         if (!t || slot >= kSrvDynSlots) return;
 
-        uint32_t dynBase = kSrvStaticCap + m_frameIndex * kSrvDynSlots;
+        uint32_t dynBase = kSrvStaticCap + m_frameIndex * kSrvDynSlots * kMaxDrawsPerFrame
+                        + m_drawCallIndex * kSrvDynSlots;
+
+        assert(dynBase + slot < 4096 && "SRV heap overflow");
 
         D3D12_CPU_DESCRIPTOR_HANDLE dst = m_srvHeap.cpuAt(dynBase + slot);
         m_device->CopyDescriptorsSimple(1, dst, t->srv,
@@ -202,7 +206,10 @@ namespace Funkin::Renderer::GAL {
         auto* s = m_samplers.get(sampler.id);
         if (!s || slot >= kSamplerDynSlots) return;
 
-        uint32_t dynBase = kSamplerStaticCap + m_frameIndex * kSamplerDynSlots;
+        uint32_t dynBase = kSamplerStaticCap + m_frameIndex * kSamplerDynSlots * kMaxDrawsPerFrame
+                        + m_drawCallIndex * kSamplerDynSlots;
+
+        assert(dynBase + slot < 2048 && "Sampler heap overflow");
 
         D3D12_CPU_DESCRIPTOR_HANDLE dst = m_samplerHeap.cpuAt(dynBase + slot);
         m_device->CopyDescriptorsSimple(1, dst, s->handle,
@@ -217,8 +224,9 @@ namespace Funkin::Renderer::GAL {
         if (!b || slot >= kCbvDynSlots) return;
 
         uint32_t cbvDynBase = kSrvStaticCap
-                            + FRAME_COUNT * kSrvDynSlots
-                            + m_frameIndex * kCbvDynSlots;
+                            + FRAME_COUNT * kSrvDynSlots * kMaxDrawsPerFrame
+                            + m_frameIndex * kCbvDynSlots * kMaxDrawsPerFrame
+                            + m_drawCallIndex * kCbvDynSlots;
 
         UINT cbSize = (size == 0) ? static_cast<UINT>(b->size) : size;
         cbSize = (cbSize + 255u) & ~255u;
@@ -249,6 +257,7 @@ namespace Funkin::Renderer::GAL {
         m_cmdList->DrawIndexedInstanced(cmd.indexCount, cmd.instanceCount,
                                         cmd.firstIndex, cmd.vertexOffset,
                                         cmd.firstInstance);
+        ++m_drawCallIndex;
     }
 
     void DX12Gal::drawLine(Vec2, Vec2, Color, float)        {}

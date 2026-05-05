@@ -2,6 +2,7 @@
 // Licensed under GNU GPL v3.0
 
 #pragma once
+
 #include <math/rect.hpp>
 #include <math/vec2.hpp>
 #include <math/color.hpp>
@@ -9,6 +10,7 @@
 #include <renderer/gal/descriptors.hpp>
 #include <string>
 #include <vector>
+#include "ui_font.hpp"
 
 namespace Funkin::UI {
     enum class TextAlign;
@@ -20,9 +22,9 @@ namespace Funkin::UI {
     };
 
     struct UIBatch {
-        std::vector<UIVertex>   vertices;
-        std::vector<uint16_t>   indices;
-        Renderer::GAL::TextureHandle texture;
+        std::vector<UIVertex>  vertices;
+        std::vector<uint16_t>  indices;
+        bool                   isText = false;
     };
 
     class UIRenderer {
@@ -39,10 +41,11 @@ namespace Funkin::UI {
         void drawFilledRect(Rect r, Color color);
         void drawRect(Rect r, Color fill, Color border, float radius = 0.0f, float borderWidth = 1.0f);
         void drawText(const std::string& text, Rect bounds, Color color,
-                    float fontSize, TextAlign align);
+                      float fontSize, TextAlign align);
         void drawSprite(Renderer::GAL::TextureHandle tex, Rect dest, Color tint = { 1,1,1,1 });
         void drawLine(Vec2 a, Vec2 b, Color color, float thickness = 1.0f);
         void drawCircle(Vec2 center, float radius, Color color, int segments = 32);
+        void drawRoundedRect(Rect r, Color fill, float radius);
 
         uint32_t width()  const { return m_width; }
         uint32_t height() const { return m_height; }
@@ -52,28 +55,28 @@ namespace Funkin::UI {
     private:
         UIRenderer() = default;
 
-        void ensureBatch(Renderer::GAL::TextureHandle tex);
-        void pushQuad(Rect r, Color color, Renderer::GAL::TextureHandle tex,
-                    float u0 = 0, float v0 = 0, float u1 = 1, float v1 = 1);
+        void ensureBatch(bool isText);
+        void pushQuad(Rect r, Color color,
+                      float u0, float v0, float u1, float v1,
+                      bool isText);
         void pushLine(Vec2 a, Vec2 b, Color color, float thickness);
-        void flushBatch(UIBatch& batch);
         void initPipeline();
-        void initWhiteTexture();
 
-        Renderer::GAL::IDAL*         m_gal      = nullptr;
-        uint32_t                     m_width    = 0;
-        uint32_t                     m_height   = 0;
+        Renderer::GAL::IDAL*          m_gal    = nullptr;
+        uint32_t                      m_width  = 0;
+        uint32_t                      m_height = 0;
 
         Renderer::GAL::ShaderHandle   m_vs;
         Renderer::GAL::ShaderHandle   m_ps;
         Renderer::GAL::PipelineHandle m_pipeline;
-        Renderer::GAL::SamplerHandle  m_sampler;
+        Renderer::GAL::SamplerHandle  m_samplerNearest;
+        Renderer::GAL::SamplerHandle  m_samplerLinear;
         Renderer::GAL::BufferHandle   m_vertexBuffer;
         Renderer::GAL::BufferHandle   m_indexBuffer;
         Renderer::GAL::BufferHandle   m_cbuffer;
-        Renderer::GAL::TextureHandle  m_whiteTexture;
 
-        std::vector<UIBatch> m_batches;
+        std::vector<UIBatch>  m_batches;
+        std::unique_ptr<Font> m_font;
 
         static constexpr uint32_t MAX_VERTICES = 65536;
         static constexpr uint32_t MAX_INDICES  = 131072;

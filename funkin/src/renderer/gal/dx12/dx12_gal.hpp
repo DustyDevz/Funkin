@@ -97,11 +97,12 @@ class DX12Gal : public IDAL {
         ResourcePool<DX12GalPipeline> m_pipelines;
         ResourcePool<DX12GalSampler>  m_samplers;
 
-        uint32_t m_frameIndex   = 0;
-        uint32_t m_width        = 0;
-        uint32_t m_height       = 0;
-        bool     m_vsync        = false;
-        bool     m_inRenderPass = false;
+        uint32_t m_frameIndex       = 0;
+        uint32_t m_width            = 0;
+        uint32_t m_height           = 0;
+        uint32_t m_drawCallIndex    = 0;
+        bool     m_vsync            = false;
+        bool     m_inRenderPass     = false;
 
         D3D12_PRIMITIVE_TOPOLOGY m_currentTopology     = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
         uint32_t                 m_currentVertexStride  = 0;
@@ -116,5 +117,6 @@ class DX12Gal : public IDAL {
         static constexpr uint32_t kCbvDynSlots      = 4;
         static constexpr uint32_t kSamplerStaticCap = 32;
         static constexpr uint32_t kSamplerDynSlots  = 8;
+        static constexpr uint32_t kMaxDrawsPerFrame = 128;
     };
 }

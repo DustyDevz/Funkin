@@ -3,11 +3,13 @@
 
 #include "ui_renderer.hpp"
 #include "theme.hpp"
+#include "ui_font.hpp"
 #include <renderer/shader/shader_loader.hpp>
 #include <renderer/shader/shader_types.hpp>
 #include <cmath>
 #include <stdexcept>
 #include <cstring>
+#include <algorithm>
 
 namespace Funkin::UI {
     UIRenderer& UIRenderer::get() {
@@ -20,7 +22,6 @@ namespace Funkin::UI {
         m_width  = width;
         m_height = height;
 
-        initWhiteTexture();
         initPipeline();
 
         m_vertexBuffer = m_gal->createBuffer({
@@ -41,24 +42,21 @@ namespace Funkin::UI {
             Renderer::GAL::MemoryHint::CPUWrite
         });
 
-        m_sampler = m_gal->createSampler({
+        m_samplerNearest = m_gal->createSampler({
+            Renderer::GAL::FilterMode::Nearest,
+            Renderer::GAL::WrapMode::Clamp,
+            Renderer::GAL::WrapMode::Clamp
+        });
+
+        m_samplerLinear = m_gal->createSampler({
             Renderer::GAL::FilterMode::Linear,
             Renderer::GAL::WrapMode::Clamp,
             Renderer::GAL::WrapMode::Clamp
         });
-    }
 
-    void UIRenderer::initWhiteTexture() {
-        Renderer::GAL::TextureDesc td{};
-        td.width  = 1;
-        td.height = 1;
-        td.format = Renderer::GAL::PixelFormat::RGBA8_Unorm;
-        td.usage  = Renderer::GAL::TextureUsage::Sampled;
-
-        m_whiteTexture = m_gal->createTexture(td);
-
-        uint8_t white[4] = { 255, 255, 255, 255 };
-        m_gal->uploadTexture(m_whiteTexture, white, 4);
+        m_font = std::make_unique<Font>();
+        if (!m_font->load(gal, Theme::get().fontRegular, 64.0f, 512))
+            throw std::runtime_error("Failed to load UI font");
     }
 
     void UIRenderer::initPipeline() {
@@ -68,7 +66,7 @@ namespace Funkin::UI {
         auto* ps = sl.get("ui", Renderer::Shader::ShaderStage::Pixel);
 
         if (!vs || !ps)
-            throw std::runtime_error("UI shaders not found — make sure ui.hlsl is in shaders/");
+            throw std::runtime_error("UI shaders not found");
 
         m_vs = m_gal->createShader({ vs->bytecode.data(), vs->bytecode.size(),
                                     Renderer::GAL::ShaderStage::Vertex });
@@ -76,9 +74,9 @@ namespace Funkin::UI {
                                     Renderer::GAL::ShaderStage::Pixel });
 
         Renderer::GAL::VertexAttribute attribs[] = {
-            { "POSITION", 0, Renderer::GAL::PixelFormat::RG32_Float,    0  },
-            { "TEXCOORD", 0, Renderer::GAL::PixelFormat::RG32_Float,    8  },
-            { "COLOR",    0, Renderer::GAL::PixelFormat::RGBA32_Float,  16 },
+            { "POSITION", 0, Renderer::GAL::PixelFormat::RG32_Float,   0  },
+            { "TEXCOORD", 0, Renderer::GAL::PixelFormat::RG32_Float,   8  },
+            { "COLOR",    0, Renderer::GAL::PixelFormat::RGBA32_Float, 16 },
         };
 
         Renderer::GAL::PipelineDesc pd{};
@@ -105,23 +103,22 @@ namespace Funkin::UI {
         m_batches.clear();
     }
 
-    void UIRenderer::ensureBatch(Renderer::GAL::TextureHandle tex) {
-        if (m_batches.empty() || m_batches.back().texture != tex)
-            m_batches.push_back({ {}, {}, tex });
+    void UIRenderer::ensureBatch(bool isText) {
+        if (m_batches.empty() || m_batches.back().isText != isText)
+            m_batches.push_back({ {}, {}, isText });
     }
 
     void UIRenderer::pushQuad(Rect r, Color color,
-                            Renderer::GAL::TextureHandle tex,
-                            float u0, float v0, float u1, float v1) {
-        ensureBatch(tex);
+                              float u0, float v0, float u1, float v1,
+                              bool isText) {
+        ensureBatch(isText);
         auto& batch = m_batches.back();
-
         uint16_t base = (uint16_t)batch.vertices.size();
 
-        batch.vertices.push_back({ r.x,        r.y,        u0, v0, color.r, color.g, color.b, color.a });
-        batch.vertices.push_back({ r.x + r.w,  r.y,        u1, v0, color.r, color.g, color.b, color.a });
-        batch.vertices.push_back({ r.x + r.w,  r.y + r.h,  u1, v1, color.r, color.g, color.b, color.a });
-        batch.vertices.push_back({ r.x,        r.y + r.h,  u0, v1, color.r, color.g, color.b, color.a });
+        batch.vertices.push_back({ r.x,       r.y,       u0, v0, color.r, color.g, color.b, color.a });
+        batch.vertices.push_back({ r.x + r.w, r.y,       u1, v0, color.r, color.g, color.b, color.a });
+        batch.vertices.push_back({ r.x + r.w, r.y + r.h, u1, v1, color.r, color.g, color.b, color.a });
+        batch.vertices.push_back({ r.x,       r.y + r.h, u0, v1, color.r, color.g, color.b, color.a });
 
         batch.indices.push_back(base + 0);
         batch.indices.push_back(base + 1);
@@ -132,9 +129,6 @@ namespace Funkin::UI {
     }
 
     void UIRenderer::pushLine(Vec2 a, Vec2 b, Color color, float thickness) {
-        ensureBatch(m_whiteTexture);
-        auto& batch = m_batches.back();
-
         float dx = b.x - a.x;
         float dy = b.y - a.y;
         float len = std::sqrt(dx*dx + dy*dy);
@@ -143,12 +137,14 @@ namespace Funkin::UI {
         float nx = (-dy / len) * (thickness * 0.5f);
         float ny = ( dx / len) * (thickness * 0.5f);
 
+        ensureBatch(false);
+        auto& batch = m_batches.back();
         uint16_t base = (uint16_t)batch.vertices.size();
 
-        batch.vertices.push_back({ a.x + nx, a.y + ny, 0, 0, color.r, color.g, color.b, color.a });
-        batch.vertices.push_back({ a.x - nx, a.y - ny, 0, 0, color.r, color.g, color.b, color.a });
-        batch.vertices.push_back({ b.x - nx, b.y - ny, 0, 0, color.r, color.g, color.b, color.a });
-        batch.vertices.push_back({ b.x + nx, b.y + ny, 0, 0, color.r, color.g, color.b, color.a });
+        batch.vertices.push_back({ a.x + nx, a.y + ny, 0.5f, 0.5f, color.r, color.g, color.b, color.a });
+        batch.vertices.push_back({ a.x - nx, a.y - ny, 0.5f, 0.5f, color.r, color.g, color.b, color.a });
+        batch.vertices.push_back({ b.x - nx, b.y - ny, 0.5f, 0.5f, color.r, color.g, color.b, color.a });
+        batch.vertices.push_back({ b.x + nx, b.y + ny, 0.5f, 0.5f, color.r, color.g, color.b, color.a });
 
         batch.indices.push_back(base + 0);
         batch.indices.push_back(base + 1);
@@ -159,17 +155,16 @@ namespace Funkin::UI {
     }
 
     void UIRenderer::drawFilledRect(Rect r, Color color) {
-        pushQuad(r, color, m_whiteTexture);
+        pushQuad(r, color, 0.0f, 0.0f, 1.0f, 1.0f, false);
     }
 
     void UIRenderer::drawRect(Rect r, Color fill, Color border,
-                            float radius, float borderWidth) {
-        pushQuad(r, fill, m_whiteTexture);
-
-        pushLine({ r.x,        r.y        }, { r.x + r.w,  r.y        }, border, borderWidth);
-        pushLine({ r.x + r.w,  r.y        }, { r.x + r.w,  r.y + r.h  }, border, borderWidth);
-        pushLine({ r.x + r.w,  r.y + r.h  }, { r.x,        r.y + r.h  }, border, borderWidth);
-        pushLine({ r.x,        r.y + r.h  }, { r.x,        r.y        }, border, borderWidth);
+                              float radius, float borderWidth) {
+        drawFilledRect(r, fill);
+        pushLine({ r.x,       r.y       }, { r.x + r.w, r.y       }, border, borderWidth);
+        pushLine({ r.x + r.w, r.y       }, { r.x + r.w, r.y + r.h }, border, borderWidth);
+        pushLine({ r.x + r.w, r.y + r.h }, { r.x,       r.y + r.h }, border, borderWidth);
+        pushLine({ r.x,       r.y + r.h }, { r.x,       r.y       }, border, borderWidth);
     }
 
     void UIRenderer::drawLine(Vec2 a, Vec2 b, Color color, float thickness) {
@@ -177,18 +172,19 @@ namespace Funkin::UI {
     }
 
     void UIRenderer::drawCircle(Vec2 center, float radius, Color color, int segments) {
-        ensureBatch(m_whiteTexture);
+        ensureBatch(false);
         auto& batch = m_batches.back();
-
         uint16_t centerIdx = (uint16_t)batch.vertices.size();
+
         batch.vertices.push_back({ center.x, center.y, 0.5f, 0.5f,
-                                    color.r, color.g, color.b, color.a });
+                                   color.r, color.g, color.b, color.a });
 
         for (int i = 0; i <= segments; ++i) {
             float angle = (float)i / (float)segments * 3.14159265f * 2.0f;
             float x = center.x + std::cos(angle) * radius;
             float y = center.y + std::sin(angle) * radius;
-            batch.vertices.push_back({ x, y, 0, 0, color.r, color.g, color.b, color.a });
+            batch.vertices.push_back({ x, y, 0.5f, 0.5f,
+                                       color.r, color.g, color.b, color.a });
         }
 
         for (int i = 0; i < segments; ++i) {
@@ -200,13 +196,46 @@ namespace Funkin::UI {
 
     void UIRenderer::drawSprite(Renderer::GAL::TextureHandle tex,
                                 Rect dest, Color tint) {
-        pushQuad(dest, tint, tex);
+        pushQuad(dest, tint, 0.0f, 0.0f, 1.0f, 1.0f, false);
     }
 
     void UIRenderer::drawText(const std::string& text, Rect bounds, Color color,
-                            float fontSize, TextAlign align) {
-        pushQuad({ bounds.x, bounds.y + bounds.h * 0.5f - 1.0f,
-                bounds.w * 0.6f, 2.0f }, color, m_whiteTexture);
+                              float fontSize, TextAlign align) {
+        if (!m_font || text.empty()) return;
+        float scale = fontSize / m_font->bakeSize();
+
+        float x = std::round(bounds.x);
+        float y = std::round(bounds.y + m_font->ascent() * scale);
+
+        for (char c : text) {
+            if (c < 32 || c > 126) continue;
+            const GlyphInfo* g = m_font->glyph(c);
+            if (!g) continue;
+
+            Rect r = {
+                std::round(x + g->x0 * scale),
+                std::round(y + g->y0 * scale),
+                std::round((g->x1 - g->x0) * scale),
+                std::round((g->y1 - g->y0) * scale)
+            };
+
+            pushQuad(r, color, g->u0, g->v0, g->u1, g->v1, true);
+            x += g->advance * scale;
+
+            if (x > bounds.x + bounds.w) break;
+        }
+    }
+
+    void UIRenderer::drawRoundedRect(Rect r, Color fill, float radius) {
+        if (radius <= 0.0f) { drawFilledRect(r, fill); return; }
+        float rad = std::min(radius, std::min(r.w, r.h) * 0.5f);
+        drawFilledRect({ r.x + rad,       r.y,       r.w - rad*2, r.h       }, fill);
+        drawFilledRect({ r.x,             r.y + rad, rad,         r.h - rad*2 }, fill);
+        drawFilledRect({ r.x + r.w - rad, r.y + rad, rad,         r.h - rad*2 }, fill);
+        drawCircle({ r.x + rad,          r.y + rad       }, rad, fill, 12);
+        drawCircle({ r.x + r.w - rad,    r.y + rad       }, rad, fill, 12);
+        drawCircle({ r.x + rad,          r.y + r.h - rad }, rad, fill, 12);
+        drawCircle({ r.x + r.w - rad,    r.y + r.h - rad }, rad, fill, 12);
     }
 
     void UIRenderer::flush() {
@@ -224,47 +253,56 @@ namespace Funkin::UI {
         void* cbData = m_gal->mapBuffer(m_cbuffer);
         memcpy(cbData, ortho, sizeof(ortho));
         m_gal->unmapBuffer(m_cbuffer);
+
         m_gal->setPipeline(m_pipeline);
         m_gal->setUniformBuffer(m_cbuffer, 0);
-        m_gal->setSampler(m_sampler, 0);
 
-        for (auto& batch : m_batches)
-            flushBatch(batch);
-            
-        m_batches.clear();
-    }
+        std::vector<UIVertex> allVerts;
+        std::vector<uint16_t> allIdx;
 
-    void UIRenderer::flushBatch(UIBatch& batch) {
-        if (batch.vertices.empty()) return;
+        for (auto& batch : m_batches) {
+            uint16_t vertBase = (uint16_t)allVerts.size();
+            for (auto& v : batch.vertices) allVerts.push_back(v);
+            for (auto  i : batch.indices)  allIdx.push_back(i + vertBase);
+        }
 
         void* vData = m_gal->mapBuffer(m_vertexBuffer);
-        memcpy(vData, batch.vertices.data(), batch.vertices.size() * sizeof(UIVertex));
+        memcpy(vData, allVerts.data(), allVerts.size() * sizeof(UIVertex));
         m_gal->unmapBuffer(m_vertexBuffer);
 
         void* iData = m_gal->mapBuffer(m_indexBuffer);
-        memcpy(iData, batch.indices.data(), batch.indices.size() * sizeof(uint16_t));
+        memcpy(iData, allIdx.data(), allIdx.size() * sizeof(uint16_t));
         m_gal->unmapBuffer(m_indexBuffer);
 
         m_gal->setVertexBuffer(m_vertexBuffer);
         m_gal->setIndexBuffer(m_indexBuffer, Renderer::GAL::IndexType::Uint16);
 
-        if (batch.texture.valid())
-            m_gal->setTexture(batch.texture, 0);
-        else
-            m_gal->setTexture(m_whiteTexture, 0);
+        uint32_t indexOffset = 0;
+        for (auto& batch : m_batches) {
+            if (batch.indices.empty()) continue;
+            if (batch.isText) {
+                m_gal->setSampler(m_samplerLinear, 0);
+                m_gal->setTexture(m_font->texture(), 0);
+            } else {
+                m_gal->setSampler(m_samplerNearest, 0);
+                m_gal->setTexture(m_font->whiteTexture(), 0);
+            }
+            m_gal->drawIndexed({
+                (uint32_t)batch.indices.size(),
+                1, indexOffset, 0, 0
+            });
+            indexOffset += (uint32_t)batch.indices.size();
+        }
 
-        m_gal->drawIndexed({
-            (uint32_t)batch.indices.size(),
-            1, 0, 0, 0
-        });
+        m_batches.clear();
     }
 
     void UIRenderer::shutdown() {
         m_gal->destroyBuffer(m_vertexBuffer);
         m_gal->destroyBuffer(m_indexBuffer);
         m_gal->destroyBuffer(m_cbuffer);
-        m_gal->destroyTexture(m_whiteTexture);
-        m_gal->destroySampler(m_sampler);
+        m_gal->destroySampler(m_samplerNearest);
+        m_gal->destroySampler(m_samplerLinear);
         m_gal->destroyPipeline(m_pipeline);
         m_gal->destroyShader(m_vs);
         m_gal->destroyShader(m_ps);

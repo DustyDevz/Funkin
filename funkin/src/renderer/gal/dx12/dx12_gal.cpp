@@ -101,10 +101,10 @@ namespace Funkin::Renderer::GAL {
 
         m_rtvHeap.init(m_device.Get(),        D3D12_DESCRIPTOR_HEAP_TYPE_RTV,         64,   false);
         m_dsvHeap.init(m_device.Get(),        D3D12_DESCRIPTOR_HEAP_TYPE_DSV,         16,   false);
-        m_srvHeap.init(m_device.Get(),        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024, true);
+        m_srvHeap.init(m_device.Get(),        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 3392, true);
         m_srvStaging.init(m_device.Get(),     D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 2048, false);
-        m_samplerHeap.init(m_device.Get(),    D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,     64,   true);
-        m_samplerStaging.init(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 128, false);
+        m_samplerHeap.init(m_device.Get(),    D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,     1952, true);
+        m_samplerStaging.init(m_device.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,     128, false);
 
         for (uint32_t i = 0; i < FRAME_COUNT; ++i) {
             if (FAILED(m_swapchain->GetBuffer(i, IID_PPV_ARGS(&m_swapTargets[i]))))
@@ -155,6 +155,8 @@ namespace Funkin::Renderer::GAL {
         waitForFrame(m_frameIndex);
         m_alloc[m_frameIndex]->Reset();
         m_cmdList->Reset(m_alloc[m_frameIndex].Get(), nullptr);
+
+        m_drawCallIndex = 0;
 
         ID3D12DescriptorHeap* heaps[] = { m_srvHeap.heap(), m_samplerHeap.heap() };
         m_cmdList->SetDescriptorHeaps(2, heaps);

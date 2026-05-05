@@ -17,6 +17,7 @@ namespace Funkin::Platform {
         bool init(const std::string& title, int w, int h) override;
         bool pump()     override;
         bool shutdown() override;
+        void setBorderless(bool enabled) override;
 
         HWND      hwnd()      const { return m_hwnd; }
         HINSTANCE hinstance() const { return m_hinstance; }

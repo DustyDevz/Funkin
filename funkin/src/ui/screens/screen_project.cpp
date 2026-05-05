@@ -7,34 +7,24 @@
 
 namespace Funkin::UI {
     void ProjectUI::init() {
-        m_sidebar       = std::make_shared<Panel>();
-        m_content       = std::make_shared<Panel>();
-        m_btnNew        = std::make_shared<Button>();
-        m_btnOpenFolder = std::make_shared<Button>();
-        m_btnOpenFile   = std::make_shared<Button>();
-        m_recentLabel   = std::make_shared<Text>();
-        m_recentList    = std::make_shared<List>();
+        m_sidebar    = std::make_shared<Panel>();
+        m_content    = std::make_shared<Panel>();
+        m_btnNew     = std::make_shared<Button>();
+        m_btnOpenFile = std::make_shared<Button>();
+        m_recentList  = std::make_shared<List>();
 
         m_btnNew->setLabel("New Project");
         m_btnNew->setStyle(ButtonStyle::Primary);
-        m_btnNew->setOnClick([]{ /* TODO: hi :3 */ });
+        m_btnNew->setOnClick([]{ /* TODO */ });
 
-        m_btnOpenFolder->setLabel("Open Folder");
-        m_btnOpenFolder->setOnClick([]{ /* TODO: hi :3 */ });
+        m_btnOpenFile->setLabel("Open .funkinProj");
+        m_btnOpenFile->setOnClick([]{ /* TODO */ });
 
-        m_btnOpenFile->setLabel("Open .project");
-        m_btnOpenFile->setOnClick([]{ /* TODO: hi :3 */ });
+        m_recentList->addItem({ "My 111111 Mod",   "C:/Projects/111" });
+        m_recentList->addItem({ "Test 11111",       "C:/Projects/Test" });
+        m_recentList->addItem({ "Another Mod",      "C:/Projects/Another" });
 
-        m_recentLabel->setText("Recent Projects");
-        m_recentLabel->setFontSize(Theme::get().fontSizeSM);
-        m_recentLabel->setColor(Theme::get().textSecondary);
-
-        m_recentList->addItem({ "My FNF Mod",   "C:/Projects/MyFNFMod" });
-        m_recentList->addItem({ "Test Project", "C:/Projects/Test" });
-
-        m_recentList->setOnSelect([](int i) {
-            // TODO: hi :3
-        });
+        m_recentList->setOnSelect([](int i) { /* TODO */ });
 
         layout(m_width, m_height);
     }
@@ -42,27 +32,27 @@ namespace Funkin::UI {
     void ProjectUI::layout(uint32_t w, uint32_t h) {
         auto& t = Theme::get();
 
-        const float sidebarW = 200.0f;
+        const float sidebarW = 220.0f;
         const float pad      = t.paddingMD;
         const float btnW     = sidebarW - pad * 2;
-        const float btnH     = 36.0f;
+        const float btnH     = 32.0f;
         const float btnX     = pad;
 
         m_sidebar->setRect({ 0, 0, sidebarW, (float)h });
-        m_btnNew->setRect(       { btnX, 80.0f,               btnW, btnH });
-        m_btnOpenFolder->setRect({ btnX, 80.0f + btnH + 8,    btnW, btnH });
-        m_btnOpenFile->setRect(  { btnX, 80.0f + (btnH+8)*2,  btnW, btnH });
+        
+        float btnBaseY = (float)h - (btnH * 2) - t.paddingSM - t.paddingMD;
+        m_btnNew->setRect(      { btnX, btnBaseY,                      btnW, btnH });
+        m_btnOpenFile->setRect( { btnX, btnBaseY + btnH + t.paddingSM, btnW, btnH });
 
         const float cx = sidebarW + 1.0f;
         const float cw = (float)w - cx;
         m_content->setRect({ cx, 0, cw, (float)h });
-        m_recentLabel->setRect({ cx + pad, 20.0f,  cw - pad*2, 20.0f });
-        m_recentList->setRect({ cx + pad,  46.0f,  cw - pad*2, (float)h - 46.0f - pad });
+        m_recentList->setRect({ cx + pad, 32.0f + 52.0f + 24.0f, cw - pad * 2,
+                                (float)h - 32.0f - 52.0f - 24.0f - pad });
     }
 
     void ProjectUI::update(Vec2 mousePos, bool mouseDown) {
         m_btnNew->update(mousePos, mouseDown);
-        m_btnOpenFolder->update(mousePos, mouseDown);
         m_btnOpenFile->update(mousePos, mouseDown);
         m_recentList->update(mousePos, mouseDown);
     }
@@ -70,28 +60,91 @@ namespace Funkin::UI {
     void ProjectUI::draw() {
         auto& r = UIRenderer::get();
         auto& t = Theme::get();
+        const float W = 1920.0f;
+        const float H = 1080.0f;
 
-        // background
-        r.drawFilledRect({ 0, 0, (float)m_width, (float)m_height }, t.bgBase);
+        r.drawFilledRect({ 0, 0, W, H }, t.bgBase);
+
+        const float titleH = 32.0f;
+        r.drawFilledRect({ 0, 0, W, titleH }, t.bgPanel);
+        r.drawLine({ 0, titleH }, { W, titleH }, t.border, 1.0f);
+
+        r.drawText("Funkin Project", { W * 0.5f - 60, 8, 120, 18 },
+            t.textSecondary, t.fontSizeSM, TextAlign::Left);
+
+        const float wbtnSize = 32.0f;
+        const float wbtnY    = 0.0f;
+
+        // close
+        r.drawFilledRect({ W - wbtnSize, wbtnY, wbtnSize, titleH }, { 0,0,0,0 });
+        r.drawLine({ W - 22, 11 }, { W - 10, 23 }, t.textSecondary, 1.5f);
+        r.drawLine({ W - 10, 11 }, { W - 22, 23 }, t.textSecondary, 1.5f);
+
+        // maximize
+        r.drawLine({ W - wbtnSize*2 + 10, 11 }, { W - wbtnSize*2 + 22, 11 }, t.textSecondary, 1.5f);
+        r.drawLine({ W - wbtnSize*2 + 22, 11 }, { W - wbtnSize*2 + 22, 23 }, t.textSecondary, 1.5f);
+        r.drawLine({ W - wbtnSize*2 + 22, 23 }, { W - wbtnSize*2 + 10, 23 }, t.textSecondary, 1.5f);
+        r.drawLine({ W - wbtnSize*2 + 10, 23 }, { W - wbtnSize*2 + 10, 11 }, t.textSecondary, 1.5f);
+
+        // minimize
+        r.drawLine({ W - wbtnSize*3 + 10, 17 }, { W - wbtnSize*3 + 22, 17 }, t.textSecondary, 1.5f);
 
         // sidebar
-        r.drawFilledRect({ 0, 0, 200.0f, (float)m_height }, t.bgPanel);
-        r.drawLine({ 200, 0 }, { 200, (float)m_height }, t.border, 1.0f);
+        const float sidebarW = 220.0f;
+        r.drawFilledRect({ 0, titleH, sidebarW, H - titleH }, t.bgPanel);
+        r.drawLine({ sidebarW, titleH }, { sidebarW, H }, t.border, 1.0f);
 
-        // sidebar header
-        r.drawText("bla bla", { 16, 20, 168, 30 },
-                t.textPrimary, t.fontSizeXL, TextAlign::Left);
-        r.drawText("alb alb", { 16, 48, 168, 18 },
-                t.textAccent, t.fontSizeSM, TextAlign::Left);
-        r.drawLine({ 0, 72 }, { 200, 72 }, t.border, 1.0f);
+        // app name
+        r.drawFilledRect({ 0, titleH, sidebarW, 56.0f }, t.bgBase);
+        r.drawLine({ 0, titleH + 56.0f }, { sidebarW, titleH + 56.0f }, t.border, 1.0f);
+        r.drawText("Funkin Project", { 16, titleH + 10, 188, 22 },
+            t.textPrimary, t.fontSizeLG, TextAlign::Left);
+        r.drawText("v0.1.0-alpha", { 16, titleH + 34, 188, 14 },
+            t.textDisabled, t.fontSizeSM, TextAlign::Left);
 
+        // nav items
+        auto drawNavItem = [&](const char* label, float y, bool active) {
+            float itemY = titleH + 56.0f + y;
+            if (active) {
+                r.drawRoundedRect({ 8.0f, itemY + 2.0f, sidebarW - 16.0f, 32.0f },
+                    t.navActiveBg, t.radiusMD);
+                r.drawFilledRect({ 8.0f, itemY + 8.0f, 3.0f, 20.0f }, t.navActiveBar);
+            }
+            r.drawText(label, { 24, itemY + 8, 180, 18 },
+                active ? t.textPrimary : t.textSecondary,
+                t.fontSizeMD, TextAlign::Left);
+        };
+
+        drawNavItem("Projects",  8,   true);
+        drawNavItem("Community", 46,  false);
+
+        // bottom buttons
+        r.drawLine({ 0, H - (32.0f * 2) - t.paddingSM - t.paddingMD - 8 },
+                   { sidebarW, H - (32.0f * 2) - t.paddingSM - t.paddingMD - 8 },
+                   t.border, 1.0f);
         m_btnNew->draw();
-        m_btnOpenFolder->draw();
         m_btnOpenFile->draw();
 
-        // content
-        r.drawFilledRect({ 201, 0, (float)m_width - 201, (float)m_height }, t.bgBase);
-        m_recentLabel->draw();
+        const float cx = sidebarW + 1.0f;
+        const float cw = W - cx;
+        const float contentTop = titleH;
+
+        // content header
+        r.drawFilledRect({ cx, contentTop, cw, 52.0f }, t.bgPanel);
+        r.drawLine({ cx, contentTop + 52.0f }, { W, contentTop + 52.0f }, t.border, 1.0f);
+        r.drawText("Projects", { cx + t.paddingMD, contentTop + 14, 300, 28 },
+            t.textPrimary, t.fontSizeXL, TextAlign::Left);
+
+        // content body
+        r.drawFilledRect({ cx, contentTop + 52.0f, cw, H - contentTop - 52.0f }, t.bgBase);
+
+        // section label
+        r.drawText("Recent", { cx + t.paddingMD, contentTop + 64, 60, 16 },
+            t.textSecondary, t.fontSizeSM, TextAlign::Left);
+        r.drawLine({ cx + t.paddingMD + 48, contentTop + 72 },
+                   { W - t.paddingMD,       contentTop + 72 },
+                   t.border, 1.0f);
+
         m_recentList->draw();
     }
 

@@ -34,39 +34,39 @@ namespace Funkin::UI {
         m_wasDown = mouseDown;
     }
 
-    void List::draw() {
-        if (!m_visible) return;
-        auto& t = Theme::get();
-        auto& r = UIRenderer::get();
+   void List::draw() {
+    auto& r = UIRenderer::get();
+    auto& t = Theme::get();
 
-        for (int i = 0; i < (int)m_items.size(); ++i) {
-            Rect itemRect = {
-                m_rect.x,
-                m_rect.y + i * m_itemHeight,
-                m_rect.w,
-                m_itemHeight
-            };
+    float y = m_rect.y;
 
-            Color bg = t.bgItem;
-            if (i == m_selected) bg = t.bgItemSelect;
-            else if (i == m_hovered) bg = t.bgItemHover;
+    for (int i = 0; i < (int)m_items.size(); ++i) {
+        bool hovered  = (i == m_hovered);
+        bool selected = (i == m_selected);
 
-            r.drawFilledRect(itemRect, bg);
-            r.drawLine(
-                { itemRect.x, itemRect.y + itemRect.h },
-                { itemRect.x + itemRect.w, itemRect.y + itemRect.h },
-                t.border, 1.0f
-            );
+        // alternate between bgItem and a slightly darker shade
+        Color baseBg = (i % 2 == 0) ? t.bgItem
+                                     : Color{ t.bgItem.r - 0.03f,
+                                              t.bgItem.g - 0.03f,
+                                              t.bgItem.b - 0.03f, 1.0f };
+        Color bg = selected ? t.bgItemSelect
+                 : hovered  ? t.bgItemHover
+                            : baseBg;
 
-            r.drawText(m_items[i].title,
-                { itemRect.x + t.paddingMD, itemRect.y + 10.0f, itemRect.w - t.paddingMD * 2, 20.0f },
-                t.textPrimary, t.fontSizeMD, TextAlign::Left);
+        r.drawRoundedRect({ m_rect.x, y + 2.0f, m_rect.w, m_itemHeight - 4.0f }, bg, t.radiusMD);
 
-            if (!m_items[i].subtitle.empty()) {
-                r.drawText(m_items[i].subtitle,
-                    { itemRect.x + t.paddingMD, itemRect.y + 30.0f, itemRect.w - t.paddingMD * 2, 16.0f },
-                    t.textSecondary, t.fontSizeSM, TextAlign::Left);
-            }
+        if (selected) {
+            r.drawLine({ m_rect.x, y + 4.0f },
+                       { m_rect.x, y + m_itemHeight - 4.0f },
+                       t.accent, 3.0f);
         }
+
+        r.drawText(m_items[i].title,    { m_rect.x + 16, y + 14, m_rect.w - 32, 20 },
+            t.textPrimary,   t.fontSizeMD, TextAlign::Left);
+        r.drawText(m_items[i].subtitle, { m_rect.x + 16, y + 38, m_rect.w - 32, 16 },
+            t.textSecondary, t.fontSizeSM, TextAlign::Left);
+
+        y += m_itemHeight;
     }
+}
 }

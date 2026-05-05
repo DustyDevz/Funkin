@@ -24,6 +24,9 @@ namespace Funkin::UI {
         bool visible() const { return m_visible; }
         bool enabled() const { return m_enabled; }
 
+        void setFocused(bool f) { m_focused = f; }
+        bool isFocused()  const { return m_focused; }
+
     protected:
         bool hitTest(Vec2 p) const {
             return p.x >= m_rect.x && p.x <= m_rect.x + m_rect.w &&
@@ -34,5 +37,6 @@ namespace Funkin::UI {
         ElementState m_state   = ElementState::Normal;
         bool         m_visible = true;
         bool         m_enabled = true;
+        bool         m_focused = false;
     };
 }

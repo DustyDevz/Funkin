@@ -35,6 +35,7 @@ namespace Funkin::Input {
 
         #ifdef _WIN32
             Platform::Input::registerRawInput(Funkin::Platform::Window_Win32::get().hwnd());
+            syncMousePosition();
 
             m_threadRunning = true;
             m_inputThread = std::thread([this]() {
@@ -118,6 +119,16 @@ namespace Funkin::Input {
         m_threadRunning = false;
         if (m_inputThread.joinable())
             m_inputThread.join();
+    }
+
+    void Input::syncMousePosition() {
+        #ifdef _WIN32
+            POINT pt;
+            GetCursorPos(&pt);
+            ScreenToClient(Funkin::Platform::Window_Win32::get().hwnd(), &pt);
+            m_state.mouseX = (float)pt.x;
+            m_state.mouseY = (float)pt.y;
+        #endif
     }
 
     void Input::update() {

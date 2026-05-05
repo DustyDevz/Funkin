@@ -49,6 +49,22 @@
             return true;
         }
 
+        void Window_Win32::setBorderless(bool enabled) {
+            DWORD style = GetWindowLong(m_hwnd, GWL_STYLE);
+
+            if (enabled) {
+                style &= ~WS_OVERLAPPEDWINDOW;
+                style |= WS_POPUP;
+            } else {
+                style &= ~WS_POPUP;
+                style |= WS_OVERLAPPEDWINDOW;
+            }
+
+            SetWindowLong(m_hwnd, GWL_STYLE, style);
+            SetWindowPos(m_hwnd, nullptr, 0, 0, 0, 0, 
+                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+        }
+
         bool Window_Win32::pump() {
             MSG msg{};
             while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -79,6 +95,15 @@
                         now
                     );
                     return 0;
+                }
+
+                case WM_NCHITTEST: {
+                    LRESULT hit = DefWindowProcW(hwnd, msg, wp, lp);
+                    if (hit == HTCLIENT) {
+                        DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+                        if (style & WS_POPUP) return HTCAPTION;
+                    }
+                    return hit;
                 }
 
                 case WM_SIZE: {
