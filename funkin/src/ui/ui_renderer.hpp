@@ -10,7 +10,6 @@
 #include <renderer/gal/descriptors.hpp>
 #include <string>
 #include <vector>
-#include "ui_font.hpp"
 
 namespace Funkin::UI {
     enum class TextAlign;
@@ -83,10 +82,10 @@ namespace Funkin::UI {
         Renderer::GAL::BufferHandle   m_vertexBuffer;
         Renderer::GAL::BufferHandle   m_indexBuffer;
         Renderer::GAL::BufferHandle   m_cbuffer;
+        Renderer::GAL::TextureHandle  m_whiteTexture{};
 
         std::vector<UIBatch>   m_batches;
         std::vector<UITextCmd> m_textCmds;
-        std::unique_ptr<Font>  m_font;
 
         static constexpr uint32_t MAX_VERTICES = 65536;
         static constexpr uint32_t MAX_INDICES  = 131072;

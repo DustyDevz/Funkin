@@ -3,7 +3,6 @@
 
 #include "ui_renderer.hpp"
 #include "theme.hpp"
-#include "ui_font.hpp"
 #include <renderer/shader/shader_loader.hpp>
 #include <renderer/shader/shader_types.hpp>
 #include <cmath>
@@ -55,9 +54,16 @@ namespace Funkin::UI {
             Renderer::GAL::WrapMode::Clamp
         });
 
-        m_font = std::make_unique<Font>();
-        if (!m_font->load(gal, Theme::get().fontRegular, 64.0f, 512))
-            throw std::runtime_error("Failed to load UI font");
+        uint32_t white = 0xFFFFFFFF;
+        Renderer::GAL::TextureDesc desc{};
+        desc.width  = 1;
+        desc.height = 1;
+        desc.mips   = 1;
+        desc.format = Renderer::GAL::PixelFormat::RGBA8_Unorm;
+        desc.usage  = Renderer::GAL::TextureUsage::Sampled;
+
+        m_whiteTexture = m_gal->createTexture(desc);
+        m_gal->uploadTexture(m_whiteTexture, &white, sizeof(white));
     }
 
     void UIRenderer::initPipeline() {
@@ -252,13 +258,8 @@ namespace Funkin::UI {
         uint32_t indexOffset = 0;
         for (auto& batch : m_batches) {
             if (batch.indices.empty()) continue;
-            if (batch.isText) {
-                m_gal->setSampler(m_samplerLinear, 0);
-                m_gal->setTexture(m_font->texture(), 0);
-            } else {
-                m_gal->setSampler(m_samplerNearest, 0);
-                m_gal->setTexture(m_font->whiteTexture(), 0);
-            }
+            m_gal->setSampler(m_samplerNearest, 0);
+            m_gal->setTexture(m_whiteTexture, 0);
             m_gal->drawIndexed({
                 (uint32_t)batch.indices.size(),
                 1, indexOffset, 0, 0
@@ -299,7 +300,7 @@ namespace Funkin::UI {
             2.0f/w,  0.0f,    0.0f,  0.0f,
             0.0f,   -2.0f/h,  0.0f,  0.0f,
             0.0f,    0.0f,    1.0f,  0.0f,
-           -1.0f,    1.0f,    0.0f,  1.0f
+            -1.0f,    1.0f,    0.0f,  1.0f
         };
 
         void* cbData = m_gal->mapBuffer(m_cbuffer);
@@ -332,13 +333,8 @@ namespace Funkin::UI {
         uint32_t indexOffset = 0;
         for (auto& batch : m_batches) {
             if (batch.indices.empty()) continue;
-            if (batch.isText) {
-                m_gal->setSampler(m_samplerLinear, 0);
-                m_gal->setTexture(m_font->texture(), 0);
-            } else {
-                m_gal->setSampler(m_samplerNearest, 0);
-                m_gal->setTexture(m_font->whiteTexture(), 0);
-            }
+            m_gal->setSampler(m_samplerNearest, 0);
+            m_gal->setTexture(m_whiteTexture, 0);
             m_gal->drawIndexed({
                 (uint32_t)batch.indices.size(),
                 1, indexOffset, 0, 0
@@ -350,6 +346,7 @@ namespace Funkin::UI {
     }
 
     void UIRenderer::shutdown() {
+        m_gal->destroyTexture(m_whiteTexture);
         m_gal->destroyBuffer(m_vertexBuffer);
         m_gal->destroyBuffer(m_indexBuffer);
         m_gal->destroyBuffer(m_cbuffer);
