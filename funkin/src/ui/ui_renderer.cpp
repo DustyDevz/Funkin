@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <algorithm>
+#include <renderer/gal/ui/ui_dx12_text.hpp>
 
 namespace Funkin::UI {
     UIRenderer& UIRenderer::get() {
@@ -101,6 +102,7 @@ namespace Funkin::UI {
 
     void UIRenderer::beginFrame() {
         m_batches.clear();
+        m_textCmds.clear();
     }
 
     void UIRenderer::ensureBatch(bool isText) {
@@ -200,30 +202,80 @@ namespace Funkin::UI {
     }
 
     void UIRenderer::drawText(const std::string& text, Rect bounds, Color color,
-                              float fontSize, TextAlign align) {
-        if (!m_font || text.empty()) return;
-        float scale = fontSize / m_font->bakeSize();
+                            float fontSize, TextAlign align) {
+        if (text.empty()) return;
+        m_textCmds.push_back({
+            std::wstring(text.begin(), text.end()),
+            bounds, color, fontSize
+        });
+    }
 
-        float x = std::round(bounds.x);
-        float y = std::round(bounds.y + m_font->ascent() * scale);
+    void UIRenderer::flushGeometry() {
+        if (m_batches.empty()) return;
 
-        for (char c : text) {
-            if (c < 32 || c > 126) continue;
-            const GlyphInfo* g = m_font->glyph(c);
-            if (!g) continue;
+        float w = (float)m_width;
+        float h = (float)m_height;
+        float ortho[16] = {
+            2.0f/w,  0.0f,    0.0f,  0.0f,
+            0.0f,   -2.0f/h,  0.0f,  0.0f,
+            0.0f,    0.0f,    1.0f,  0.0f,
+        -1.0f,    1.0f,    0.0f,  1.0f
+        };
 
-            Rect r = {
-                std::round(x + g->x0 * scale),
-                std::round(y + g->y0 * scale),
-                std::round((g->x1 - g->x0) * scale),
-                std::round((g->y1 - g->y0) * scale)
-            };
+        void* cbData = m_gal->mapBuffer(m_cbuffer);
+        memcpy(cbData, ortho, sizeof(ortho));
+        m_gal->unmapBuffer(m_cbuffer);
 
-            pushQuad(r, color, g->u0, g->v0, g->u1, g->v1, true);
-            x += g->advance * scale;
+        m_gal->setPipeline(m_pipeline);
+        m_gal->setUniformBuffer(m_cbuffer, 0);
 
-            if (x > bounds.x + bounds.w) break;
+        std::vector<UIVertex> allVerts;
+        std::vector<uint16_t> allIdx;
+
+        for (auto& batch : m_batches) {
+            uint16_t vertBase = (uint16_t)allVerts.size();
+            for (auto& v : batch.vertices) allVerts.push_back(v);
+            for (auto  i : batch.indices)  allIdx.push_back(i + vertBase);
         }
+
+        void* vData = m_gal->mapBuffer(m_vertexBuffer);
+        memcpy(vData, allVerts.data(), allVerts.size() * sizeof(UIVertex));
+        m_gal->unmapBuffer(m_vertexBuffer);
+
+        void* iData = m_gal->mapBuffer(m_indexBuffer);
+        memcpy(iData, allIdx.data(), allIdx.size() * sizeof(uint16_t));
+        m_gal->unmapBuffer(m_indexBuffer);
+
+        m_gal->setVertexBuffer(m_vertexBuffer);
+        m_gal->setIndexBuffer(m_indexBuffer, Renderer::GAL::IndexType::Uint16);
+
+        uint32_t indexOffset = 0;
+        for (auto& batch : m_batches) {
+            if (batch.indices.empty()) continue;
+            if (batch.isText) {
+                m_gal->setSampler(m_samplerLinear, 0);
+                m_gal->setTexture(m_font->texture(), 0);
+            } else {
+                m_gal->setSampler(m_samplerNearest, 0);
+                m_gal->setTexture(m_font->whiteTexture(), 0);
+            }
+            m_gal->drawIndexed({
+                (uint32_t)batch.indices.size(),
+                1, indexOffset, 0, 0
+            });
+            indexOffset += (uint32_t)batch.indices.size();
+        }
+
+        m_batches.clear();
+    }
+
+    void UIRenderer::flushText() {
+    #ifdef _WIN32
+        auto& txt = Funkin::Renderer::GAL::UI::DX12TextRenderer::get();
+        for (auto& cmd : m_textCmds)
+            txt.drawText(cmd.text, cmd.bounds, cmd.color, cmd.fontSize);
+    #endif
+        m_textCmds.clear();
     }
 
     void UIRenderer::drawRoundedRect(Rect r, Color fill, float radius) {

@@ -50,7 +50,7 @@ class DX12Gal : public IDAL {
         void setTexture(TextureHandle tex, uint32_t slot)                                              override;
         void setSampler(SamplerHandle sampler, uint32_t slot)                                          override;
         void setUniformBuffer(BufferHandle buf, uint32_t slot,
-                            uint32_t offset = 0, uint32_t size = 0)                                  override;
+                            uint32_t offset = 0, uint32_t size = 0)                                    override;
         void pushConstants(const void* data, uint32_t size, uint32_t offset = 0)                       override;
         void draw(const DrawCmd& cmd)                                                                  override;
         void drawIndexed(const DrawIndexedCmd& cmd)                                                    override;
@@ -59,6 +59,12 @@ class DX12Gal : public IDAL {
         void drawFilledRect(Rect r, Color color)                                                       override;
         void drawCircle(Vec2 center, float radius, Color color, int segments = 32)                     override;
         Vec2 project(Vec3 worldPos, const Mat4& viewProj) const                                        override;
+
+        ID3D12Device*      device()    const { return m_device.Get(); }
+        ID3D12CommandQueue* queue()    const { return m_queue.Get(); }
+        IDXGISwapChain3*   swapchain() const { return m_swapchain.Get(); }
+
+        void setPrePresentCallback(std::function<void(uint32_t)> cb) { m_prePresentCallback = std::move(cb); }
 
     private:
         void waitForFrame(uint32_t frame);
@@ -118,5 +124,7 @@ class DX12Gal : public IDAL {
         static constexpr uint32_t kSamplerStaticCap = 32;
         static constexpr uint32_t kSamplerDynSlots  = 8;
         static constexpr uint32_t kMaxDrawsPerFrame = 128;
+
+        std::function<void(uint32_t)> m_prePresentCallback;
     };
 }

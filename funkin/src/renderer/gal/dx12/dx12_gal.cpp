@@ -177,6 +177,9 @@ namespace Funkin::Renderer::GAL {
 
         signalFrame(m_frameIndex);
 
+        if (m_prePresentCallback)
+            m_prePresentCallback(m_frameIndex);
+
         m_swapchain->Present(m_vsync ? 1 : 0, 0);
         m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
     }

@@ -37,5 +37,13 @@
     #include <directx/d3d12.h>
     #include <directx/d3dx12.h>
     #include <dxgi1_6.h>
+    #include <d3d11on12.h>
+    #include <d2d1_3.h>
+    #include <dwrite_3.h>
+
+    #pragma comment(lib, "d3d11.lib")
+    #pragma comment(lib, "d2d1.lib")
+    #pragma comment(lib, "dwrite.lib")
+
     using Microsoft::WRL::ComPtr;
 #endif

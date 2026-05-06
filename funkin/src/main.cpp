@@ -8,6 +8,8 @@
 #include <platform/input/input_win32.hpp>
 #include <ui/screens/screen_project.hpp>
 #include <math/vec2.hpp>
+#include <renderer/gal/ui/ui_dx12_text.hpp>
+#include <renderer/gal/dx12/dx12_gal.hpp>
 
 namespace GAL    = Funkin::Renderer::GAL;
 namespace Shader = Funkin::Renderer::Shader;
@@ -52,15 +54,22 @@ static int run() {
         ProjectUI.onResize((uint32_t)size.x, (uint32_t)size.y);
     }
 
+    auto* dx12 = static_cast<Funkin::Renderer::GAL::DX12Gal*>(gal);
+    auto& txt  = GAL::UI::DX12TextRenderer::get();
+    txt.setFontFile(L"fonts/reg.ttf");
+    txt.init(dx12->device(), dx12->queue(), dx12->swapchain(),
+            2, cfg.width, cfg.height);
+
+
     engine.setResizeCallback([&](uint32_t w, uint32_t h) {
         ui.resize(w, h);
         ProjectUI.onResize(w, h);
+        txt.resize(dx12->swapchain(), 2, w, h);
     });
 
     engine.setFrameCallback([&]() {
-        auto& input   = Funkin::Input::Input::get();
+        auto& input = Funkin::Input::Input::get();
         input.syncMousePosition();
-
         Funkin::Vec2 mouse = { input.state().mouseX, input.state().mouseY };
         bool clicked = input.state().mouseButtons[(size_t)Funkin::Input::MouseButton::Left];
 
@@ -72,21 +81,26 @@ static int run() {
         color.storeOp    = GAL::StoreOp::Store;
 
         GAL::RenderPassDesc rp{};
-        rp.useSwapchainTarget  = true;
-        rp.colorAttachments    = &color;
-        rp.colorCount          = 1;
+        rp.useSwapchainTarget = true;
+        rp.colorAttachments   = &color;
+        rp.colorCount         = 1;
 
         gal->beginRenderPass(rp);
-        
         auto size = gal->swapchainSize();
-        gal->setViewport({ 0.0f, 0.0f, size.x, size.y });
-        gal->setScissor ({ 0.0f, 0.0f, size.x, size.y });
+        gal->setViewport({ 0, 0, size.x, size.y });
+        gal->setScissor ({ 0, 0, size.x, size.y });
 
         ui.beginFrame();
         ProjectUI.draw();
-        ui.flush();
+        ui.flushGeometry();
 
         gal->endRenderPass();
+    });
+
+    dx12->setPrePresentCallback([&](uint32_t frameIdx) {
+        txt.beginDraw(frameIdx);
+        ui.flushText();
+        txt.endDraw(frameIdx);
     });
 
     LOG_INFO("engine: running");

@@ -27,6 +27,13 @@ namespace Funkin::UI {
         bool                   isText = false;
     };
 
+    struct UITextCmd {
+        std::wstring text;
+        Rect         bounds;
+        Color        color;
+        float        fontSize;
+    };
+
     class UIRenderer {
     public:
         static UIRenderer& get();
@@ -37,6 +44,8 @@ namespace Funkin::UI {
 
         void beginFrame();
         void flush();
+        void flushGeometry();
+        void flushText();
 
         void drawFilledRect(Rect r, Color color);
         void drawRect(Rect r, Color fill, Color border, float radius = 0.0f, float borderWidth = 1.0f);
@@ -75,8 +84,9 @@ namespace Funkin::UI {
         Renderer::GAL::BufferHandle   m_indexBuffer;
         Renderer::GAL::BufferHandle   m_cbuffer;
 
-        std::vector<UIBatch>  m_batches;
-        std::unique_ptr<Font> m_font;
+        std::vector<UIBatch>   m_batches;
+        std::vector<UITextCmd> m_textCmds;
+        std::unique_ptr<Font>  m_font;
 
         static constexpr uint32_t MAX_VERTICES = 65536;
         static constexpr uint32_t MAX_INDICES  = 131072;
