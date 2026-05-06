@@ -99,24 +99,20 @@ namespace Funkin::Renderer::GAL::UI {
     }
 
 void DX12TextRenderer::beginDraw(uint32_t frameIndex) {
-    printf("beginDraw frame %u, target: %p\n", frameIndex, m_d2dTargets[frameIndex].Get());
     m_11on12->AcquireWrappedResources(m_wrappedBuffers[frameIndex].GetAddressOf(), 1);
     m_d2dCtx->SetTarget(m_d2dTargets[frameIndex].Get());
     m_d2dCtx->BeginDraw();
-    printf("BeginDraw called\n");
 }
 
 void DX12TextRenderer::endDraw(uint32_t frameIndex) {
     D2D1_TAG tag1 = 0, tag2 = 0;
     HRESULT hr = m_d2dCtx->EndDraw(&tag1, &tag2);
-    printf("EndDraw hr: 0x%08X tag1: %llu tag2: %llu\n", hr, tag1, tag2);
     m_d2dCtx->SetTarget(nullptr);
     m_11on12->ReleaseWrappedResources(m_wrappedBuffers[frameIndex].GetAddressOf(), 1);
     m_d3d11ctx->Flush();
 }
 
     IDWriteTextFormat* DX12TextRenderer::getOrCreateFormat(float fontSize) {
-        printf("getOrCreateFormat: %.1f\n", fontSize);
         int key = (int)(fontSize * 10);
         auto it = m_formats.find(key);
         if (it != m_formats.end()) return it->second.Get();
@@ -171,7 +167,7 @@ void DX12TextRenderer::endDraw(uint32_t frameIndex) {
         auto* fmt = getOrCreateFormat(fontSize);
         if (!fmt) return;
 
-        m_brush->SetColor(D2D1::ColorF(1.0f, 0.0f, 0.0f, 1.0f));
+        m_brush->SetColor(D2D1::ColorF(color.r, color.g, color.b, color.a));
 
         D2D1_RECT_F r = {
             bounds.x,
