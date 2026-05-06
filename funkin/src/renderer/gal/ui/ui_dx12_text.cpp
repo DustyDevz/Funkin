@@ -44,6 +44,26 @@ namespace Funkin::Renderer::GAL::UI {
 
         m_d2dCtx->CreateSolidColorBrush(D2D1::ColorF(1, 1, 1, 1), &m_brush);
 
+        ComPtr<IDWriteFontSetBuilder1> builder;
+        ComPtr<IDWriteFontFile> fontFile;
+        if (SUCCEEDED(m_dwFactory->CreateFontSetBuilder(&builder)) &&
+            SUCCEEDED(m_dwFactory->CreateFontFileReference(m_fontPath.c_str(), nullptr, &fontFile))) {
+            builder->AddFontFile(fontFile.Get());
+            ComPtr<IDWriteFontSet> fontSet;
+            builder->CreateFontSet(&fontSet);
+            m_dwFactory->CreateFontCollectionFromFontSet(fontSet.Get(), &m_fontCollection);
+            if (m_fontCollection) {
+                UINT32 idx = 0; BOOL exists = false;
+                m_fontCollection->FindFamilyName(L"Inter", &idx, &exists);
+                if (!exists) idx = 0;
+                ComPtr<IDWriteFontFamily> family;
+                m_fontCollection->GetFontFamily(idx, &family);
+                ComPtr<IDWriteLocalizedStrings> names;
+                family->GetFamilyNames(&names);
+                names->GetString(0, m_familyName, 64);
+            }
+        }
+
         createBuffers(swapchain, frameCount, width, height);
     }
 
@@ -79,7 +99,7 @@ namespace Funkin::Renderer::GAL::UI {
     }
 
     void DX12TextRenderer::resize(IDXGISwapChain3* swapchain, uint32_t frameCount,
-                                uint32_t width, uint32_t height) {
+                                  uint32_t width, uint32_t height) {
         m_width  = width;
         m_height = height;
         releaseBuffers();
@@ -89,6 +109,7 @@ namespace Funkin::Renderer::GAL::UI {
     void DX12TextRenderer::shutdown() {
         releaseBuffers();
         m_formats.clear();
+        m_fontCollection.Reset();
         m_brush.Reset();
         m_d2dCtx.Reset();
         m_d2dDevice.Reset();
@@ -98,19 +119,19 @@ namespace Funkin::Renderer::GAL::UI {
         m_11on12.Reset();
     }
 
-void DX12TextRenderer::beginDraw(uint32_t frameIndex) {
-    m_11on12->AcquireWrappedResources(m_wrappedBuffers[frameIndex].GetAddressOf(), 1);
-    m_d2dCtx->SetTarget(m_d2dTargets[frameIndex].Get());
-    m_d2dCtx->BeginDraw();
-}
+    void DX12TextRenderer::beginDraw(uint32_t frameIndex) {
+        m_11on12->AcquireWrappedResources(m_wrappedBuffers[frameIndex].GetAddressOf(), 1);
+        m_d2dCtx->SetTarget(m_d2dTargets[frameIndex].Get());
+        m_d2dCtx->BeginDraw();
+    }
 
-void DX12TextRenderer::endDraw(uint32_t frameIndex) {
-    D2D1_TAG tag1 = 0, tag2 = 0;
-    HRESULT hr = m_d2dCtx->EndDraw(&tag1, &tag2);
-    m_d2dCtx->SetTarget(nullptr);
-    m_11on12->ReleaseWrappedResources(m_wrappedBuffers[frameIndex].GetAddressOf(), 1);
-    m_d3d11ctx->Flush();
-}
+    void DX12TextRenderer::endDraw(uint32_t frameIndex) {
+        D2D1_TAG tag1 = 0, tag2 = 0;
+        m_d2dCtx->EndDraw(&tag1, &tag2);
+        m_d2dCtx->SetTarget(nullptr);
+        m_11on12->ReleaseWrappedResources(m_wrappedBuffers[frameIndex].GetAddressOf(), 1);
+        m_d3d11ctx->Flush();
+    }
 
     IDWriteTextFormat* DX12TextRenderer::getOrCreateFormat(float fontSize) {
         int key = (int)(fontSize * 10);
@@ -118,37 +139,12 @@ void DX12TextRenderer::endDraw(uint32_t frameIndex) {
         if (it != m_formats.end()) return it->second.Get();
 
         ComPtr<IDWriteTextFormat> fmt;
-        ComPtr<IDWriteFontSetBuilder1> builder;
-        ComPtr<IDWriteFontFile> fontFile;
-
-        bool customFont = false;
-        if (SUCCEEDED(m_dwFactory->CreateFontSetBuilder(&builder)) &&
-            SUCCEEDED(m_dwFactory->CreateFontFileReference(m_fontPath.c_str(), nullptr, &fontFile))) {
-            builder->AddFontFile(fontFile.Get());
-            ComPtr<IDWriteFontSet> fontSet;
-            builder->CreateFontSet(&fontSet);
-            ComPtr<IDWriteFontCollection1> collection;
-            m_dwFactory->CreateFontCollectionFromFontSet(fontSet.Get(), &collection);
-
-            UINT32 idx = 0; BOOL exists = false;
-            collection->FindFamilyName(L"Inter", &idx, &exists);
-            if (!exists) { idx = 0; }
-
-            ComPtr<IDWriteFontFamily> family;
-            collection->GetFontFamily(idx, &family);
-            ComPtr<IDWriteLocalizedStrings> names;
-            family->GetFamilyNames(&names);
-            wchar_t familyName[64] = {};
-            names->GetString(0, familyName, 64);
-
-            if (SUCCEEDED(m_dwFactory->CreateTextFormat(
-                    familyName, collection.Get(),
-                    DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL,
-                    DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &fmt)))
-                customFont = true;
-        }
-
-        if (!customFont) {
+        if (m_fontCollection) {
+            m_dwFactory->CreateTextFormat(
+                m_familyName, m_fontCollection.Get(),
+                DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL,
+                DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &fmt);
+        } else {
             m_dwFactory->CreateTextFormat(
                 L"Segoe UI", nullptr,
                 DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL,
@@ -157,7 +153,6 @@ void DX12TextRenderer::endDraw(uint32_t frameIndex) {
 
         fmt->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
         fmt->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-
         m_formats[key] = fmt;
         return fmt.Get();
     }

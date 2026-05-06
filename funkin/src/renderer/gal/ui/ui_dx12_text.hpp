@@ -53,5 +53,8 @@ namespace Funkin::Renderer::GAL::UI {
 
         uint32_t m_width  = 0;
         uint32_t m_height = 0;
+
+        ComPtr<IDWriteFontCollection1> m_fontCollection;
+        wchar_t m_familyName[64] = {};
     };
 }
