@@ -78,18 +78,21 @@ namespace Funkin::Renderer::GAL::UI {
 
         for (uint32_t i = 0; i < frameCount; ++i) {
             ComPtr<ID3D12Resource> backBuffer;
-            swapchain->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
+            HRESULT hr = swapchain->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
+            if (FAILED(hr)) { printf("GetBuffer[%u] FAILED: 0x%08X\n", i, hr); continue; }
 
             D3D11_RESOURCE_FLAGS flags{ D3D11_BIND_RENDER_TARGET };
-            m_11on12->CreateWrappedResource(
+            hr = m_11on12->CreateWrappedResource(
                 backBuffer.Get(), &flags,
-                D3D12_RESOURCE_STATE_RENDER_TARGET,
+                D3D12_RESOURCE_STATE_PRESENT,
                 D3D12_RESOURCE_STATE_PRESENT,
                 IID_PPV_ARGS(&m_wrappedBuffers[i]));
+            if (FAILED(hr)) { printf("CreateWrappedResource[%u] FAILED: 0x%08X\n", i, hr); continue; }
 
             ComPtr<IDXGISurface> surface;
             m_wrappedBuffers[i].As(&surface);
-            m_d2dCtx->CreateBitmapFromDxgiSurface(surface.Get(), &bmpProps, &m_d2dTargets[i]);
+            hr = m_d2dCtx->CreateBitmapFromDxgiSurface(surface.Get(), &bmpProps, &m_d2dTargets[i]);
+            if (FAILED(hr)) { printf("CreateBitmap[%u] FAILED: 0x%08X\n", i, hr); }
         }
     }
 
@@ -102,6 +105,7 @@ namespace Funkin::Renderer::GAL::UI {
                                   uint32_t width, uint32_t height) {
         m_width  = width;
         m_height = height;
+        m_formats.clear();
         releaseBuffers();
         createBuffers(swapchain, frameCount, width, height);
     }

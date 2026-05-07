@@ -28,13 +28,15 @@ namespace Funkin::Renderer::GAL::UI {
 
         void setFontFile(const std::wstring& path) { m_fontPath = path; }
 
+        void releaseBuffers();
+        void flushD3D11() { if (m_d3d11ctx) m_d3d11ctx->Flush(); }
+
     private:
         DX12TextRenderer() = default;
 
         IDWriteTextFormat* getOrCreateFormat(float fontSize);
         void createBuffers(IDXGISwapChain3* swapchain, uint32_t frameCount,
                         uint32_t width, uint32_t height);
-        void releaseBuffers();
 
         ComPtr<ID3D11On12Device>        m_11on12;
         ComPtr<ID3D11DeviceContext>     m_d3d11ctx;

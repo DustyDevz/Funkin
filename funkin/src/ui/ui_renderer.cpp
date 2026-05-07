@@ -216,60 +216,6 @@ namespace Funkin::UI {
         });
     }
 
-    void UIRenderer::flushGeometry() {
-        if (m_batches.empty()) return;
-
-        float w = (float)m_width;
-        float h = (float)m_height;
-        float ortho[16] = {
-            2.0f/w,  0.0f,    0.0f,  0.0f,
-            0.0f,   -2.0f/h,  0.0f,  0.0f,
-            0.0f,    0.0f,    1.0f,  0.0f,
-        -1.0f,    1.0f,    0.0f,  1.0f
-        };
-
-        void* cbData = m_gal->mapBuffer(m_cbuffer);
-        memcpy(cbData, ortho, sizeof(ortho));
-        m_gal->unmapBuffer(m_cbuffer);
-
-        m_gal->setPipeline(m_pipeline);
-        m_gal->setUniformBuffer(m_cbuffer, 0);
-
-        std::vector<UIVertex> allVerts;
-        std::vector<uint16_t> allIdx;
-
-        for (auto& batch : m_batches) {
-            uint16_t vertBase = (uint16_t)allVerts.size();
-            for (auto& v : batch.vertices) allVerts.push_back(v);
-            for (auto  i : batch.indices)  allIdx.push_back(i + vertBase);
-        }
-
-        void* vData = m_gal->mapBuffer(m_vertexBuffer);
-        memcpy(vData, allVerts.data(), allVerts.size() * sizeof(UIVertex));
-        m_gal->unmapBuffer(m_vertexBuffer);
-
-        void* iData = m_gal->mapBuffer(m_indexBuffer);
-        memcpy(iData, allIdx.data(), allIdx.size() * sizeof(uint16_t));
-        m_gal->unmapBuffer(m_indexBuffer);
-
-        m_gal->setVertexBuffer(m_vertexBuffer);
-        m_gal->setIndexBuffer(m_indexBuffer, Renderer::GAL::IndexType::Uint16);
-
-        uint32_t indexOffset = 0;
-        for (auto& batch : m_batches) {
-            if (batch.indices.empty()) continue;
-            m_gal->setSampler(m_samplerNearest, 0);
-            m_gal->setTexture(m_whiteTexture, 0);
-            m_gal->drawIndexed({
-                (uint32_t)batch.indices.size(),
-                1, indexOffset, 0, 0
-            });
-            indexOffset += (uint32_t)batch.indices.size();
-        }
-
-        m_batches.clear();
-    }
-
     void UIRenderer::flushText() {
     #ifdef _WIN32
         auto& txt = Funkin::Renderer::GAL::UI::DX12TextRenderer::get();
@@ -300,7 +246,7 @@ namespace Funkin::UI {
             2.0f/w,  0.0f,    0.0f,  0.0f,
             0.0f,   -2.0f/h,  0.0f,  0.0f,
             0.0f,    0.0f,    1.0f,  0.0f,
-            -1.0f,    1.0f,    0.0f,  1.0f
+           -1.0f,    1.0f,    0.0f,  1.0f
         };
 
         void* cbData = m_gal->mapBuffer(m_cbuffer);

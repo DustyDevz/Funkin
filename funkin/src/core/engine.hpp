@@ -43,14 +43,18 @@ namespace Funkin::Core {
 
         bool processEvents();
         void tickFrame();
+        void forceFrame() { tickFrame(); }
         void resize(int w, int h);
 
         void setFrameCallback(FrameCallback cb) { m_frameCallback = std::move(cb); }
         void setResizeCallback(ResizeCallback cb) { m_resizeCallback = std::move(cb); }
+        void setPreResizeCallback(std::function<void()> cb) { m_preResizeCallback = std::move(cb); }
 
-        Renderer::GAL::IDAL* gal()          const { return m_renderer; }
+        Renderer::GAL::IDAL* gal()           const { return m_renderer; }
         const EngineConfig&  config()       const { return m_cfg; }
         bool                 isRunning()    const { return m_running; }
+
+        bool m_resizing = false;
 
     private:
         Engine() = default;
@@ -61,6 +65,7 @@ namespace Funkin::Core {
         Renderer::GAL::IDAL*                   m_renderer     = nullptr;
         FrameCallback                          m_frameCallback;
         ResizeCallback                         m_resizeCallback;
+        std::function<void()>                  m_preResizeCallback;
     };
 
 }

@@ -76,14 +76,20 @@ namespace Funkin::Core {
 
     void Engine::resize(int w, int h) {
         if (w <= 0 || h <= 0 || !m_renderer) return;
-        
+        if (w == m_cfg.width && h == m_cfg.height) return;
+
         m_cfg.width  = w;
         m_cfg.height = h;
+
+        if (m_preResizeCallback) 
+            m_preResizeCallback();
+
         m_renderer->resize(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
-        
-        if (m_resizeCallback) {
+
+        if (m_resizeCallback)
             m_resizeCallback(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
-        }
+        
+        tickFrame();
     }
 
     void Engine::shutdown() {

@@ -56,10 +56,16 @@ static int run() {
 
     auto* dx12 = static_cast<Funkin::Renderer::GAL::DX12Gal*>(gal);
     auto& txt  = GAL::UI::DX12TextRenderer::get();
+    auto initialSize = gal->swapchainSize();
     txt.setFontFile(L"fonts/reg.ttf");
     txt.init(dx12->device(), dx12->queue(), dx12->swapchain(),
-            2, cfg.width, cfg.height);
+            2, (uint32_t)initialSize.x, (uint32_t)initialSize.y);
 
+
+    engine.setPreResizeCallback([&]() {
+        txt.releaseBuffers();
+        txt.flushD3D11();
+    });
 
     engine.setResizeCallback([&](uint32_t w, uint32_t h) {
         ui.resize(w, h);
@@ -86,13 +92,17 @@ static int run() {
         rp.colorCount         = 1;
 
         gal->beginRenderPass(rp);
+
         auto size = gal->swapchainSize();
+        uint32_t sw = (uint32_t)size.x;
+        uint32_t sh = (uint32_t)size.y;
+
         gal->setViewport({ 0, 0, size.x, size.y });
         gal->setScissor ({ 0, 0, size.x, size.y });
 
         ui.beginFrame();
         ProjectUI.draw();
-        ui.flushGeometry();
+        ui.flush();
 
         gal->endRenderPass();
     });

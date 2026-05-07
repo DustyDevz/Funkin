@@ -43,7 +43,6 @@ namespace Funkin::UI {
 
         void beginFrame();
         void flush();
-        void flushGeometry();
         void flushText();
 
         void drawFilledRect(Rect r, Color color);

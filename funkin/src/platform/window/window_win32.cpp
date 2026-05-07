@@ -106,11 +106,26 @@
                     return hit;
                 }
 
+                case WM_PAINT: {
+                    PAINTSTRUCT ps;
+                    HDC hdc = BeginPaint(hwnd, &ps);
+
+                    if (Core::Engine::get().isRunning()) {
+                        Core::Engine::get().tickFrame();
+                    }
+
+                    EndPaint(hwnd, &ps);
+                    return 0;
+                }
+
                 case WM_SIZE: {
                     uint32_t w = LOWORD(lp);
                     uint32_t h = HIWORD(lp);
-                    if (w > 0 && h > 0)
+
+                    if (w > 0 && h > 0) {
                         Core::Engine::get().resize(w, h);
+                    }
+
                     return 0;
                 }
 

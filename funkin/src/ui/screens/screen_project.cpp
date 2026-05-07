@@ -4,6 +4,7 @@
 #include "screen_project.hpp"
 #include <ui/theme.hpp>
 #include <ui/ui_renderer.hpp>
+#include <algorithm>
 
 namespace Funkin::UI {
     void ProjectUI::init() {
@@ -45,10 +46,10 @@ namespace Funkin::UI {
         m_btnOpenFile->setRect( { btnX, btnBaseY + btnH + t.paddingSM, btnW, btnH });
 
         const float cx = sidebarW + 1.0f;
-        const float cw = (float)w - cx;
+        const float cw = std::max(0.0f, (float)w - cx);
         m_content->setRect({ cx, 0, cw, (float)h });
-        m_recentList->setRect({ cx + pad, 32.0f + 52.0f + 24.0f, cw - pad * 2,
-                                (float)h - 32.0f - 52.0f - 24.0f - pad });
+        m_recentList->setRect({ cx + pad, 32.0f + 52.0f + 24.0f, std::max(0.0f, cw - pad * 2),
+                                std::max(0.0f, (float)h - 32.0f - 52.0f - 24.0f - pad) });
     }
 
     void ProjectUI::update(Vec2 mousePos, bool mouseDown) {
@@ -60,8 +61,8 @@ namespace Funkin::UI {
     void ProjectUI::draw() {
         auto& r = UIRenderer::get();
         auto& t = Theme::get();
-        const float W = 1920.0f;
-        const float H = 1080.0f;
+        const float W = (float)m_width;
+        const float H = (float)m_height;
 
         r.drawFilledRect({ 0, 0, W, H }, t.bgBase);
 
