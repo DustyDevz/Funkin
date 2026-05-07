@@ -61,8 +61,14 @@
             }
 
             SetWindowLong(m_hwnd, GWL_STYLE, style);
-            SetWindowPos(m_hwnd, nullptr, 0, 0, 0, 0, 
-                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+
+            RECT clientRect;
+            GetClientRect(m_hwnd, &clientRect);
+            uint32_t w = clientRect.right  - clientRect.left;
+            uint32_t h = clientRect.bottom - clientRect.top;
+
+            SetWindowPos(m_hwnd, nullptr, 0, 0, w, h, 
+                         SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
         }
 
         bool Window_Win32::pump() {

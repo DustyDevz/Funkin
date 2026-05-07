@@ -24,6 +24,7 @@ namespace Funkin::Core {
         m_running = true;
 
         PlatformWindow::get().init(cfg.title, cfg.width, cfg.height);
+        PlatformWindow::get().setBorderless(true);
         Input::Input::get().init();
 
         #ifdef _WIN32
