@@ -7,6 +7,7 @@
     #include <input/input.hpp>
     #include <platform/input/input_win32.hpp>
     #include <stdexcept>
+    #include <windowsx.h>
 
     namespace Funkin::Platform {
         Window_Win32& Window_Win32::get() {
@@ -107,7 +108,31 @@
                     LRESULT hit = DefWindowProcW(hwnd, msg, wp, lp);
                     if (hit == HTCLIENT) {
                         DWORD style = GetWindowLong(hwnd, GWL_STYLE);
-                        if (style & WS_POPUP) return HTCAPTION;
+                        if (style & WS_POPUP) {
+                            POINT pt = { GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
+                            ScreenToClient(hwnd, &pt);
+
+                            RECT rc;
+                            GetClientRect(hwnd, &rc);
+                            int w = rc.right;
+                            int h = rc.bottom;
+                            const int border = 8;
+
+                            // corners
+                            if (pt.x < border && pt.y < border)           return HTTOPLEFT;
+                            if (pt.x > w - border && pt.y < border)       return HTTOPRIGHT;
+                            if (pt.x < border && pt.y > h - border)       return HTBOTTOMLEFT;
+                            if (pt.x > w - border && pt.y > h - border)   return HTBOTTOMRIGHT;
+
+                            // edges
+                            if (pt.x < border)       return HTLEFT;
+                            if (pt.x > w - border)   return HTRIGHT;
+                            if (pt.y < border)       return HTTOP;
+                            if (pt.y > h - border)   return HTBOTTOM;
+
+                            // title bar
+                            if (pt.y < 32) return HTCAPTION;
+                        }
                     }
                     return hit;
                 }
