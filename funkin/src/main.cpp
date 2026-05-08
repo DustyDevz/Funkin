@@ -1,3 +1,6 @@
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
+
 #include "core/engine.hpp"
 #include "core/log.hpp"
 #include "renderer/shader/shader_loader.hpp"
