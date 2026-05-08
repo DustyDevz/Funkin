@@ -116,14 +116,15 @@ static int run() {
     LOG_INFO("engine: running");
     while (engine.isRunning()) {
         if (!engine.processEvents()) break;
-        engine.tickFrame();
-
+        
         if (input.justDown("test")) {
             uint64_t eventTime = input.getLastTimestamp("test");
             uint64_t now = input.getNow();
             double latencyMs = (now >= eventTime) ? (double)(now - eventTime) / 1'000'000.0 : 0.0;
             LOG_INFO("Now: {} | Event: {} | Latency: {:.4f} ms", now, eventTime, latencyMs);
         }
+
+        engine.tickFrame();
     }
 
     gal->waitIdle();

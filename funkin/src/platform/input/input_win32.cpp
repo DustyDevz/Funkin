@@ -9,10 +9,12 @@
 
 namespace Funkin::Platform::Input {
     uint64_t nanoTime() {
-        LARGE_INTEGER freq, count;
-        QueryPerformanceFrequency(&freq);
+        static LARGE_INTEGER freq = [] {
+            LARGE_INTEGER f; QueryPerformanceFrequency(&f); return f;
+        }();
+        LARGE_INTEGER count;
         QueryPerformanceCounter(&count);
-        return (uint64_t)(count.QuadPart * 1000000000LL / freq.QuadPart);
+        return (uint64_t)(count.QuadPart * 1'000'000'000LL / freq.QuadPart);
     }
 
     void registerRawInput(HWND hwnd) {

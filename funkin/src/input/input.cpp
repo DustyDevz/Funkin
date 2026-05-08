@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstring>
 #include <timeapi.h>
+#include <emmintrin.h>
 
 #ifdef _WIN32
     #include <platform/input/input_win32.hpp>
@@ -45,7 +46,7 @@ namespace Funkin::Input {
 
                 while (m_threadRunning) {
                     Platform::Input::pollXInput(m_ring, m_startTime, s_xiState, s_xiConnected);
-                    std::this_thread::yield(); 
+                    _mm_pause();
                 }
                 timeEndPeriod(1);
             });
