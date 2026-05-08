@@ -5,6 +5,8 @@
 #include <ui/theme.hpp>
 #include <ui/ui_renderer.hpp>
 #include <algorithm>
+#include <core/engine.hpp>
+#include <platform/window/window_win32.hpp>
 
 namespace Funkin::UI {
     void ProjectUI::init() {
@@ -53,6 +55,36 @@ namespace Funkin::UI {
     }
 
     void ProjectUI::update(Vec2 mousePos, bool mouseDown) {
+        auto& r = UIRenderer::get();
+        float W = (float)m_width;
+        const float wbtnSize = 32.0f;
+        const float titleH   = 32.0f;
+
+        // close
+        if (mouseDown &&
+            mousePos.x >= W - wbtnSize && mousePos.x <= W &&
+            mousePos.y >= 0 && mousePos.y <= titleH) {
+            Core::Engine::get().quit();
+        }
+
+        // maximize
+        if (mouseDown &&
+            mousePos.x >= W - wbtnSize*2 && mousePos.x <= W - wbtnSize &&
+            mousePos.y >= 0 && mousePos.y <= titleH) {
+            HWND hwnd = Funkin::Platform::Window_Win32::get().hwnd();
+            if (IsZoomed(hwnd))
+                ShowWindow(hwnd, SW_RESTORE);
+            else
+                ShowWindow(hwnd, SW_MAXIMIZE);
+        }
+
+        // minimize
+        if (mouseDown &&
+            mousePos.x >= W - wbtnSize*3 && mousePos.x <= W - wbtnSize*2 &&
+            mousePos.y >= 0 && mousePos.y <= titleH) {
+            ShowWindow(Funkin::Platform::Window_Win32::get().hwnd(), SW_MINIMIZE);
+        }
+
         m_btnNew->update(mousePos, mouseDown);
         m_btnOpenFile->update(mousePos, mouseDown);
         m_recentList->update(mousePos, mouseDown);
