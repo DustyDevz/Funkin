@@ -14,141 +14,128 @@
 namespace GAL    = Funkin::Renderer::GAL;
 namespace Shader = Funkin::Renderer::Shader;
 
-static int run() {
-    Funkin::Core::EngineConfig cfg {
-        .title  = "Funkin Project",
-        .width  = 900,
-        .height = 600,
-        .vsync  = true,
-    };
+struct AppState {
+    Funkin::UI::UIRenderer& ui = Funkin::UI::UIRenderer::get();
+    Funkin::Input::Input& input = Funkin::Input::Input::get();
+    GAL::UI::DX12TextRenderer& txt = GAL::UI::DX12TextRenderer::get();
+    Funkin::UI::ProjectUI projectUI;
+    GAL::RenderPassDesc renderPass{};
+    GAL::ColorAttachment colorAttachment{};
+};
 
-    auto& engine = Funkin::Core::Engine::get();
-
-    LOG_INFO("init: engine ({}x{})", cfg.width, cfg.height);
-    if (!engine.init(cfg)) {
-        LOG_ERR("fail: engine init");
-        return -1;
-    }
-
-    auto* gal = engine.gal();
-
-    LOG_INFO("init: shaders");
-    auto& shaderLoader = Shader::ShaderLoader::get();
-    shaderLoader.init(Shader::ShaderBackend::DX12);
-
-    LOG_INFO("init: ui renderer");
-    auto& ui = Funkin::UI::UIRenderer::get();
-    ui.init(gal, cfg.width, cfg.height);
-
-    LOG_INFO("input: test binded");
-    auto& input = Funkin::Input::Input::get();
-    input.bind("test", Funkin::Input::KeyCode::W);
-
-    LOG_INFO("init: project manager");
-    Funkin::UI::ProjectUI ProjectUI;
-    ProjectUI.init();
-
-    {
-        auto size = gal->swapchainSize();
-        ui.resize((uint32_t)size.x, (uint32_t)size.y);
-        ProjectUI.onResize((uint32_t)size.x, (uint32_t)size.y);
-    }
-
-    auto* dx12 = static_cast<Funkin::Renderer::GAL::DX12Gal*>(gal);
-    auto& txt  = GAL::UI::DX12TextRenderer::get();
-    auto initialSize = gal->swapchainSize();
-    txt.setFontFile(L"fonts/reg.ttf");
-    txt.init(dx12->device(), dx12->queue(), dx12->swapchain(),
-            2, (uint32_t)initialSize.x, (uint32_t)initialSize.y);
-
-
+void setupCallbacks(Funkin::Core::Engine& engine, AppState& state, GAL::DX12Gal* dx12) {
     engine.setPreResizeCallback([&]() {
-        txt.releaseBuffers();
-        txt.flushD3D11();
+        LOG_REND("pre-resize: synchronizing GPU");
+        dx12->waitIdle();
+        state.txt.releaseBuffers();
+        state.txt.flushD3D11();
     });
 
     engine.setResizeCallback([&](uint32_t w, uint32_t h) {
-        ui.resize(w, h);
-        ProjectUI.onResize(w, h);
-        txt.resize(dx12->swapchain(), 2, w, h);
+        if (w == 0 || h == 0) return;
+        LOG_REND("resize: {}x{}", w, h);
+        state.ui.resize(w, h);
+        state.projectUI.onResize(w, h);
+        state.txt.resize(dx12->swapchain(), 2, w, h);
     });
 
     engine.setFrameCallback([&]() {
-        auto& input = Funkin::Input::Input::get();
-        input.syncMousePosition();
-        Funkin::Vec2 mouse = { input.state().mouseX, input.state().mouseY };
-        bool clicked = input.state().mouseButtons[(size_t)Funkin::Input::MouseButton::Left];
+        state.input.syncMousePosition();
+        const auto& s = state.input.state();
+        
+        state.projectUI.update({ s.mouseX, s.mouseY }, s.mouseButtons[(size_t)Funkin::Input::MouseButton::Left]);
 
-        ProjectUI.update(mouse, clicked);
-
-        GAL::ColorAttachment color{};
-        color.clearColor = { .07f, .07f, .07f, 1.0f };
-        color.loadOp     = GAL::LoadOp::Clear;
-        color.storeOp    = GAL::StoreOp::Store;
-
-        GAL::RenderPassDesc rp{};
-        rp.useSwapchainTarget = true;
-        rp.colorAttachments   = &color;
-        rp.colorCount         = 1;
-
-        gal->beginRenderPass(rp);
-
+        auto* gal = engine.gal();
         auto size = gal->swapchainSize();
-        uint32_t sw = (uint32_t)size.x;
-        uint32_t sh = (uint32_t)size.y;
 
+        if (size.x <= 0 || size.y <= 0) return;
+
+        gal->beginRenderPass(state.renderPass);
         gal->setViewport({ 0, 0, size.x, size.y });
-        gal->setScissor ({ 0, 0, size.x, size.y });
+        gal->setScissor({ 0, 0, size.x, size.y });
 
-        ui.beginFrame();
-        ProjectUI.draw();
-        ui.flush();
-
+        state.ui.beginFrame();
+        state.projectUI.draw();
+        state.ui.flush();
         gal->endRenderPass();
     });
 
     dx12->setPrePresentCallback([&](uint32_t frameIdx) {
-        txt.beginDraw(frameIdx);
-        ui.flushText();
-        txt.endDraw(frameIdx);
+        state.txt.beginDraw(frameIdx);
+        state.ui.flushText();
+        state.txt.endDraw(frameIdx);
     });
+}
 
-    LOG_INFO("engine: running");
+static int run() {
+    auto& engine = Funkin::Core::Engine::get();
+    AppState state;
+
+    Funkin::Core::EngineConfig cfg {
+        .title = "Funkin Project",
+        .width = 900, 
+        .height = 600,
+        .vsync = true 
+    };
+
+    if (!engine.init(cfg)) return -1;
+
+    auto* dx12 = static_cast<GAL::DX12Gal*>(engine.gal());
+    auto size = dx12->swapchainSize();
+
+    Shader::ShaderLoader::get().init(Shader::ShaderBackend::DX12);
+    state.ui.init(dx12, (uint32_t)size.x, (uint32_t)size.y);
+    state.projectUI.init();
+    state.projectUI.onResize((uint32_t)size.x, (uint32_t)size.y);
+
+    state.txt.setFontFile(L"fonts/reg.ttf");
+    state.txt.init(dx12->device(), dx12->queue(), dx12->swapchain(), 2, (uint32_t)size.x, (uint32_t)size.y);
+
+    state.colorAttachment = {
+        .loadOp     = GAL::LoadOp::Clear,
+        .storeOp    = GAL::StoreOp::Store,
+        .clearColor = { .07f, .07f, .07f, 1.0f }
+    };
+
+    state.renderPass = {
+        .colorAttachments   = &state.colorAttachment,
+        .colorCount         = 1,
+        .useSwapchainTarget = true
+    };
+
+    state.input.bind("test", Funkin::Input::KeyCode::W);
+    setupCallbacks(engine, state, dx12);
+
     while (engine.isRunning()) {
         if (!engine.processEvents()) break;
-        
-        if (input.justDown("test")) {
-            uint64_t eventTime = input.getLastTimestamp("test");
-            uint64_t now = input.getNow();
-            double latencyMs = (now >= eventTime) ? (double)(now - eventTime) / 1'000'000.0 : 0.0;
-            LOG_INFO("Now: {} | Event: {} | Latency: {:.4f} ms", now, eventTime, latencyMs);
+
+        if (state.input.justDown("test")) {
+            uint64_t eventTime = state.input.getLastTimestamp("test");
+            uint64_t now = state.input.getNow();
+            LOG_INFO("latency: {:.4f} ms", (double)(now - eventTime) * 1e-6);
         }
 
         engine.tickFrame();
     }
 
-    gal->waitIdle();
-
-    ProjectUI.shutdown();
-    ui.shutdown();
-    shaderLoader.shutdown();
+    dx12->waitIdle();
+    state.projectUI.shutdown();
+    state.ui.shutdown();
+    Shader::ShaderLoader::get().shutdown();
     engine.shutdown();
 
-    LOG_INFO("engine: shutdown");
     return 0;
 }
 
 #ifdef _WIN32
-    int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-        AllocConsole();
-        FILE* fDummy;
-        freopen_s(&fDummy, "CONOUT$", "w", stdout);
-        freopen_s(&fDummy, "CONOUT$", "w", stderr);
-        freopen_s(&fDummy, "CONIN$", "r", stdin);
-        return run();
-    }
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd) {
+    AllocConsole();
+    FILE* fDummy;
+    freopen_s(&fDummy, "CONOUT$", "w", stdout);
+    freopen_s(&fDummy, "CONOUT$", "w", stderr);
+    freopen_s(&fDummy, "CONIN$", "r", stdin);
+    return run();
+}
 #else
-    int main() {
-        return run();
-    }
+int main() { return run(); }
 #endif
