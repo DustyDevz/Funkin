@@ -9,7 +9,7 @@ namespace Funkin::Renderer::GAL {
 
 class VKGal : public IDAL {
 public:
-    void     init(const GALDesc& desc)        override;
+    bool     init(const GALDesc& desc)        override;
     void     shutdown()                       override;
     void     beginFrame()                     override;
     void     endFrame()                       override;

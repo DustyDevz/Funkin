@@ -14,7 +14,7 @@ namespace Funkin::Renderer::GAL {
     public:
         virtual ~IDAL() = default;
 
-        virtual void init(const GALDesc& desc)     = 0;
+        virtual bool init(const GALDesc& desc)     = 0;
         virtual void shutdown()                    = 0;
 
         virtual void beginFrame()                  = 0;

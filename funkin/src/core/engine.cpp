@@ -10,6 +10,7 @@
     #include <renderer/gal/dx12/dx12_gal.hpp>
     using PlatformWindow = Funkin::Platform::Window_Win32;
 #elif __linux__
+    #include <platform/window/window_x11.hpp>
     using PlatformWindow = Funkin::Platform::X11_Window;
 #endif
 
@@ -20,39 +21,51 @@ namespace Funkin::Core {
     }
 
     bool Engine::init(const EngineConfig& cfg) {
-        m_cfg     = cfg;
+        LOG_INFO("Initializing Engine: {} ({}x{})", cfg.title, cfg.width, cfg.height);
+        
+        m_cfg = cfg;
         m_running = true;
 
-        PlatformWindow::get().init(cfg.title, cfg.width, cfg.height);
-        PlatformWindow::get().setBorderless(true);
+        auto& window = PlatformWindow::get();
+        window.init(cfg.title, cfg.width, cfg.height);
+        window.setBorderless(true);
+        
         Input::Input::get().init();
 
         #ifdef _WIN32
-            if (cfg.renderer == RendererBackend::DX12)
+            if (cfg.renderer == RendererBackend::DX12) {
+                LOG_REND("Selecting DX12 Backend");
                 m_galOwner = std::make_unique<Renderer::GAL::DX12Gal>();
-        else
-            m_galOwner = std::make_unique<Renderer::GAL::VKGal>();
-        #elif __linux__
+            } else {
+                LOG_REND("Selecting Vulkan Backend");
+                m_galOwner = std::make_unique<Renderer::GAL::VKGal>();
+            }
+        #else
+            LOG_REND("Selecting Vulkan Backend");
             m_galOwner = std::make_unique<Renderer::GAL::VKGal>();
         #endif
 
         m_renderer = m_galOwner.get();
 
-        Renderer::GAL::GALDesc galDesc{};
-        galDesc.width  = static_cast<uint32_t>(cfg.width);
-        galDesc.height = static_cast<uint32_t>(cfg.height);
-        galDesc.vsync  = cfg.vsync;
+        Renderer::GAL::GALDesc galDesc{
+            .width = static_cast<uint32_t>(cfg.width),
+            .height = static_cast<uint32_t>(cfg.height),
+            .vsync = cfg.vsync
+        };
 
         #ifdef _WIN32
-            galDesc.windowHandle = static_cast<void*>(PlatformWindow::get().hwnd());
+            galDesc.windowHandle = static_cast<void*>(window.hwnd());
         #endif
 
         m_renderer->init(galDesc);
+
+        LOG_INFO("Engine initialized successfully");
         return true;
     }
 
     bool Engine::processEvents() {
         if (!PlatformWindow::get().pump()) {
+            LOG_INFO("Window close requested");
             quit();
             return false;
         }
@@ -62,12 +75,14 @@ namespace Funkin::Core {
 
     void Engine::tickFrame() {
         if (!m_running || !m_renderer) return;
+        
         m_renderer->beginFrame();
         if (m_frameCallback) m_frameCallback();
         m_renderer->endFrame();
     }
 
     void Engine::run() {
+        LOG_INFO("Entering main loop");
         while (m_running) {
             processEvents();
             tickFrame();
@@ -75,25 +90,27 @@ namespace Funkin::Core {
         m_renderer->waitIdle();
     }
 
-    void Engine::resize(int w, int h) {
+    void Engine::resize(int w, int h) { 
         if (w <= 0 || h <= 0 || !m_renderer) return;
         if (w == m_cfg.width && h == m_cfg.height) return;
 
-        m_cfg.width  = w;
+        LOG_INFO("Resizing buffer: {}x{}", w, h);
+        m_renderer->waitIdle();
+
+        m_cfg.width = w;
         m_cfg.height = h;
 
-        if (m_preResizeCallback) 
-            m_preResizeCallback();
+        if (m_preResizeCallback) m_preResizeCallback();
 
         m_renderer->resize(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
 
-        if (m_resizeCallback)
+        if (m_resizeCallback) {
             m_resizeCallback(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
-        
-        tickFrame();
+        }
     }
 
     void Engine::shutdown() {
+        LOG_INFO("Engine shutdown initiated");
         if (m_renderer) {
             m_renderer->shutdown();
             m_renderer = nullptr;

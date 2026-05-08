@@ -5,7 +5,7 @@
 #include "vk_gal.hpp"
 
 namespace Funkin::Renderer::GAL {
-    void VKGal::init(const GALDesc&) {}
+    bool VKGal::init(const GALDesc&) {return true;}
     void VKGal::shutdown() {}
     void VKGal::waitIdle() {}
 

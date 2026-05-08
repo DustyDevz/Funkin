@@ -5,7 +5,7 @@
 #include "dx12_gal.hpp"
 
 namespace Funkin::Renderer::GAL {
-    void DX12Gal::init(const GALDesc& desc) {
+    bool DX12Gal::init(const GALDesc& desc) {
         m_width  = desc.width;
         m_height = desc.height;
         m_vsync  = desc.vsync;
@@ -113,6 +113,8 @@ namespace Funkin::Renderer::GAL {
             m_device->CreateRenderTargetView(m_swapTargets[i].Get(), nullptr, m_swapRTVs[i]);
             m_swapTargetStates[i] = D3D12_RESOURCE_STATE_PRESENT;
         }
+
+        return true;
     }
 
     void DX12Gal::shutdown() {

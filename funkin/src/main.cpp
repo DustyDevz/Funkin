@@ -81,7 +81,10 @@ static int run() {
         .vsync = true 
     };
 
-    if (!engine.init(cfg)) return -1;
+    if (!engine.init(cfg)) {
+        LOG_ERR("Engine initialization failed");
+        return -1;
+    }
 
     auto* dx12 = static_cast<GAL::DX12Gal*>(engine.gal());
     auto size = dx12->swapchainSize();

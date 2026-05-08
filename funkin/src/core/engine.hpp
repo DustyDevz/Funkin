@@ -9,7 +9,6 @@
 #include <renderer/gal/idal.hpp>
 
 namespace Funkin::Core {
-
     enum class RendererBackend {
         Vulkan,
         #ifdef _WIN32
@@ -67,5 +66,4 @@ namespace Funkin::Core {
         ResizeCallback                         m_resizeCallback;
         std::function<void()>                  m_preResizeCallback;
     };
-
 }
