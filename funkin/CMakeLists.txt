@@ -14,9 +14,14 @@ add_executable(Funkin ${EXE_TYPE} ${Funkin_SOURCES})
 find_package(Vulkan REQUIRED)
 
 target_include_directories(Funkin
+    BEFORE
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/directx/include
+)
+
+target_include_directories(Funkin
     PUBLIC src
     PRIVATE
-        third_party/directx/include
         third_party/zstd/lib
         third_party/imgui
         third_party/stb
