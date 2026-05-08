@@ -18,6 +18,7 @@ target_include_directories(Funkin
     PRIVATE
         third_party/directx/include
         third_party/zstd/lib
+        third_party/imgui
         third_party/stb
 )
 

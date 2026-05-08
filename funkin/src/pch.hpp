@@ -27,6 +27,13 @@
 
 #include <vulkan/vulkan.h>
 
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <backends/imgui_impl_dx12.h>
+#include <backends/imgui_impl_vulkan.h>
+#include <backends/imgui_impl_win32.h>
+#include <backends/imgui_impl_glfw.h>
+
 #ifdef _WIN32
     #ifndef WIN32_LEAN_AND_MEAN
         #define WIN32_LEAN_AND_MEAN
