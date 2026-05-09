@@ -23,6 +23,8 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <fstream>
+#include <sstream>
 
 #include <math/vec2.hpp>
 #include <math/vec3.hpp>
@@ -46,6 +48,7 @@
     #include <d3d11on12.h>
     #include <d2d1_3.h>
     #include <dwrite_3.h>
+    #include <d3dcompiler.h>
     
     #include <backends/imgui_impl_win32.h>
     #include <backends/imgui_impl_dx12.h>
@@ -55,6 +58,7 @@
     #pragma comment(lib, "d3d11.lib")
     #pragma comment(lib, "d2d1.lib")
     #pragma comment(lib, "dwrite.lib")
+    #pragma comment(lib, "d3dcompiler.lib")
 
     using Microsoft::WRL::ComPtr;
 #else
