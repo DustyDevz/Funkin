@@ -10,3 +10,6 @@
 [submodule "funkin/third_party/imgui"]
 	path = funkin/third_party/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "funkin/third_party/lz4"]
+	path = funkin/third_party/lz4
+	url = https://github.com/lz4/lz4
