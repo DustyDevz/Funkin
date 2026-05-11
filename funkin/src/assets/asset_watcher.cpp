@@ -35,8 +35,7 @@ namespace Funkin::Assets {
 
         m_running = true;
         m_thread  = std::thread([this]{ watchLoop(); });
-        printf("[AssetWatcher] Watching: %s (poll every %lldms)\n",
-               watchFolder.string().c_str(), (long long)pollInterval.count());
+        LOG_INFO("Watching: {} (poll every {}ms)", watchFolder.string().c_str(), (long long)pollInterval.count());
     }
 
     void AssetWatcher::shutdown() {
@@ -91,7 +90,7 @@ namespace Funkin::Assets {
 
         if (changes.empty()) return;
 
-        printf("[AssetWatcher] %zu file(s) changed, hot-reloading...\n", changes.size());
+        LOG_INFO("{} file(s) changed, hot-reloading...", changes.size());
 
         if (m_callback) {
             for (auto& p : changes)

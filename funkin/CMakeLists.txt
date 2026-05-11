@@ -24,6 +24,18 @@ endif()
 
 add_executable(Funkin ${EXE_TYPE} ${Funkin_SOURCES} ${IMGUI_SOURCES})
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(Funkin PRIVATE
+        PACK_PATH="${CMAKE_SOURCE_DIR}/export/debug/assets.funkin"
+        SOURCE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/"
+    )
+else()
+    target_compile_definitions(Funkin PRIVATE
+        PACK_PATH="assets.funkin"
+        SOURCE_PATH=""
+    )
+endif()
+
 find_package(Vulkan REQUIRED)
 
 target_include_directories(Funkin

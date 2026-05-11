@@ -33,6 +33,14 @@
 #include <math/rect.hpp>
 #include <math/mat4.hpp>
 
+#include <assets/asset_cache.hpp>
+#include <assets/asset_compiler.hpp>
+#include <assets/asset_handle.hpp>
+#include <assets/asset_loader.hpp>
+#include <assets/asset_packer.hpp>
+#include <assets/asset_types.hpp>
+#include <assets/asset_watcher.hpp>
+
 #include <vulkan/vulkan.h>
 
 #include <imgui.h>

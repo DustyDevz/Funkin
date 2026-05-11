@@ -95,7 +95,7 @@ namespace Funkin::Assets {
             entry.subtype        = asset.subtype;
             entry.compressMode   = asset.compressMode;
             entry.shaderBackend  = asset.shaderBackend;
-            entry.offset         = 0; // filled by writePack
+            entry.offset         = 0;
             entry.compressedSize = (uint32_t)compressed.size();
             entry.originalSize   = (uint32_t)asset.data.size();
             entry.fingerprint    = asset.fingerprint;

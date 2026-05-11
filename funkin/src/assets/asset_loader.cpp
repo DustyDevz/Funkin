@@ -30,13 +30,13 @@ namespace Funkin::Assets {
             if (!packExists) {
                 newAssets = AssetCompiler::compileFolder(sourceFolder, {}, shaderBackend);
                 AssetPacker::packAll(packPath, newAssets);
-                printf("[Assets] Built %zu assets -> %s\n",
+                LOG_INFO("Built %zu assets -> {}",
                        newAssets.size(), packPath.string().c_str());
             } else if (!newAssets.empty()) {
                 uint32_t n = AssetPacker::update(packPath, newAssets);
-                printf("[Assets] Updated %u asset(s) in %s\n", n, packPath.string().c_str());
+                LOG_INFO("Updated %u asset(s) in {}", n, packPath.string().c_str());
             } else {
-                printf("[Assets] Pack up to date: %s\n", packPath.string().c_str());
+                LOG_INFO("Pack up to date: {}", packPath.string().c_str());
             }
         } else if (!packExists) {
             throw std::runtime_error("[Assets] No pack found and no source folder: "
@@ -55,8 +55,7 @@ namespace Funkin::Assets {
         for (uint32_t i = 0; i < nThreads; ++i)
             m_workers.emplace_back([this]{ workerLoop(); });
 
-        printf("[Assets] Loaded TOC: %zu entries, %u worker threads\n",
-               m_toc.size(), nThreads);
+        LOG_INFO("Loaded TOC: {} entries, {} worker threads", m_toc.size(), nThreads);
     }
 
     void AssetLoader::shutdown() {
@@ -293,7 +292,7 @@ namespace Funkin::Assets {
                     m_pendingCBs.push_back({ req.id, req.onComplete });
                 }
             } catch (const std::exception& e) {
-                fprintf(stderr, "[Assets] Async load failed: %s\n", e.what());
+                LOG_ERR("Async load failed: {}", e.what());
             }
         }
     }

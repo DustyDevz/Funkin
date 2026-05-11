@@ -75,10 +75,10 @@ static int run() {
     AppState state;
 
     Funkin::Core::EngineConfig cfg {
-        .title = "Funkin Project",
+        .title = "Funkin",
         .width = 900, 
         .height = 600,
-        .vsync = true 
+        .vsync = true
     };
 
     if (!engine.init(cfg)) {
@@ -109,6 +109,15 @@ static int run() {
         .useSwapchainTarget = true
     };
 
+    #ifdef FUNKIN_DEBUG
+        LOG_INFO("Debug enabled");
+        Funkin::Assets::AssetWatcher::get().init("assets/");
+        Funkin::Assets::AssetWatcher::get().onChanged([](auto& path) {
+            auto assets = Funkin::Assets::AssetCompiler::compileFolder(path.parent_path());
+            Funkin::Assets::AssetPacker::update("bin/assets.funkin", assets);
+        });
+    #endif
+
     state.input.bind("test", Funkin::Input::KeyCode::W);
     setupCallbacks(engine, state, dx12);
 
@@ -121,6 +130,11 @@ static int run() {
             LOG_INFO("latency: {:.4f} ms", (double)(now - eventTime) * 1e-6);
         }
 
+        Funkin::Assets::AssetLoader::get().tick();
+        #if FUNKIN_DEBUG
+            Funkin::Assets::AssetWatcher::get().tick();
+        #endif
+
         engine.tickFrame();
     }
 
@@ -128,6 +142,7 @@ static int run() {
     state.projectUI.shutdown();
     state.ui.shutdown();
     Shader::ShaderLoader::get().shutdown();
+    Funkin::Assets::AssetLoader::get().shutdown();
     engine.shutdown();
 
     return 0;

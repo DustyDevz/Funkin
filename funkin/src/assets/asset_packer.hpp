@@ -8,7 +8,6 @@
 #include <vector>
 
 namespace Funkin::Assets {
-
     class AssetPacker {
     public:
         static std::vector<AssetTOCEntry> readTOC(const std::filesystem::path& path);
