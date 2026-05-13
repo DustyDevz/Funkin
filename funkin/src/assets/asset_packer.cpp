@@ -2,13 +2,7 @@
 // Licensed under GNU GPL v3.0
 
 #include "asset_packer.hpp"
-#include <fstream>
-#include <stdexcept>
-#include <algorithm>
-#include <cstring>
-#include <chrono>
 #include <zstd.h>
-#include <unordered_map>
 
 namespace Funkin::Assets {
     static uint64_t nowUnix() {

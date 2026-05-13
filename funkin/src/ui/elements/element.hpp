@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <math/rect.hpp>
-#include <math/vec2.hpp>
+#include <math/math_rect.hpp>
+#include <math/math_vec2.hpp>
 
 namespace Funkin::UI {
     enum class ElementState { Normal, Hover, Pressed, Disabled };
@@ -13,14 +13,14 @@ namespace Funkin::UI {
     public:
         virtual ~Element() = default;
 
-        virtual void update(Vec2 mousePos, bool mouseDown) = 0;
+        virtual void update(Math::Vec2 mousePos, bool mouseDown) = 0;
         virtual void draw() = 0;
 
-        void setRect(Rect r)    { m_rect = r; }
+        void setRect(Math::Rect r)    { m_rect = r; }
         void setVisible(bool v) { m_visible = v; }
         void setEnabled(bool e) { m_enabled = e; }
 
-        Rect rect()    const { return m_rect; }
+        Math::Rect rect()    const { return m_rect; }
         bool visible() const { return m_visible; }
         bool enabled() const { return m_enabled; }
 
@@ -28,12 +28,12 @@ namespace Funkin::UI {
         bool isFocused()  const { return m_focused; }
 
     protected:
-        bool hitTest(Vec2 p) const {
+        bool hitTest(Math::Vec2 p) const {
             return p.x >= m_rect.x && p.x <= m_rect.x + m_rect.w &&
                 p.y >= m_rect.y && p.y <= m_rect.y + m_rect.h;
         }
 
-        Rect         m_rect{};
+        Math::Rect         m_rect{};
         ElementState m_state   = ElementState::Normal;
         bool         m_visible = true;
         bool         m_enabled = true;

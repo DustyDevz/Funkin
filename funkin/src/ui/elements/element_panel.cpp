@@ -1,12 +1,12 @@
 // © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
 // Licensed under GNU GPL v3.0
 
+#include <ui/ui_theme.hpp>
+#include <drivers/d3d12/d3d12_ui/d3d12_ui.hpp>
 #include "element_panel.hpp"
-#include <ui/theme.hpp>
-#include <ui/ui_renderer.hpp>
 
 namespace Funkin::UI {
-    void Panel::update(Vec2 mousePos, bool mouseDown) {
+    void Panel::update(Math::Vec2 mousePos, bool mouseDown) {
         for (auto& child : m_children)
             child->update(mousePos, mouseDown);
     }

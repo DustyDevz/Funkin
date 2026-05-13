@@ -3,13 +3,6 @@
 
 #pragma once
 #include "asset_types.hpp"
-#include <filesystem>
-#include <functional>
-#include <unordered_map>
-#include <thread>
-#include <mutex>
-#include <atomic>
-#include <chrono>
 
 namespace Funkin::Assets {
 #ifdef FUNKIN_DEBUG

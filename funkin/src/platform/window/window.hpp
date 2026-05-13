@@ -3,9 +3,6 @@
 
 #pragma once
 
-#include <string>
-#include <memory>
-
 namespace Funkin::Platform {
     class Window {
     public:

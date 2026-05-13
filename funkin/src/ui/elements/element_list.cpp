@@ -1,19 +1,19 @@
 // © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
 // Licensed under GNU GPL v3.0
 
+#include <ui/ui_theme.hpp>
+#include <drivers/d3d12/d3d12_ui/d3d12_ui.hpp>
 #include "element_list.hpp"
 #include "element_text.hpp"
-#include <ui/theme.hpp>
-#include <ui/ui_renderer.hpp>
 
 namespace Funkin::UI {
-    void List::update(Vec2 mousePos, bool mouseDown) {
+    void List::update(Math::Vec2 mousePos, bool mouseDown) {
         if (!m_enabled) return;
 
         m_hovered = -1;
 
         for (int i = 0; i < (int)m_items.size(); ++i) {
-            Rect itemRect = {
+            Math::Rect itemRect = {
                 m_rect.x,
                 m_rect.y + i * m_itemHeight,
                 m_rect.w,
@@ -44,12 +44,11 @@ namespace Funkin::UI {
         bool hovered  = (i == m_hovered);
         bool selected = (i == m_selected);
 
-        // alternate between bgItem and a slightly darker shade
-        Color baseBg = (i % 2 == 0) ? t.bgItem
-                                     : Color{ t.bgItem.r - 0.03f,
+        Math::Color baseBg = (i % 2 == 0) ? t.bgItem
+                                     : Math::Color{ t.bgItem.r - 0.03f,
                                               t.bgItem.g - 0.03f,
                                               t.bgItem.b - 0.03f, 1.0f };
-        Color bg = selected ? t.bgItemSelect
+        Math::Color bg = selected ? t.bgItemSelect
                  : hovered  ? t.bgItemHover
                             : baseBg;
 

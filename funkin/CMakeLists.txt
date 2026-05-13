@@ -62,7 +62,7 @@ target_link_libraries(Funkin PRIVATE
     libzstd_static
 )
 
-target_precompile_headers(Funkin PRIVATE src/pch.hpp)
+target_precompile_headers(Funkin PRIVATE src/shared/pch.hpp)
 
 target_compile_definitions(Funkin PRIVATE
     $<$<CONFIG:Debug>:FUNKIN_DEBUG>

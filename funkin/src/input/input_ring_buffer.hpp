@@ -2,10 +2,7 @@
 // Licensed under GNU GPL v3.0
 
 #pragma once
-
 #include "input_types.hpp"
-#include <atomic>
-#include <array>
 
 namespace Funkin::Input {
     template<size_t N>

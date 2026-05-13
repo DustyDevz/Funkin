@@ -3,7 +3,6 @@
 
 #pragma once
 #include "asset_types.hpp"
-#include <memory>
 
 namespace Funkin::Assets {
     template<typename T>

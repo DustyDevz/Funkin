@@ -6,18 +6,8 @@
 #include "asset_handle.hpp"
 #include "asset_cache.hpp"
 #include "asset_packer.hpp"
-#include <filesystem>
-#include <unordered_map>
-#include <thread>
-#include <mutex>
-#include <queue>
-#include <condition_variable>
-#include <functional>
-#include <atomic>
-#include <fstream>
 
 namespace Funkin::Assets {
-
     struct AsyncRequest {
         AssetID   id;
         AssetType type;

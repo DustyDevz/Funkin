@@ -3,10 +3,6 @@
 
 #pragma once
 #include "asset_types.hpp"
-#include <unordered_map>
-#include <list>
-#include <mutex>
-#include <memory>
 
 namespace Funkin::Assets {
     template<typename T>

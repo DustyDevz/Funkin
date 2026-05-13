@@ -3,9 +3,6 @@
 
 #pragma once
 
-#include <cstdint>
-#include <string>
-
 namespace Funkin::Input {
     using Timestamp = uint64_t;
 

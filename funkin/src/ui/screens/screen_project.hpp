@@ -8,13 +8,12 @@
 #include <ui/elements/element_text.hpp>
 #include <ui/elements/element_list.hpp>
 #include <ui/elements/element_panel.hpp>
-#include <memory>
 
 namespace Funkin::UI {
     class ProjectUI : public Screen {
     public:
         void init()                                override;
-        void update(Vec2 mousePos, bool mouseDown) override;
+        void update(Math::Vec2 mousePos, bool mouseDown) override;
         void draw()                                override;
         void shutdown()                            override;
         void onResize(uint32_t w, uint32_t h)      override;

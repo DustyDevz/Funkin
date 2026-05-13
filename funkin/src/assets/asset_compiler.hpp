@@ -3,8 +3,6 @@
 
 #pragma once
 #include "asset_types.hpp"
-#include <filesystem>
-#include <vector>
 
 namespace Funkin::Assets {
     struct CompiledAsset {

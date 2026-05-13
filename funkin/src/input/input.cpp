@@ -2,11 +2,6 @@
 // Licensed under GNU GPL v3.0
 
 #include "input.hpp"
-#include <fstream>
-#include <algorithm>
-#include <cstring>
-#include <timeapi.h>
-#include <emmintrin.h>
 
 #ifdef _WIN32
     #include <platform/input/input_win32.hpp>

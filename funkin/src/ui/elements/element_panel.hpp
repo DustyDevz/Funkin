@@ -4,13 +4,11 @@
 #pragma once
 
 #include "element.hpp"
-#include <vector>
-#include <memory>
 
 namespace Funkin::UI {
     class Panel : public Element {
     public:
-        void update(Vec2 mousePos, bool mouseDown) override;
+        void update(Math::Vec2 mousePos, bool mouseDown) override;
         void draw() override;
 
         void addChild(std::shared_ptr<Element> e) { m_children.push_back(e); }

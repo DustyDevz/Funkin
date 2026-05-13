@@ -4,7 +4,6 @@
 #include "asset_loader.hpp"
 #include "asset_compiler.hpp"
 #include <zstd.h>
-#include <stdexcept>
 
 namespace Funkin::Assets {
     AssetLoader& AssetLoader::get() {

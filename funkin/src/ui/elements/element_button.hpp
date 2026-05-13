@@ -4,16 +4,14 @@
 #pragma once
 
 #include "element.hpp"
-#include <math/color.hpp>
-#include <string>
-#include <functional>
+#include <math/math_color.hpp>
 
 namespace Funkin::UI {
     enum class ButtonStyle { Default, Primary, Ghost };
 
     class Button : public Element {
     public:
-        void update(Vec2 mousePos, bool mouseDown) override;
+        void update(Math::Vec2 mousePos, bool mouseDown) override;
         void draw() override;
 
         void setLabel(const std::string& l)       { m_label = l; }

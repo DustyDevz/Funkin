@@ -4,8 +4,6 @@
 #pragma once
 #include "asset_types.hpp"
 #include "asset_compiler.hpp"
-#include <filesystem>
-#include <vector>
 
 namespace Funkin::Assets {
     class AssetPacker {

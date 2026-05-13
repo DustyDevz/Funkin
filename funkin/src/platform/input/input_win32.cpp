@@ -3,9 +3,6 @@
 
 #ifdef _WIN32
 #include "input_win32.hpp"
-#include <cstring>
-
-#pragma comment(lib, "xinput.lib")
 
 namespace Funkin::Platform::Input {
     uint64_t nanoTime() {

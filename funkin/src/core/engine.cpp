@@ -1,17 +1,14 @@
 // © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
 // Licensed under GNU GPL v3.0
 
-#include "engine.hpp"
-#include <renderer/gal/vk/vk_gal.hpp>
+#include <drivers/vulkan/vulkan.hpp>
 #include <input/input.hpp>
+#include "engine.hpp"
 
 #ifdef _WIN32
     #include <platform/window/window_win32.hpp>
-    #include <renderer/gal/dx12/dx12_gal.hpp>
+    #include <drivers/d3d12/d3d12.hpp>
     using PlatformWindow = Funkin::Platform::Window_Win32;
-#elif __linux__
-    #include <platform/window/window_x11.hpp>
-    using PlatformWindow = Funkin::Platform::X11_Window;
 #endif
 
 namespace Funkin::Core {

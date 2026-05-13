@@ -2,7 +2,7 @@
 // Licensed under GNU GPL v3.0
 
 #include "element_text.hpp"
-#include <ui/ui_renderer.hpp>
+#include <drivers/d3d12/d3d12_ui/d3d12_ui.hpp>
 
 namespace Funkin::UI {
     void Text::draw() {

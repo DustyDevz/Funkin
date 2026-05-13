@@ -2,11 +2,7 @@
 // Licensed under GNU GPL v3.0
 
 #pragma once
-
-#include <string>
-#include <functional>
-#include <memory>
-#include <renderer/gal/idal.hpp>
+#include <drivers/driver_interface.hpp>
 
 namespace Funkin::Core {
     enum class RendererBackend {

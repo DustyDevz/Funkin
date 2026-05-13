@@ -5,13 +5,6 @@
 
 #include "input_types.hpp"
 #include "input_ring_buffer.hpp"
-#include <array>
-#include <vector>
-#include <string>
-#include <functional>
-#include <thread>
-#include <atomic>
-#include <unordered_map>
 
 namespace Funkin::Input {
     struct Binding {

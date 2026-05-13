@@ -1,12 +1,11 @@
 // © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
 // Licensed under GNU GPL v3.0
 
-#include "screen_project.hpp"
-#include <ui/theme.hpp>
-#include <ui/ui_renderer.hpp>
-#include <algorithm>
 #include <core/engine.hpp>
+#include <drivers/d3d12/d3d12_ui/d3d12_ui.hpp>
+#include <ui/ui_theme.hpp>
 #include <platform/window/window_win32.hpp>
+#include "screen_project.hpp"
 
 namespace Funkin::UI {
     void ProjectUI::init() {
@@ -54,7 +53,7 @@ namespace Funkin::UI {
                                 std::max(0.0f, (float)h - 32.0f - 52.0f - 24.0f - pad) });
     }
 
-    void ProjectUI::update(Vec2 mousePos, bool mouseDown) {
+    void ProjectUI::update(Math::Vec2 mousePos, bool mouseDown) {
         auto& r = UIRenderer::get();
         float W = (float)m_width;
         const float wbtnSize = 32.0f;

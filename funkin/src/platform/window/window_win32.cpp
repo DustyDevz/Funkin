@@ -2,12 +2,10 @@
 // Licensed under GNU GPL v3.0
 
 #ifdef _WIN32
-    #include "window_win32.hpp"
-    #include "core/engine.hpp"
+    #include <core/engine.hpp>
     #include <input/input.hpp>
     #include <platform/input/input_win32.hpp>
-    #include <stdexcept>
-    #include <windowsx.h>
+    #include "window_win32.hpp"
 
     namespace Funkin::Platform {
         Window_Win32& Window_Win32::get() {

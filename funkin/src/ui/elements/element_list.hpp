@@ -16,7 +16,7 @@ namespace Funkin::UI {
 
     class List : public Element {
     public:
-        void update(Vec2 mousePos, bool mouseDown) override;
+        void update(Math::Vec2 mousePos, bool mouseDown) override;
         void draw() override;
 
         void addItem(const ListItem& item) { m_items.push_back(item); }

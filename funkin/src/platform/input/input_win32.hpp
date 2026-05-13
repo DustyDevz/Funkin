@@ -6,11 +6,6 @@
 #ifdef _WIN32
     #include <input/input_types.hpp>
     #include <input/input_ring_buffer.hpp>
-    #include <functional>
-
-    #define WIN32_LEAN_AND_MEAN
-    #include <Windows.h>
-    #include <Xinput.h>
 
     using namespace Funkin::Input;
     namespace Funkin::Platform::Input {

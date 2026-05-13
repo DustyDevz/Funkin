@@ -3,11 +3,11 @@
 
 #include "element_button.hpp"
 #include "element_text.hpp"
-#include <ui/theme.hpp>
-#include <ui/ui_renderer.hpp>
+#include <ui/ui_theme.hpp>
+#include <drivers/d3d12/d3d12_ui/d3d12_ui.hpp>
 
 namespace Funkin::UI {
-    void Button::update(Vec2 mousePos, bool mouseDown) {
+    void Button::update(Math::Vec2 mousePos, bool mouseDown) {
         m_clicked = false;
         if (!m_enabled) { m_state = ElementState::Disabled; return; }
 
@@ -32,7 +32,7 @@ namespace Funkin::UI {
         auto& t = Theme::get();
         auto& r = UIRenderer::get();
 
-        Color bg;
+        Math::Color bg;
         switch (m_style) {
             case ButtonStyle::Primary:
                 bg = m_state == ElementState::Hover   ? t.btnBgPrimaryH :
@@ -54,22 +54,22 @@ namespace Funkin::UI {
             r.drawLine(
                 { m_rect.x - fw,           m_rect.y - fw },
                 { m_rect.x + m_rect.w + fw, m_rect.y - fw },
-                m_focused ? t.focusRing : Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
+                m_focused ? t.focusRing : Math::Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
                 fw);
             r.drawLine(
                 { m_rect.x + m_rect.w + fw, m_rect.y - fw },
                 { m_rect.x + m_rect.w + fw, m_rect.y + m_rect.h + fw },
-                m_focused ? t.focusRing : Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
+                m_focused ? t.focusRing : Math::Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
                 fw);
             r.drawLine(
                 { m_rect.x + m_rect.w + fw, m_rect.y + m_rect.h + fw },
                 { m_rect.x - fw,             m_rect.y + m_rect.h + fw },
-                m_focused ? t.focusRing : Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
+                m_focused ? t.focusRing : Math::Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
                 fw);
             r.drawLine(
                 { m_rect.x - fw, m_rect.y + m_rect.h + fw },
                 { m_rect.x - fw, m_rect.y - fw },
-                m_focused ? t.focusRing : Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
+                m_focused ? t.focusRing : Math::Color{ t.focusRing.r, t.focusRing.g, t.focusRing.b, 0.3f },
                 fw);
         }
 

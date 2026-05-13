@@ -4,7 +4,7 @@
 #pragma once
 
 #include "element.hpp"
-#include <math/color.hpp>
+#include <math/math_color.hpp>
 #include <string>
 
 namespace Funkin::UI {
@@ -12,11 +12,11 @@ namespace Funkin::UI {
 
     class Text : public Element {
     public:
-        void update(Vec2, bool) override {}
+        void update(Math::Vec2, bool) override {}
         void draw() override;
 
         void setText(const std::string& t) { m_text = t; }
-        void setColor(Color c)             { m_color = c; }
+        void setColor(Math::Color c)             { m_color = c; }
         void setFontSize(float s)          { m_fontSize = s; }
         void setAlign(TextAlign a)         { m_align = a; }
         void setBold(bool b)               { m_bold = b; }
@@ -25,7 +25,7 @@ namespace Funkin::UI {
 
     private:
         std::string m_text;
-        Color       m_color    = { 0.92f, 0.92f, 0.92f, 1.0f };
+        Math::Color       m_color    = { 0.92f, 0.92f, 0.92f, 1.0f };
         float       m_fontSize = 13.0f;
         TextAlign   m_align    = TextAlign::Left;
         bool        m_bold     = false;
