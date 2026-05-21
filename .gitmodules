@@ -1,0 +1,9 @@
+[submodule "funkin/third_party/bgfx"]
+	path = funkin/third_party/bgfx
+	url = https://github.com/bkaradzic/bgfx.git
+[submodule "funkin/third_party/bx"]
+	path = funkin/third_party/bx
+	url = https://github.com/bkaradzic/bx.git
+[submodule "funkin/third_party/bimg"]
+	path = funkin/third_party/bimg
+	url = https://github.com/bkaradzic/bimg.git
