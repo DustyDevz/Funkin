@@ -1,12 +1,12 @@
-add_executable(FNFCPP
+add_executable(FNFCPP WIN32
     "src/core/main.cpp"
 )
 
 target_include_directories(FNFCPP PRIVATE
     src
-    ${CMAKE_SOURCE_DIR}/third_party/bgfx/include
-    ${CMAKE_SOURCE_DIR}/third_party/bx/include
-    ${CMAKE_SOURCE_DIR}/third_party/bimg/include
+    ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx/bgfx/include
+    ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx/bx/include
+    ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx/bimg/include
 )
 
 target_link_libraries(FNFCPP PRIVATE bgfx bx bimg)
