@@ -9,7 +9,12 @@ target_include_directories(FNFCPP PRIVATE
     ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx/bimg/include
 )
 
-target_link_libraries(FNFCPP PRIVATE bgfx bx bimg)
+target_link_libraries(FNFCPP PRIVATE 
+    SDL3::SDL3-static 
+    bgfx 
+    bx 
+    bimg
+)
 
 if(WIN32)
     target_link_libraries(FNFCPP PRIVATE
