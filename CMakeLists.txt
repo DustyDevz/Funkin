@@ -1,15 +1,7 @@
-﻿cmake_minimum_required(VERSION 3.26)
+﻿cmake_minimum_required(VERSION 3.20)
 project(FNFCPP VERSION 0.1.0 LANGUAGES CXX)
 
-option(FORCE_PRINT_ON_RELEASE "Enable logging on release" ON) # don't leave this true when given to public !!!
-option(PLUS_BUILD_EDITOR "Build editor" ON)
-option(PLUS_BUILD_PLUSC  "Build asset compiler" ON)
-
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
@@ -25,9 +17,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${BASE_EXPORT_DIR}/release")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${BASE_EXPORT_DIR}/release")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${BASE_EXPORT_DIR}/release")
 
-set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
-set(ZSTD_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
-set(ZSTD_BUILD_SHARED   OFF CACHE BOOL "" FORCE)
-
-add_subdirectory(funkin/third_party/zstd/build/cmake)
 add_subdirectory(funkin)
