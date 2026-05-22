@@ -29,16 +29,16 @@ jobs:
         with:
           arch: x64
           
-      - name: Install Ninja & Ccache
-        run: choco install ninja ccache -y
-        
-      - name: Setup Ccache Environment
-        uses: hendrikmuhs/ccache-action@v1.2
+      - name: Install Ninja
+        run: choco install ninja -y
+
+      - name: Cache Build Directory
+        uses: actions/cache@v4
         with:
-          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          path: build
+          key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt', 'funkin/third_party/**') }}
           restore-keys: |
-            ${{ runner.os }}-ccache-
-          variant: ccache
+            ${{ runner.os }}-build-
 
       - name: Configure CMake
         run: |
