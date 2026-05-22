@@ -1,16 +1,122 @@
 // © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
 // Licensed under GNU GPL v3.0
 
-#include <windows.h>
-#include <stdio.h>
+#define SDL_MAIN_HANDLED
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+#include <bgfx/bgfx.h>
+#include <bgfx/platform.h>
+#include <string>
+#include "shared/log.hpp"
 
-int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd) {
-    AllocConsole();
+struct BgfxCallback : public bgfx::CallbackI {
+    void fatal(const char* filePath, uint16_t line,
+               bgfx::Fatal::Enum code, const char* str) override {
+        LOG_CRIT("{}({}): {}", filePath, line, str);
+    }
 
-    FILE* fDummy;
+   void traceVargs(const char* filePath, uint16_t line,
+                const char* format, va_list argList) override {
+        char buf[1024];
+        vsnprintf(buf, sizeof(buf), format, argList);
+        std::string_view sv = buf;
+        while (!sv.empty() && (sv.back() == '\n' || sv.back() == '\r'))
+            sv.remove_suffix(1);
+        if (!sv.empty())
+            LOG_PRINT("{}", sv);
+    }
+    
+    void profilerBegin(const char*, uint32_t, const char*, uint16_t) override {}
+    void profilerBeginLiteral(const char*, uint32_t, const char*, uint16_t) override {}
+    void profilerEnd() override {}
+    uint32_t cacheReadSize(uint64_t) override { return 0; }
+    bool cacheRead(uint64_t, void*, uint32_t) override { return false; }
+    void cacheWrite(uint64_t, const void*, uint32_t) override {}
+    void screenShot(const char*, uint32_t, uint32_t, uint32_t,
+                    bgfx::TextureFormat::Enum,
+                    const void*, uint32_t, bool) override {}
+    void captureBegin(uint32_t, uint32_t, uint32_t,
+                      bgfx::TextureFormat::Enum, bool) override {}
+    void captureEnd() override {}
+    void captureFrame(const void*, uint32_t) override {}
+};
 
-    freopen_s(&fDummy, "CONOUT$", "w", stdout);
-    freopen_s(&fDummy, "CONOUT$", "w", stderr);
-    freopen_s(&fDummy, "CONIN$", "r", stdin);
+int main(int argc, char** argv) {
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        LOG_ERR("SDL init failed: {}", SDL_GetError());
+        return 1;
+    }
+
+    SDL_Window* window = SDL_CreateWindow(
+        "FNF CPP | initializing...",
+        1280, 720,
+        SDL_WINDOW_RESIZABLE);
+
+    if (!window) {
+        LOG_ERR("SDL window failed: {}", SDL_GetError());
+        return 1;
+    }
+
+    LOG_PRINT("SDL window OK");
+
+    SDL_PropertiesID props = SDL_GetWindowProperties(window);
+    void* hwnd = SDL_GetPointerProperty(props,
+        SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
+
+    LOG_PRINT("HWND = {}", hwnd);
+
+    bgfx::PlatformData pd{};
+    pd.nwh = hwnd;
+    pd.ndt = nullptr;
+    bgfx::setPlatformData(pd);
+
+    bgfx::renderFrame();
+
+    static BgfxCallback cb;
+
+    bgfx::Init init{};
+    init.callback          = &cb;
+    init.platformData      = pd;
+    init.resolution.width  = 1280;
+    init.resolution.height = 720;
+    init.resolution.reset  = BGFX_RESET_VSYNC;
+    init.type              = bgfx::RendererType::Vulkan;
+
+    LOG_PRINT("bgfx initializing...");
+
+    if (!bgfx::init(init)) {
+        LOG_CRIT("bgfx init failed");
+        return 1;
+    }
+
+    const char* name = bgfx::getRendererName(bgfx::getRendererType());
+    LOG_PRINT("bgfx using: {}", name);
+    SDL_SetWindowTitle(window, (std::string("FNF [") + name + "]").c_str());
+
+    bgfx::setViewClear(0,
+        BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH,
+        0x1a1a1aff, 1.0f, 0);
+    bgfx::setViewRect(0, 0, 0, 1280, 720);
+
+    bool running = true;
+    SDL_Event e;
+    while (running) {
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_EVENT_QUIT) running = false;
+            if (e.type == SDL_EVENT_WINDOW_RESIZED) {
+                uint32_t w = (uint32_t)e.window.data1;
+                uint32_t h = (uint32_t)e.window.data2;
+                bgfx::reset(w, h, BGFX_RESET_VSYNC);
+                bgfx::setViewRect(0, 0, 0, (uint16_t)w, (uint16_t)h);
+            }
+        }
+
+        bgfx::touch(0);
+        bgfx::frame();
+    }
+
+    bgfx::shutdown();
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }

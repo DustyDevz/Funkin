@@ -1,4 +1,4 @@
-add_executable(FNFCPP WIN32
+add_executable(FNFCPP
     "src/core/main.cpp"
 )
 

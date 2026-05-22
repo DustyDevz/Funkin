@@ -33,6 +33,10 @@ set(SDL_STATIC ON CACHE BOOL "" FORCE)
 set(BGFX_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(BGFX_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(FUNKIN_DEBUG)
+endif()
+
 add_subdirectory(funkin/third_party/sdl)
 add_subdirectory(funkin/third_party/bgfx)
 add_subdirectory(funkin)
