@@ -100,7 +100,11 @@ int main(int argc, char** argv) {
 
     bool running = true;
     SDL_Event e;
+    constexpr int TARGET_FPS = 60;
+    constexpr double TARGET_MS = 1000.0 / TARGET_FPS;
     while (running) {
+        auto frame_start = std::chrono::high_resolution_clock::now();
+
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_EVENT_QUIT) running = false;
             if (e.type == SDL_EVENT_WINDOW_RESIZED) {
@@ -113,6 +117,17 @@ int main(int argc, char** argv) {
 
         bgfx::touch(0);
         bgfx::frame();
+
+        auto frame_end = std::chrono::high_resolution_clock::now();
+        double elapsed = std::chrono::duration<double, std::milli>(frame_end - frame_start).count();
+        double sleep_ms = TARGET_MS - elapsed - 1.0;
+        if (sleep_ms > 0)
+            SDL_Delay((uint32_t)sleep_ms);
+
+        while (std::chrono::duration<double, std::milli>(
+            std::chrono::high_resolution_clock::now() - frame_start).count() < TARGET_MS) {
+            SDL_DelayNS(100);
+        }
     }
 
     bgfx::shutdown();
