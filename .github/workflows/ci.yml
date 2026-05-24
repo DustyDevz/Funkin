@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - uses: seanmiddleditch/gha-setup-ninja@v5
+
+      - uses: mozilla-actions/sccache-action@v0.0.4
+
+      - name: Download deps
+        uses: actions/download-artifact@v4
+        with:
+          name: deps-install
+          path: deps-install
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/sccache
+          key: sccache-v1
+          restore-keys: sccache-
+
+      - name: Configure
+        run: |
+          cmake -B build -S . -G Ninja ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache ^
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ^
+            -DCMAKE_UNITY_BUILD=ON
+
+      - name: Build
+        run: cmake --build build -j 16
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Funkin-Windows
+          path: export/release/FNFCPP.exe
