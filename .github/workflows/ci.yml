@@ -5,6 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -30,6 +31,13 @@ jobs:
           name: deps-install
           path: deps-install
 
+      - name: Check deps
+        run: |
+          if not exist deps-install (
+            echo "ERROR: deps missing. Run deps workflow first."
+            exit 1
+          )
+
       - uses: actions/cache@v4
         with:
           path: ~/.cache/sccache
@@ -38,11 +46,7 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -B build -S . -G Ninja ^
-            -DCMAKE_BUILD_TYPE=Release ^
-            -DCMAKE_C_COMPILER_LAUNCHER=sccache ^
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ^
-            -DCMAKE_UNITY_BUILD=ON
+          cmake -B build -S . -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_UNITY_BUILD=ON
 
       - name: Build
         run: cmake --build build -j 16
