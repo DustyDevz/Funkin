@@ -4,3 +4,27 @@
 [submodule "funkin/third_party/sdl"]
 	path = funkin/third_party/sdl
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "funkin/third_party/sol2"]
+	path = funkin/third_party/sol2
+	url = https://github.com/ThePhD/sol2
+[submodule "funkin/third_party/lua"]
+	path = funkin/third_party/lua
+	url = https://github.com/lua/lua
+[submodule "funkin/third_party/pl_mpeg"]
+	path = funkin/third_party/pl_mpeg
+	url = https://github.com/phoboslab/pl_mpeg
+[submodule "funkin/third_party/miniaudio"]
+	path = funkin/third_party/miniaudio
+	url = https://github.com/mackron/miniaudio
+[submodule "funkin/third_party/steam-audio"]
+	path = funkin/third_party/steam-audio
+	url = https://github.com/ValveSoftware/steam-audio
+[submodule "funkin/third_party/freetype"]
+	path = funkin/third_party/freetype
+	url = https://github.com/freetype/freetype
+[submodule "funkin/third_party/glm"]
+	path = funkin/third_party/glm
+	url = https://github.com/g-truc/glm
+[submodule "funkin/third_party/stb"]
+	path = funkin/third_party/stb
+	url = https://github.com/nothings/stb
