@@ -23,10 +23,15 @@ jobs:
 
       - uses: seanmiddleditch/gha-setup-ninja@v5
 
-      - name: Build deps
+      - name: Configure deps
         run: |
           cmake -B build-deps -S . -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=deps-install -DONLY_BUILD_DEPS=ON -DBGFX_BUILD_EXAMPLES=OFF -DBGFX_BUILD_TOOLS=OFF -DBGFX_BUILD_TESTS=OFF
-          cmake --build build-deps -j 16
+
+      - name: Build deps
+        run: cmake --build build-deps -j 16
+
+      - name: Install deps
+        run: cmake --install build-deps
 
       - uses: actions/upload-artifact@v4
         with:
