@@ -25,13 +25,7 @@ jobs:
 
       - name: Build deps
         run: |
-          cmake -B build-deps -S . -G Ninja ^
-            -DCMAKE_BUILD_TYPE=Release ^
-            -DCMAKE_INSTALL_PREFIX=deps-install ^
-            -DONLY_BUILD_DEPS=ON ^
-            -DBGFX_BUILD_EXAMPLES=OFF ^
-            -DBGFX_BUILD_TOOLS=OFF ^
-            -DBGFX_BUILD_TESTS=OFF
+          cmake -B build-deps -S . -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=deps-install -DONLY_BUILD_DEPS=ON -DBGFX_BUILD_EXAMPLES=OFF -DBGFX_BUILD_TOOLS=OFF -DBGFX_BUILD_TESTS=OFF
           cmake --build build-deps -j 16
 
       - uses: actions/upload-artifact@v4
