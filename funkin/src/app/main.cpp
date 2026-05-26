@@ -87,10 +87,6 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    #ifdef FUNKIN_DEBUG
-        bgfx::setDebug(BGFX_DEBUG_TEXT | BGFX_DEBUG_STATS);
-    #endif
-
     const char* name = bgfx::getRendererName(bgfx::getRendererType());
     LOG_PRINT("bgfx using: {}", name);
     SDL_SetWindowTitle(window, (std::string("FNF [") + name + "]").c_str());
@@ -106,8 +102,11 @@ int main(int argc, char** argv) {
 
     // test binding
     input.bind("test", Funkin::Input::KeyCode::G);
+    // debug binding
+    input.bind("debug", Funkin::Input::KeyCode::F1);
 
     bool running = true;
+    bool debug   = false;
     SDL_Event e;
     constexpr int TARGET_FPS = 9999999;
     constexpr double TARGET_MS = 1000.0 / TARGET_FPS;
@@ -132,6 +131,17 @@ int main(int argc, char** argv) {
             uint64_t eventTime = input.getLastTimestamp("test");
             uint64_t now = input.getNow();
             LOG_PRINT("input latency: {:.4f} ms", (double)(now - eventTime) * 1e-6);
+        }
+
+        if (input.justDown("debug")) {
+            debug = !debug;
+            LOG_PRINT("debug: {}", debug);
+
+            if (debug) {
+                bgfx::setDebug(BGFX_DEBUG_TEXT | BGFX_DEBUG_STATS);
+            } else {
+                bgfx::setDebug(0);
+            }
         }
 
         bgfx::touch(0);
