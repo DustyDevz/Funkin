@@ -1,5 +1,11 @@
 add_executable(FNFCPP
-    "src/core/main.cpp"
+    src/app/main.cpp
+    src/input/input.cpp
+    src/platform/win32/win32_input.cpp
+)
+
+target_precompile_headers(FNFCPP PRIVATE
+    src/shared/pch.hpp
 )
 
 target_include_directories(FNFCPP PRIVATE

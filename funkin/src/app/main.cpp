@@ -1,6 +1,3 @@
-// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
-// Licensed under GNU GPL v3.0
-
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -8,6 +5,7 @@
 #include <bgfx/platform.h>
 #include <string>
 #include "shared/log.hpp"
+#include "input/input.hpp"
 
 struct BgfxCallback : public bgfx::CallbackI {
     void fatal(const char* filePath, uint16_t line,
@@ -42,7 +40,7 @@ struct BgfxCallback : public bgfx::CallbackI {
 };
 
 int main(int argc, char** argv) {
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         LOG_ERR("SDL init failed: {}", SDL_GetError());
         return 1;
     }
@@ -89,6 +87,10 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    #ifdef FUNKIN_DEBUG
+        bgfx::setDebug(BGFX_DEBUG_TEXT | BGFX_DEBUG_STATS);
+    #endif
+
     const char* name = bgfx::getRendererName(bgfx::getRendererType());
     LOG_PRINT("bgfx using: {}", name);
     SDL_SetWindowTitle(window, (std::string("FNF [") + name + "]").c_str());
@@ -98,15 +100,24 @@ int main(int argc, char** argv) {
         0x1a1a1aff, 1.0f, 0);
     bgfx::setViewRect(0, 0, 0, 1280, 720);
 
+    Funkin::Input::Input& input = Funkin::Input::Input::get();
+    input.init();
+    input.setWindow(window);
+
+    // test binding
+    input.bind("test", Funkin::Input::KeyCode::G);
+
     bool running = true;
     SDL_Event e;
-    constexpr int TARGET_FPS = 60;
+    constexpr int TARGET_FPS = 9999999;
     constexpr double TARGET_MS = 1000.0 / TARGET_FPS;
+    
     while (running) {
-        auto frame_start = std::chrono::high_resolution_clock::now();
-
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_EVENT_QUIT) running = false;
+            
+            input.handleSDLEvent(e);
+
             if (e.type == SDL_EVENT_WINDOW_RESIZED) {
                 uint32_t w = (uint32_t)e.window.data1;
                 uint32_t h = (uint32_t)e.window.data2;
@@ -115,21 +126,19 @@ int main(int argc, char** argv) {
             }
         }
 
+        input.update();
+
+        if (input.justDown("test")) {
+            uint64_t eventTime = input.getLastTimestamp("test");
+            uint64_t now = input.getNow();
+            LOG_PRINT("input latency: {:.4f} ms", (double)(now - eventTime) * 1e-6);
+        }
+
         bgfx::touch(0);
         bgfx::frame();
-
-        auto frame_end = std::chrono::high_resolution_clock::now();
-        double elapsed = std::chrono::duration<double, std::milli>(frame_end - frame_start).count();
-        double sleep_ms = TARGET_MS - elapsed - 1.0;
-        if (sleep_ms > 0)
-            SDL_Delay((uint32_t)sleep_ms);
-
-        while (std::chrono::duration<double, std::milli>(
-            std::chrono::high_resolution_clock::now() - frame_start).count() < TARGET_MS) {
-            SDL_DelayNS(100);
-        }
     }
 
+    input.shutdown();
     bgfx::shutdown();
     SDL_DestroyWindow(window);
     SDL_Quit();
