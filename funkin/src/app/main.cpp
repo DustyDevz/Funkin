@@ -1,3 +1,6 @@
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
+
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -6,6 +9,7 @@
 #include <string>
 #include "shared/log.hpp"
 #include "input/input.hpp"
+#include "settings.hpp"
 
 struct BgfxCallback : public bgfx::CallbackI {
     void fatal(const char* filePath, uint16_t line,
@@ -108,6 +112,7 @@ int main(int argc, char** argv) {
     bool running = true;
     bool debug   = false;
     SDL_Event e;
+    Funkin::Settings appSettings;
     constexpr int TARGET_FPS = 9999999;
     constexpr double TARGET_MS = 1000.0 / TARGET_FPS;
     
@@ -120,7 +125,7 @@ int main(int argc, char** argv) {
             if (e.type == SDL_EVENT_WINDOW_RESIZED) {
                 uint32_t w = (uint32_t)e.window.data1;
                 uint32_t h = (uint32_t)e.window.data2;
-                bgfx::reset(w, h, BGFX_RESET_VSYNC);
+                bgfx::reset(w, h, (appSettings.vsync == Funkin::Settings::VSyncMode::On) ? BGFX_RESET_VSYNC : 0);
                 bgfx::setViewRect(0, 0, 0, (uint16_t)w, (uint16_t)h);
             }
         }

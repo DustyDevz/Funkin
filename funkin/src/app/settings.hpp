@@ -1,15 +1,14 @@
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
+
 #pragma once
 
 namespace Funkin {
-    enum class VSyncMode {
-        Off,
-        On,
-    };
-
     struct Settings {
-        VSyncMode vsync = VSyncMode::On;
-        int fpsCap      = 60;
+        enum class VSyncMode { Off, On };
+        VSyncMode vsync   = VSyncMode::On;
+        int fpsCap        = 60;
+        int windowWidth   = 1280;
+        int windowHeight = 720;
     };
-
-    inline Settings g_Settings;
 }
