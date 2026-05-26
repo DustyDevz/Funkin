@@ -6,10 +6,6 @@
 #include "input_types.hpp"
 #include "input_ring_buffer.hpp"
 #include <SDL3/SDL.h>
-#include <string>
-#include <array>
-#include <vector>
-#include <unordered_map>
 
 namespace Funkin::Input {
     struct Binding {

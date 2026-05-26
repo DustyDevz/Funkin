@@ -2,8 +2,6 @@
 // Licensed under GNU GPL v3.0
 
 #include "input.hpp"
-#include <fstream>
-#include <cstring>
 #include <SDL3/SDL_scancode.h>
 
 namespace Funkin::Input {

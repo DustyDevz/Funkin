@@ -1,6 +1,7 @@
-#pragma once
+// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// Licensed under GNU GPL v3.0
 
-#include <cstdint>
+#pragma once
 
 namespace Funkin::Input {
     using Timestamp = uint64_t;

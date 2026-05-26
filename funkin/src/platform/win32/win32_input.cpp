@@ -2,7 +2,6 @@
 // Licensed under GNU GPL v3.0
 
 #include "win32_input.hpp"
-#pragma comment(lib, "xinput.lib")
 
 #ifdef _WIN32
     namespace Funkin::Platform::Input {

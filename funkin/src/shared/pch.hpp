@@ -45,4 +45,5 @@
     #include <wrl/client.h>
 
     using Microsoft::WRL::ComPtr;
+    #pragma comment(lib, "xinput.lib")
 #endif
