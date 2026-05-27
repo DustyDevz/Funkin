@@ -28,3 +28,6 @@
 [submodule "funkin/third_party/stb"]
 	path = funkin/third_party/stb
 	url = https://github.com/nothings/stb
+[submodule "funkin/third_party/imgui"]
+	path = funkin/third_party/imgui
+	url = https://github.com/ocornut/imgui/tree/docking

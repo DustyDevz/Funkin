@@ -4,15 +4,30 @@ add_executable(FNFCPP
     src/platform/win32/win32_input.cpp
 )
 
+set(BGFX_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx)
+set(BGFX_IMGUI_DIR ${BGFX_DIR}/bgfx/examples/common)
+set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/imgui)
+
+target_sources(FNFCPP PRIVATE
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+)
+
 target_precompile_headers(FNFCPP PRIVATE
     src/shared/pch.hpp
 )
 
 target_include_directories(FNFCPP PRIVATE
     src
-    ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx/bgfx/include
-    ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx/bx/include
-    ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx/bimg/include
+    ${IMGUI_DIR}
+    ${BGFX_IMGUI_DIR}
+    ${BGFX_DIR}/bgfx/3rdparty
+    ${BGFX_DIR}/bgfx/include
+    ${BGFX_DIR}/bx/include
+    ${BGFX_DIR}/bimg/include
 )
 
 target_link_libraries(FNFCPP PRIVATE 
