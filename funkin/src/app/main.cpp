@@ -10,6 +10,8 @@
 #include "shared/log.hpp"
 #include "input/input.hpp"
 #include "settings.hpp"
+#include "imgui/imgui_impl_bgfx.hpp"
+#include "imgui/imgui_impl_sdl3.hpp"
 
 struct BgfxCallback : public bgfx::CallbackI {
     void fatal(const char* filePath, uint16_t line,
@@ -91,6 +93,12 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    // imgui
+    ImGui::CreateContext();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    Funkin::ImGui_SDL3::init(window);
+    Funkin::ImGui_BGFX::init(255);
+
     const char* name = bgfx::getRendererName(bgfx::getRendererType());
     LOG_PRINT("bgfx using: {}", name);
     SDL_SetWindowTitle(window, (std::string("FNF [") + name + "]").c_str());
@@ -119,9 +127,8 @@ int main(int argc, char** argv) {
     while (running) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_EVENT_QUIT) running = false;
-            
             input.handleSDLEvent(e);
-
+            Funkin::ImGui_SDL3::processEvent(e);
             if (e.type == SDL_EVENT_WINDOW_RESIZED) {
                 uint32_t w = (uint32_t)e.window.data1;
                 uint32_t h = (uint32_t)e.window.data2;
@@ -140,22 +147,31 @@ int main(int argc, char** argv) {
 
         if (input.justDown("debug")) {
             debug = !debug;
-            LOG_PRINT("debug: {}", debug);
-
-            if (debug) {
-                bgfx::setDebug(BGFX_DEBUG_TEXT | BGFX_DEBUG_STATS);
-            } else {
-                bgfx::setDebug(0);
-            }
+            bgfx::setDebug(debug ? BGFX_DEBUG_TEXT | BGFX_DEBUG_STATS : 0);
         }
+
+        Funkin::ImGui_SDL3::newFrame();
+        Funkin::ImGui_BGFX::newFrame();
+        ImGui::NewFrame();
+
+        ImGui::ShowDemoWindow();
+
+        ImGui::Render();
+        Funkin::ImGui_BGFX::render(ImGui::GetDrawData());
 
         bgfx::touch(0);
         bgfx::frame();
     }
 
+
+    Funkin::ImGui_BGFX::shutdown();
+    Funkin::ImGui_SDL3::shutdown();
+    ImGui::DestroyContext();
+
     input.shutdown();
     bgfx::shutdown();
     SDL_DestroyWindow(window);
     SDL_Quit();
+    
     return 0;
 }
