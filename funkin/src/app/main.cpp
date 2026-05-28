@@ -18,7 +18,8 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    SDL_Window* window = SDL_CreateWindow("FNF CPP | initializing...", 1280, 720, SDL_WINDOW_RESIZABLE);
+    Funkin::Settings appSettings;
+    SDL_Window* window = SDL_CreateWindow("FNF CPP | initializing...", appSettings.windowWidth, appSettings.windowHeight, SDL_WINDOW_RESIZABLE);
     if (!window) {
         LOG_ERR("SDL window failed: {}", SDL_GetError());
         return 1;
@@ -39,8 +40,8 @@ int main(int argc, char** argv) {
 
     bgfx::Init init{};
     init.platformData      = pd;
-    init.resolution.width  = 1280;
-    init.resolution.height = 720;
+    init.resolution.width  = appSettings.windowWidth;
+    init.resolution.height = appSettings.windowHeight;
     init.resolution.reset  = BGFX_RESET_VSYNC;
     init.type              = bgfx::RendererType::Vulkan;
 
@@ -58,7 +59,7 @@ int main(int argc, char** argv) {
     SDL_SetWindowTitle(window, (std::string("FNF [") + name + "]").c_str());
 
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x1a1a1aff, 1.0f, 0);
-    bgfx::setViewRect(0, 0, 0, 1280, 720);
+    bgfx::setViewRect(0, 0, 0, appSettings.windowWidth, appSettings.windowHeight);
 
     Funkin::Input::Input& input = Funkin::Input::Input::get();
     input.init();
@@ -67,7 +68,6 @@ int main(int argc, char** argv) {
     input.bind("debug", Funkin::Input::KeyCode::F1);
 
     bool running = true;
-    Funkin::Settings appSettings;
     SDL_Event e;
 
     while (running) {
