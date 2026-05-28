@@ -39,6 +39,7 @@ namespace Funkin::ImGui_SDL3 {
     }
 
     void shutdown() {
+        SDL_StopTextInput(s_data->window);
         for (auto& cursor : s_data->cursors)
             if (cursor) SDL_DestroyCursor(cursor);
         delete s_data;
@@ -61,6 +62,12 @@ namespace Funkin::ImGui_SDL3 {
         io.DeltaTime   = (float)((double)(now - s_data->lastTime) / 1e9);
         if (io.DeltaTime <= 0.0f) io.DeltaTime = 1.0f / 60.0f;
         s_data->lastTime = now;
+
+        if (io.WantTextInput) {
+            SDL_StartTextInput(s_data->window);
+        } else {
+            SDL_StopTextInput(s_data->window);
+        }
 
         if (!(io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)) {
             ImGuiMouseCursor cur = ImGui::GetMouseCursor();
