@@ -10,6 +10,7 @@ add_executable(FNFCPP
 set(BGFX_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx)
 set(BGFX_IMGUI_DIR ${BGFX_DIR}/bgfx/examples/common)
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/imgui)
+set(JSON_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/json)
 
 target_sources(FNFCPP PRIVATE
     ${IMGUI_DIR}/imgui.cpp
@@ -26,6 +27,7 @@ target_precompile_headers(FNFCPP PRIVATE
 target_include_directories(FNFCPP PRIVATE
     src
     ${IMGUI_DIR}
+    ${JSON_DIR}
     ${BGFX_IMGUI_DIR}
     ${BGFX_DIR}/bgfx/3rdparty
     ${BGFX_DIR}/bgfx/include

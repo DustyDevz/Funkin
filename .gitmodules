@@ -31,3 +31,6 @@
 [submodule "funkin/third_party/imgui"]
 	path = funkin/third_party/imgui
 	url = https://github.com/ocornut/imgui/tree/docking
+[submodule "funkin/third_party/json"]
+	path = funkin/third_party/json
+	url = https://github.com/nlohmann/json
