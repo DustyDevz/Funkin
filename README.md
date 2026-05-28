@@ -1,7 +1,8 @@
 # Funkin project (I don’t have a name yet)
+I only have this repo public because why not, do not download this (it does NOTHING)
 
 > [!WARNING]
-> **This project is in very early development and is currently being worked on by one person. Currently, there’s NOTHING to do, it’s just ImGui!!! so uh idk**
+> **This project is in very early development and is currently being worked on by one person. Currently, there’s NOTHING to do, it’s just ImGui**
 
 ## Dependencies
 this is just here so my dumbass can rememeber
