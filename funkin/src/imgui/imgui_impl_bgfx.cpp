@@ -70,10 +70,11 @@ namespace Funkin::ImGui_BGFX {
         s_data->fontTex = bgfx::createTexture2D(
             (uint16_t)fw, (uint16_t)fh, false, 1,
             bgfx::TextureFormat::BGRA8,
-            0, bgfx::makeRef(pixels, fw * fh * 4)
+            0, bgfx::copy(pixels, fw * fh * 4)
         );
-        io.Fonts->SetTexID((ImTextureID)(uintptr_t)s_data->fontTex.idx);
 
+        io.Fonts->SetTexID((ImTextureID)(uintptr_t)s_data->fontTex.idx);
+        s_data->uTexture = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
         return true;
     }
 
