@@ -83,25 +83,21 @@ namespace Funkin::App {
             std::ifstream f(projectFile);
             auto j = nlohmann::json::parse(f);
             name    = j["name"].get<std::string>();
-            author  = j["author"].get<std::string>();
-            version = j["version"].get<std::string>();
             root    = projectFile.parent_path();
             assets  = root / "bin" / "assets";
             m_loaded = true;
-            LOG_PRINT("Project loaded: {} by {} v{}", name, author, version);
+            LOG_PRINT("Project loaded: {}", name);
             LOG_PRINT("Project root: {}", root.string());
             addRecent({ name, root.string() });
             return true;
-        } catch (...) {
-            LOG_ERR("Failed to parse funkin.project");
+        } catch (const std::exception& e) {
+            LOG_ERR("Failed to parse funkin.project: {}", e.what());
             return false;
         }
     }
 
     bool Project::create(const std::filesystem::path& folder,
-                        const std::string& pName,
-                        const std::string& pAuthor,
-                        const std::string& pVersion) {
+                        const std::string& pName) {
         if (!std::filesystem::exists(folder)) {
             LOG_ERR("Folder does not exist: {}", folder.string());
             return false;
@@ -109,8 +105,6 @@ namespace Funkin::App {
 
         nlohmann::json j;
         j["name"]    = pName;
-        j["author"]  = pAuthor;
-        j["version"] = pVersion;
         j["assets"]  = "bin/assets";
 
         {

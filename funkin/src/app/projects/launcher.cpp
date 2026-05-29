@@ -13,8 +13,6 @@ namespace Funkin::App {
     bool RunLauncher() {
         static std::vector<RecentProject> s_recents    = Project::loadRecent();
         static char s_newName[128]                     = "";
-        static char s_newAuthor[128]                   = "";
-        static char s_newVersion[32]                   = "";
         static char s_newFolder[512]                   = "";
         static char s_openPath[512]                    = "";
         static std::string s_error                     = "";
@@ -79,8 +77,6 @@ namespace Funkin::App {
 
             if (ImGui::BeginTabItem("New Project")) {
                 ImGui::InputText("Name",    s_newName,    sizeof(s_newName));
-                ImGui::InputText("Author",  s_newAuthor,  sizeof(s_newAuthor));
-                ImGui::InputText("Version", s_newVersion, sizeof(s_newVersion));
                 ImGui::InputText("Folder",  s_newFolder,  sizeof(s_newFolder));
 
                 ImGui::Spacing();
@@ -93,7 +89,7 @@ namespace Funkin::App {
                         s_error = "Folder does not exist.";
                     } else {
                         s_error = "";
-                        if (Project::get().create(s_newFolder, s_newName, s_newAuthor, s_newVersion)) {
+                        if (Project::get().create(s_newFolder, s_newName)) {
                             shouldClose = true;
                         } else {
                             s_error = "Failed to create project.";

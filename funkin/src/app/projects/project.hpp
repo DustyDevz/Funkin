@@ -15,8 +15,6 @@ namespace Funkin::App {
 
     struct Project {
         std::string                  name;
-        std::string                  author;
-        std::string                  version;
         std::filesystem::path        root;
         std::filesystem::path        assets;
 
@@ -24,9 +22,7 @@ namespace Funkin::App {
 
         bool load(const std::filesystem::path& projectFile);
         bool create(const std::filesystem::path& folder,
-                    const std::string& name,
-                    const std::string& author,
-                    const std::string& version);
+                    const std::string& name);
 
         bool        isLoaded() const { return m_loaded; }
         void        unload()         { m_loaded = false; }
