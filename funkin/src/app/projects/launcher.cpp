@@ -10,6 +10,51 @@
 #include <vector>
 
 namespace Funkin::App {
+    static std::string OpenFolderDialog() {
+        std::string resultPath = "";
+        #ifdef _WIN32
+            HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+            if (SUCCEEDED(hr)) {
+                IFileOpenDialog* pFileOpen = nullptr;
+                hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileOpenDialog, reinterpret_cast<void**>(&pFileOpen));
+                if (SUCCEEDED(hr)) {
+                    DWORD dwOptions;
+                    if (SUCCEEDED(pFileOpen->GetOptions(&dwOptions))) {
+                        pFileOpen->SetOptions(dwOptions | FOS_PICKFOLDERS);
+                    }
+                    if (SUCCEEDED(pFileOpen->Show(NULL))) {
+                        IShellItem* pItem = nullptr;
+                        if (SUCCEEDED(pFileOpen->GetResult(&pItem))) {
+                            PWSTR pszFilePath = nullptr;
+                            if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath))) {
+                                std::wstring ws(pszFilePath);
+                                resultPath = std::string(ws.begin(), ws.end());
+                                CoTaskMemFree(pszFilePath);
+                            }
+                            pItem->Release();
+                        }
+                    }
+                    pFileOpen->Release();
+                }
+                CoUninitialize();
+            }
+        #else
+            FILE* pipe = popen("zenity --file-selection --directory 2>/dev/null", "r");
+            if (!pipe) pipe = popen("kdialog --getexistingdirectory 2>/dev/null", "r");
+            if (pipe) {
+                char buffer[1024];
+                if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+                    resultPath = buffer;
+                    if (!resultPath.empty() && resultPath.back() == '\n') {
+                        resultPath.pop_back();
+                    }
+                }
+                pclose(pipe);
+            }
+#       endif
+        return resultPath;
+    }
+
     bool RunLauncher() {
         static std::vector<RecentProject> s_recents    = Project::loadRecent();
         static char s_newName[128]                     = "";
@@ -63,6 +108,13 @@ namespace Funkin::App {
                 ImGui::Text("Open existing project:");
                 ImGui::InputText("##openpath", s_openPath, sizeof(s_openPath));
                 ImGui::SameLine();
+                if (ImGui::Button("Browse##open")) {
+                    std::string picked = OpenFolderDialog();
+                    if (!picked.empty()) {
+                        snprintf(s_openPath, sizeof(s_openPath), "%s", picked.c_str());
+                    }
+                }
+                ImGui::SameLine();
                 if (ImGui::Button("Open##btn")) {
                     auto projectFile = std::filesystem::path(s_openPath) / "funkin.project";
                     if (Project::get().load(projectFile)) {
@@ -78,6 +130,13 @@ namespace Funkin::App {
             if (ImGui::BeginTabItem("New Project")) {
                 ImGui::InputText("Name",    s_newName,    sizeof(s_newName));
                 ImGui::InputText("Folder",  s_newFolder,  sizeof(s_newFolder));
+                ImGui::SameLine();
+                if (ImGui::Button("Browse##new")) {
+                    std::string picked = OpenFolderDialog();
+                    if (!picked.empty()) {
+                        snprintf(s_newFolder, sizeof(s_newFolder), "%s", picked.c_str());
+                    }
+                }
 
                 ImGui::Spacing();
                 if (ImGui::Button("Create Project", ImVec2(-1, 0))) {

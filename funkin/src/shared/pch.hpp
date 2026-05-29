@@ -43,6 +43,7 @@
     #include <Xinput.h>
     #include <timeapi.h>
     #include <wrl/client.h>
+    #include <shobjidl.h>
 
     using Microsoft::WRL::ComPtr;
     #pragma comment(lib, "xinput.lib")
