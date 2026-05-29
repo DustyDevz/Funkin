@@ -19,7 +19,10 @@ this is just here so my dumbass can rememeber
 * Using BGFX for rendering since im ass at this shit
 * Using SDL3 for window handling
 * ImGui ported to work with BGFX + SDL3
+* Improved input
 <img width="1919" height="1042" alt="image" src="https://github.com/user-attachments/assets/7bd345e7-2c6b-459a-8751-c2d87e8f782f" />
+<img width="689" height="220" alt="image" src="https://github.com/user-attachments/assets/f744f422-2791-4e8a-9764-a8d6344e4241" />
+
 
 # OLD
 * Shader test
