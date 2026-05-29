@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.20)
-project(FNFCPP VERSION 0.1.0 LANGUAGES CXX) 
+project(Funkin VERSION 0.1.0 LANGUAGES CXX) 
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -35,6 +35,10 @@ set(BGFX_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(FUNKIN_DEBUG)
+endif()
+
+if(WIN32)
+    set(FUNKIN_WIN32_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resource.rc" CACHE INTERNAL "")
 endif()
 
 add_subdirectory(funkin/third_party/sdl)

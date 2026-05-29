@@ -1,4 +1,8 @@
-add_executable(FNFCPP
+if(WIN32)
+    list(APPEND FUNKIN_WIN32_RESOURCES ${FUNKIN_WIN32_RESOURCE})
+endif()
+
+add_executable(Funkin
     src/app/main.cpp
     src/input/input.cpp
     src/platform/win32/win32_input.cpp
@@ -7,6 +11,7 @@ add_executable(FNFCPP
     src/app/debug.cpp
     src/app/projects/project.cpp
     src/app/projects/launcher.cpp
+    ${FUNKIN_WIN32_RESOURCES}
 )
 
 set(BGFX_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx)
@@ -14,7 +19,7 @@ set(BGFX_IMGUI_DIR ${BGFX_DIR}/bgfx/examples/common)
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/imgui)
 set(JSON_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/json/include)
 
-target_sources(FNFCPP PRIVATE
+target_sources(Funkin PRIVATE
     ${IMGUI_DIR}/imgui.cpp
     ${IMGUI_DIR}/imgui_draw.cpp
     ${IMGUI_DIR}/imgui_tables.cpp
@@ -22,11 +27,11 @@ target_sources(FNFCPP PRIVATE
     ${IMGUI_DIR}/imgui_demo.cpp
 )
 
-target_precompile_headers(FNFCPP PRIVATE
+target_precompile_headers(Funkin PRIVATE
     src/shared/pch.hpp
 )
 
-target_include_directories(FNFCPP PRIVATE
+target_include_directories(Funkin PRIVATE
     src
     ${IMGUI_DIR}
     ${JSON_DIR}
@@ -37,7 +42,7 @@ target_include_directories(FNFCPP PRIVATE
     ${BGFX_DIR}/bimg/include
 )
 
-target_link_libraries(FNFCPP PRIVATE 
+target_link_libraries(Funkin PRIVATE 
     SDL3::SDL3-static 
     bgfx 
     bx 
@@ -45,13 +50,16 @@ target_link_libraries(FNFCPP PRIVATE
 )
 
 if(WIN32)
-    target_link_libraries(FNFCPP PRIVATE
+    target_link_libraries(Funkin PRIVATE
         d3d11
         dxgi
         d3dcompiler
         dxguid
+        shlwapi
+        ole32
+        uuid
     )
-    target_compile_definitions(FNFCPP PRIVATE
+    target_compile_definitions(Funkin PRIVATE
         NOMINMAX
         WIN32_LEAN_AND_MEAN
         _WIN32_WINNT=0x0601
@@ -59,7 +67,7 @@ if(WIN32)
 endif()
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(FNFCPP PRIVATE
+    target_link_libraries(Funkin PRIVATE
         GL
         X11
         pthread
@@ -68,11 +76,11 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(FUNKIN_DEBUG)
-    target_compile_definitions(FNFCPP PRIVATE FUNKIN_DEBUG)
+    target_compile_definitions(Funkin PRIVATE FUNKIN_DEBUG)
 endif()
 
-add_custom_command(TARGET FNFCPP POST_BUILD
+add_custom_command(TARGET Funkin POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/assets
-    $<TARGET_FILE_DIR:FNFCPP>/assets
+    $<TARGET_FILE_DIR:Funkin>/assets
 )
