@@ -125,7 +125,7 @@ namespace Funkin::App {
             base / "images" / "stages",
             base / "audio"  / "music",
             base / "audio"  / "sfx",
-            base / "audio"  / "voices",
+            base / "audio"  / "songs",
             base / "video"  / "cutscenes",
             base / "fonts",
             base / "shaders" / "src",
@@ -133,8 +133,6 @@ namespace Funkin::App {
             base / "data"   / "charts",
             base / "data"   / "characters",
             base / "data"   / "stages",
-            base / "sprites" / "characters",
-            base / "sprites" / "ui",
         };
 
         for (auto& d : dirs)
