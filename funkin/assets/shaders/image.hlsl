@@ -1,4 +1,4 @@
-// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// © 2026 Dusty | https://github.com/DustyDevz/Funkin
 // Licensed under GNU GPL v3.0
 
 cbuffer OrthoBuffer : register(b0) {
