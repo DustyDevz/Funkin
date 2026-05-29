@@ -11,6 +11,8 @@
 #include "input/input.hpp"
 #include "settings.hpp"
 #include "app/debug.hpp"
+#include "projects/project.hpp"
+#include "projects/launcher.hpp"
 
 int main(int argc, char** argv) {
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
@@ -98,6 +100,15 @@ int main(int argc, char** argv) {
         }
 
         Funkin::DebugManager::beginFrame();
+
+        // TEMP
+        if (!Funkin::App::Project::get().isLoaded()) {
+            if (Funkin::App::RunLauncher()) {
+                LOG_PRINT("Project loaded");
+                SDL_SetWindowTitle(window, (std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
+            }
+        }
+
         Funkin::DebugManager::endFrame();
 
         bgfx::touch(0);

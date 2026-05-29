@@ -58,7 +58,8 @@ namespace Funkin::DebugManager {
         ImGui_BGFX::newFrame();
         ImGui::NewFrame();
 
-        ImGui::ShowDemoWindow();
+        // ? only use for debugging imgui issues
+        //ImGui::ShowDemoWindow();
     }
 
     void endFrame() {

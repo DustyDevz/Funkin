@@ -5,6 +5,8 @@ add_executable(FNFCPP
     src/imgui/imgui_impl_sdl3.cpp
     src/imgui/imgui_impl_bgfx.cpp
     src/app/debug.cpp
+    src/app/projects/project.cpp
+    src/app/projects/launcher.cpp
 )
 
 set(BGFX_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx)
