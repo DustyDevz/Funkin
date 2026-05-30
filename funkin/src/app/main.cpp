@@ -17,6 +17,7 @@
 #include "projects/project.hpp"
 #include "projects/launcher.hpp"
 #include "registry.hpp"
+#include "filesystem/filesystem.hpp"
 
 void DrawFileAssociationModal(bool& showModal) {
     if (showModal) {
@@ -32,11 +33,7 @@ void DrawFileAssociationModal(bool& showModal) {
 
         if (ImGui::Button("Yes", ImVec2(120, 0))) {
             Funkin::App::ApplyFileAssociation();
-            
-            // temp for now till i make a filesystem manager or something
-            std::ofstream configFile("recent.json");
-            configFile << "{\n  \"associated\": true\n}";
-            configFile.close();
+            Funkin::Filesystem::writeString("local://data.json", "{\n  \"associated\": true\n}");
 
             showModal = false;
             ImGui::CloseCurrentPopup();
@@ -45,9 +42,7 @@ void DrawFileAssociationModal(bool& showModal) {
         ImGui::SameLine();
         
         if (ImGui::Button("No", ImVec2(120, 0))) {
-            std::ofstream configFile("recent.json");
-            configFile << "{\n  \"associated\": false\n}";
-            configFile.close();
+            Funkin::Filesystem::writeString("local://data.json", "{\n  \"associated\": false\n}");
 
             showModal = false;
             ImGui::CloseCurrentPopup();
@@ -58,8 +53,10 @@ void DrawFileAssociationModal(bool& showModal) {
 }
 
 int main(int argc, char** argv) {
+    Funkin::Filesystem::init();
+
     bool showAssociationPrompt = false;
-    if (!std::filesystem::exists("recent.json")) {
+    if (Funkin::Filesystem::readString("local://data.json").empty()) {
         showAssociationPrompt = true;
     }
 
