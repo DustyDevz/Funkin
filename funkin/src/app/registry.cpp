@@ -9,20 +9,20 @@ namespace Funkin::App {
         GetModuleFileNameW(nullptr, exePath, MAX_PATH);
         std::wstring wExePath(exePath);
         std::wstring classesPath = L"Software\\Classes\\";
-        std::wstring appKeyPath = classesPath + L"Applications\\Funkin.exe";
         
+        std::wstring progIdPath = classesPath + L"Funkin.ProjectFile";
         HKEY hKey;
 
-        if (RegCreateKeyExW(HKEY_CURRENT_USER, appKeyPath.c_str(), 0, NULL, 
+        if (RegCreateKeyExW(HKEY_CURRENT_USER, progIdPath.c_str(), 0, NULL, 
                             REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
                 
-            std::wstring friendlyName = L"Funkin";
-            RegSetValueExW(hKey, L"FriendlyAppName", 0, REG_SZ, 
-                        (const BYTE*)friendlyName.c_str(), (friendlyName.length() + 1) * sizeof(wchar_t));
+            std::wstring friendlyDocName = L"Funkin Engine Project";
+            RegSetValueExW(hKey, NULL, 0, REG_SZ, 
+                        (const BYTE*)friendlyDocName.c_str(), (friendlyDocName.length() + 1) * sizeof(wchar_t));
             RegCloseKey(hKey);
         }
 
-        std::wstring commandKeyPath = appKeyPath + L"\\shell\\open\\command";
+        std::wstring commandKeyPath = progIdPath + L"\\shell\\open\\command";
         if (RegCreateKeyExW(HKEY_CURRENT_USER, commandKeyPath.c_str(), 0, NULL, 
                             REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
             
@@ -32,7 +32,7 @@ namespace Funkin::App {
             RegCloseKey(hKey);
         }
 
-        std::wstring iconKeyPath = appKeyPath + L"\\DefaultIcon";
+        std::wstring iconKeyPath = progIdPath + L"\\DefaultIcon";
         if (RegCreateKeyExW(HKEY_CURRENT_USER, iconKeyPath.c_str(), 0, NULL, 
                             REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
             
@@ -46,7 +46,7 @@ namespace Funkin::App {
         if (RegCreateKeyExW(HKEY_CURRENT_USER, assocKeyPath.c_str(), 0, NULL, 
                             REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
             
-            RegSetValueExW(hKey, L"Funkin.exe", 0, REG_NONE, NULL, 0);
+            RegSetValueExW(hKey, L"Funkin.ProjectFile", 0, REG_NONE, NULL, 0);
             RegCloseKey(hKey);
         }
 
