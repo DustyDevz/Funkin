@@ -44,6 +44,7 @@
     #include <timeapi.h>
     #include <wrl/client.h>
     #include <shobjidl.h>
+    #include <ShlObj_core.h>
 
     using Microsoft::WRL::ComPtr;
     #pragma comment(lib, "xinput.lib")

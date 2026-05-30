@@ -93,7 +93,7 @@ namespace Funkin::App {
                         ImGui::TextDisabled("(%s)", rp.path.c_str());
                         ImGui::SameLine();
                         if (ImGui::SmallButton("Open")) {
-                            auto projectFile = std::filesystem::path(rp.path) / "funkin.project";
+                            auto projectFile = std::filesystem::path(rp.path) / "project.funkin";
                             if (Project::get().load(projectFile)) {
                                 shouldClose = true;
                             } else {
@@ -116,12 +116,12 @@ namespace Funkin::App {
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Open##btn")) {
-                    auto projectFile = std::filesystem::path(s_openPath) / "funkin.project";
+                    auto projectFile = std::filesystem::path(s_openPath) / "project.funkin";
                     if (Project::get().load(projectFile)) {
                         s_recents = Project::loadRecent();
                         shouldClose = true;
                     } else {
-                        s_error = "funkin.project not found in: " + std::string(s_openPath);
+                        s_error = "project.funkin not found in: " + std::string(s_openPath);
                     }
                 }
                 ImGui::EndTabItem();

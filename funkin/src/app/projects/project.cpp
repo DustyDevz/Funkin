@@ -91,7 +91,7 @@ namespace Funkin::App {
             addRecent({ name, root.string() });
             return true;
         } catch (const std::exception& e) {
-            LOG_ERR("Failed to parse funkin.project: {}", e.what());
+            LOG_ERR("Failed to parse project.funkin: {}", e.what());
             return false;
         }
     }
@@ -108,7 +108,7 @@ namespace Funkin::App {
         j["assets"]  = "bin/assets";
 
         {
-            std::ofstream f(folder / "funkin.project");
+            std::ofstream f(folder / "project.funkin");
             f << j.dump(4);
         }
 
@@ -133,6 +133,6 @@ namespace Funkin::App {
             std::filesystem::create_directories(d);
 
         LOG_PRINT("Project created: {} at {}", pName, folder.string());
-        return load(folder / "funkin.project");
+        return load(folder / "project.funkin");
     }
 }

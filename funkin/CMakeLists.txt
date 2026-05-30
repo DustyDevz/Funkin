@@ -12,6 +12,8 @@ add_executable(Funkin
     src/app/projects/project.cpp
     src/app/projects/launcher.cpp
     ${FUNKIN_WIN32_RESOURCES}
+    src/app/registry.cpp
+    src/filesystem/filesystem.cpp
 )
 
 set(BGFX_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx)

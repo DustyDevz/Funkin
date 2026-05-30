@@ -6,15 +6,72 @@
 #include <SDL3/SDL_main.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
+#include <filesystem>
+#include <fstream>
 #include <string>
+#include <imgui.h>
 #include "shared/log.hpp"
 #include "input/input.hpp"
 #include "settings.hpp"
 #include "app/debug.hpp"
 #include "projects/project.hpp"
 #include "projects/launcher.hpp"
+#include "registry.hpp"
+
+void DrawFileAssociationModal(bool& showModal) {
+    if (showModal) {
+        ImGui::OpenPopup("File Association");
+    }
+
+    if (ImGui::BeginPopupModal("File Association", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::TextWrapped(
+            "Would you like for project files to be opened with the editor when double clicked? "
+            "You can change this later in the settings."
+        );
+        ImGui::Separator();
+
+        if (ImGui::Button("Yes", ImVec2(120, 0))) {
+            Funkin::App::ApplyFileAssociation();
+            
+            // temp for now till i make a filesystem manager or something
+            std::ofstream configFile("recent.json");
+            configFile << "{\n  \"associated\": true\n}";
+            configFile.close();
+
+            showModal = false;
+            ImGui::CloseCurrentPopup();
+        }
+        
+        ImGui::SameLine();
+        
+        if (ImGui::Button("No", ImVec2(120, 0))) {
+            std::ofstream configFile("recent.json");
+            configFile << "{\n  \"associated\": false\n}";
+            configFile.close();
+
+            showModal = false;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+}
 
 int main(int argc, char** argv) {
+    bool showAssociationPrompt = false;
+    if (!std::filesystem::exists("recent.json")) {
+        showAssociationPrompt = true;
+    }
+
+    if (argc > 1) {
+        std::filesystem::path target(argv[1]);
+        if (target.filename() == "project.funkin") {
+            if (Funkin::App::Project::get().load(target)) {
+                LOG_PRINT("Project loaded from command line: {}", target.string());
+            }
+        }
+    }
+
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         LOG_ERR("SDL init failed: {}", SDL_GetError());
         return 1;
@@ -101,7 +158,10 @@ int main(int argc, char** argv) {
 
         Funkin::DebugManager::beginFrame();
 
-        // TEMP
+        if (showAssociationPrompt) {
+            DrawFileAssociationModal(showAssociationPrompt);
+        }
+
         if (!Funkin::App::Project::get().isLoaded()) {
             if (Funkin::App::RunLauncher()) {
                 LOG_PRINT("Project loaded");
