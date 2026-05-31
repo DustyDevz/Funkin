@@ -34,3 +34,6 @@
 [submodule "funkin/third_party/json"]
 	path = funkin/third_party/json
 	url = https://github.com/nlohmann/json
+[submodule "funkin/third_party/xxhash"]
+	path = funkin/third_party/xxhash
+	url = https://github.com/Cyan4973/xxHash

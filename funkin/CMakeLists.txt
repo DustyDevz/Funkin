@@ -19,6 +19,7 @@ add_executable(Funkin
     src/assets/loaders/audio_loader.cpp
     src/assets/loaders/json_loader.cpp
     src/assets/loaders/font_loader.cpp
+    src/shaders/shader_compiler.cpp
 )
 
 set(BGFX_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx)
@@ -27,6 +28,7 @@ set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/imgui)
 set(JSON_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/json/include)
 set(STB_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/stb)
 set(MINIAUDIO_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/miniaudio)
+set(XXHASH_DIR ${CMAKE_SOURCE_DIR}/funkin/third_party/xxhash)
 
 target_sources(Funkin PRIVATE
     ${IMGUI_DIR}/imgui.cpp
@@ -47,6 +49,7 @@ target_include_directories(Funkin PRIVATE
     ${BGFX_IMGUI_DIR}
     ${STB_DIR}
     ${MINIAUDIO_DIR}
+    ${XXHASH_DIR}
     ${BGFX_DIR}/bgfx/3rdparty
     ${BGFX_DIR}/bgfx/include
     ${BGFX_DIR}/bx/include
