@@ -18,6 +18,7 @@
 #include "projects/launcher.hpp"
 #include "registry.hpp"
 #include "filesystem/filesystem.hpp"
+#include "assets/assets.hpp"
 
 void DrawFileAssociationModal(bool& showModal) {
     if (showModal) {
@@ -107,8 +108,9 @@ int main(int argc, char** argv) {
         LOG_CRIT("bgfx init failed");
         return 1;
     }
-
+    
     Funkin::DebugManager::init(window, 255);
+    Funkin::Assets::AssetManager::get().init();
 
     const char* name = bgfx::getRendererName(bgfx::getRendererType());
     LOG_PRINT("bgfx using: {}", name);
@@ -132,6 +134,7 @@ int main(int argc, char** argv) {
             
             input.handleSDLEvent(e);
             Funkin::DebugManager::handleEvent(e);
+            Funkin::Assets::AssetManager::get().update();
 
             if (e.type == SDL_EVENT_WINDOW_RESIZED) {
                 uint32_t w = (uint32_t)e.window.data1;
@@ -163,6 +166,13 @@ int main(int argc, char** argv) {
             if (Funkin::App::RunLauncher()) {
                 LOG_PRINT("Project loaded");
                 SDL_SetWindowTitle(window, (std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
+
+                // image test
+                auto tex = Funkin::Assets::Load<Funkin::Assets::Texture>("images/ui/test.png");
+                if (tex)
+                    LOG_PRINT("Test texture loaded: {}x{}", tex->width, tex->height);
+                else
+                    LOG_ERR("Test texture failed to load");
             }
         }
 
@@ -172,6 +182,7 @@ int main(int argc, char** argv) {
         bgfx::frame();
     }
 
+    Funkin::Assets::AssetManager::get().shutdown();
     Funkin::DebugManager::shutdown();
     input.shutdown();
     bgfx::shutdown();

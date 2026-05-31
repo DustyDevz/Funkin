@@ -37,6 +37,8 @@
 #include <filesystem>
 #include <emmintrin.h>
 
+#include "log.hpp"
+
 #ifdef _WIN32
     #include <Windows.h>
     #include <windowsx.h>
