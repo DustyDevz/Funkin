@@ -37,3 +37,6 @@
 [submodule "funkin/third_party/xxhash"]
 	path = funkin/third_party/xxhash
 	url = https://github.com/Cyan4973/xxHash
+[submodule "funkin/third_party/shaderc"]
+	path = funkin/third_party/shaderc
+	url = https://github.com/google/shaderc
