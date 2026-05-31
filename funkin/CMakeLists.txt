@@ -95,6 +95,18 @@ endif()
 
 add_custom_command(TARGET Funkin POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/assets
-    $<TARGET_FILE_DIR:Funkin>/assets
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:Funkin>/assets
+
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/shaderc.exe
+        $<TARGET_FILE_DIR:Funkin>/bin/shaderc.exe
+
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/tools/varying.def.sc
+        $<TARGET_FILE_DIR:Funkin>/bin/varying.def.sc
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/funkin/third_party/bgfx/bgfx/src
+        $<TARGET_FILE_DIR:Funkin>/bin/shaderc_include
 )

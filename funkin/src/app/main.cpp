@@ -19,6 +19,8 @@
 #include "registry.hpp"
 #include "filesystem/filesystem.hpp"
 #include "assets/assets.hpp"
+#include "shaders/shader_compiler.hpp"
+#include "shaders/sprites/sprite_shader.hpp"
 
 void DrawFileAssociationModal(bool& showModal) {
     if (showModal) {
@@ -173,6 +175,13 @@ int main(int argc, char** argv) {
                     LOG_PRINT("Test texture loaded: {}x{}", tex->width, tex->height);
                 else
                     LOG_ERR("Test texture failed to load");
+
+                // shader test
+                auto hi = Funkin::Shader::loadOrCompileProgram({
+                    "sprite",
+                    Funkin::Shader::Sprites::SpriteVS,
+                    Funkin::Shader::Sprites::SpriteFS
+                });
             }
         }
 
