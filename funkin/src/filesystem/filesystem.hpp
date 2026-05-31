@@ -11,6 +11,7 @@ namespace Funkin {
         
         static std::filesystem::path getLocalDir();
         static std::filesystem::path getModsDir();
+        static std::filesystem::path getCacheDir();
         
         static std::filesystem::path resolve(const std::string& virtualPath);
         
@@ -20,5 +21,6 @@ namespace Funkin {
     private:
         static std::filesystem::path s_localPath;
         static std::filesystem::path s_modsPath;
+        static std::filesystem::path s_cachePath;
     };
 }

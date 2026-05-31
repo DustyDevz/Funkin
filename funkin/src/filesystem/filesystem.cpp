@@ -6,6 +6,7 @@
 namespace Funkin {
     std::filesystem::path Filesystem::s_localPath;
     std::filesystem::path Filesystem::s_modsPath;
+    std::filesystem::path Filesystem::s_cachePath;
 
     void Filesystem::init() {
         wchar_t localAppDataW[MAX_PATH];
@@ -13,6 +14,9 @@ namespace Funkin {
             s_localPath = std::filesystem::path(localAppDataW) / "FunkinEngine";
             std::filesystem::create_directories(s_localPath);
             std::filesystem::create_directories(s_localPath / "logs");
+            
+            s_cachePath = s_localPath / "cache";
+            std::filesystem::create_directories(s_cachePath);
         }
 
         wchar_t exeW[MAX_PATH];
@@ -23,6 +27,7 @@ namespace Funkin {
 
     std::filesystem::path Filesystem::getLocalDir() { return s_localPath; }
     std::filesystem::path Filesystem::getModsDir()  { return s_modsPath; }
+    std::filesystem::path Filesystem::getCacheDir() { return s_cachePath; }
 
     std::filesystem::path Filesystem::resolve(const std::string& virtualPath) {
         if (virtualPath.rfind("local://", 0) == 0) {
@@ -30,6 +35,9 @@ namespace Funkin {
         }
         if (virtualPath.rfind("mods://", 0) == 0) {
             return s_modsPath / virtualPath.substr(7);
+        }
+        if (virtualPath.rfind("cache://", 0) == 0) {
+            return s_cachePath / virtualPath.substr(8);
         }
         return std::filesystem::path(virtualPath);
     }
