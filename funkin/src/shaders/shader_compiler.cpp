@@ -71,8 +71,7 @@ namespace Funkin::Shader {
             " --varyingdef \"" + varyingDef.string() + "\""
             " -i \""       + bgfxInclude.string() + "\"\"";
 
-            static std::atomic<int> s_logCount{0};
-            LOG_PRINT("Compiling {} shader: {} (ID: {})", sType, outNormal.string(), s_logCount++);
+        LOG_PRINT("Compiling {} shader: {}", sType, outNormal.string());
 
         int result = std::system(command.c_str());
         std::remove(tempSrcPath.string().c_str());
