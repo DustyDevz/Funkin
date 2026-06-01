@@ -27,8 +27,7 @@ namespace Funkin::App {
                         if (SUCCEEDED(pFileOpen->GetResult(&pItem))) {
                             PWSTR pszFilePath = nullptr;
                             if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath))) {
-                                std::wstring ws(pszFilePath);
-                                resultPath = std::string(ws.begin(), ws.end());
+                                resultPath = Shared::wideToUTF8(pszFilePath);
                                 CoTaskMemFree(pszFilePath);
                             }
                             pItem->Release();

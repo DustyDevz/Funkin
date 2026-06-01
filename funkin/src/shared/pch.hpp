@@ -40,6 +40,7 @@
 #include <regex>
 
 #include "log.hpp"
+#include "utils.hpp"
 
 #ifdef _WIN32
     #include <Windows.h>

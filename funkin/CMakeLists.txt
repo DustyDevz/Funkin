@@ -46,6 +46,10 @@ set(SHADER_SOURCES
     src/shaders/shader_program.cpp
 )
 
+set(SHARED_SOURCES
+    src/shared/utils.cpp
+)
+
 set(THIRD_PARTY_SOURCES
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui.cpp
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui_draw.cpp
@@ -62,6 +66,7 @@ target_sources(Funkin PRIVATE
     ${ASSET_SOURCES}
     ${SHADER_SOURCES}
     ${THIRD_PARTY_SOURCES}
+    ${SHARED_SOURCES}
 )
 
 target_precompile_headers(Funkin PRIVATE
