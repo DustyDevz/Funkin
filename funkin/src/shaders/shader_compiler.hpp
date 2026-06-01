@@ -6,11 +6,7 @@
 #include <string>
 
 namespace Funkin::Shader {
-    struct ShaderSource {
-        const char* name;
-        const char* vs; // vertex
-        const char* fs; // fragment
-    };
-
-    bgfx::ProgramHandle loadOrCompileProgram(const ShaderSource& source);
+    std::string rendererSuffix();
+    std::string shaderProfile();
+    bool compileShaderToDisk(const char* source, const char* type, const std::string& outPath);
 }

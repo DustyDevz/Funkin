@@ -1,6 +1,8 @@
 // © 2026 Dusty | https://github.com/DustyDevz/Funkin
 // Licensed under GNU GPL v3.0
 
+// holy fucking shit
+// this file is a fucking mess, i'm sorry :(
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -19,8 +21,9 @@
 #include "registry.hpp"
 #include "filesystem/filesystem.hpp"
 #include "assets/assets.hpp"
-#include "shaders/shader_compiler.hpp"
 #include "shaders/sprites/sprite_shader.hpp"
+#include "shaders/shader_job_queue.hpp"
+#include "shaders/shader_program.hpp"
 
 void DrawFileAssociationModal(bool& showModal) {
     if (showModal) {
@@ -56,6 +59,7 @@ void DrawFileAssociationModal(bool& showModal) {
 }
 
 int main(int argc, char** argv) {
+    std::unique_ptr<Funkin::Shader::Program> spriteShader;
     Funkin::Filesystem::init();
 
     bool showAssociationPrompt = false;
@@ -158,6 +162,7 @@ int main(int argc, char** argv) {
             Funkin::DebugManager::toggleDebugStats();
         }
 
+        Funkin::Shader::tickShaderJobs();
         Funkin::DebugManager::beginFrame();
 
         if (showAssociationPrompt) {
@@ -177,11 +182,11 @@ int main(int argc, char** argv) {
                     LOG_ERR("Test texture failed to load");
 
                 // shader test
-                auto hi = Funkin::Shader::loadOrCompileProgram({
+                spriteShader = std::make_unique<Funkin::Shader::Program>(
                     "sprite",
                     Funkin::Shader::Sprites::SpriteVS,
                     Funkin::Shader::Sprites::SpriteFS
-                });
+                );
             }
         }
 
@@ -193,6 +198,7 @@ int main(int argc, char** argv) {
 
     Funkin::Assets::AssetManager::get().shutdown();
     Funkin::DebugManager::shutdown();
+    Funkin::Shader::shutdownShaderJobs();
     input.shutdown();
     bgfx::shutdown();
     SDL_DestroyWindow(window);

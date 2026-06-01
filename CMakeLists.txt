@@ -1,5 +1,8 @@
-﻿cmake_minimum_required(VERSION 3.20)
-project(Funkin VERSION 0.1.0 LANGUAGES CXX) 
+﻿set(ENGINE_PROJECT_NAME "Funkin")
+
+## DO NOT EDIT THIS PART UNLESS YOU KNOW WHAT YOU ARE DOING ###########
+cmake_minimum_required(VERSION 3.20)
+project(${ENGINE_PROJECT_NAME} VERSION 0.1.0 LANGUAGES CXX) 
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -44,3 +47,4 @@ endif()
 add_subdirectory(funkin/third_party/sdl)
 add_subdirectory(funkin/third_party/bgfx)
 add_subdirectory(funkin)
+########################################################################

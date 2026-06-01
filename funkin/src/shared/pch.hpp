@@ -37,6 +37,7 @@
 #include <filesystem>
 #include <emmintrin.h>
 #include <future>
+#include <regex>
 
 #include "log.hpp"
 
