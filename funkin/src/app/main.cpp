@@ -175,11 +175,11 @@ int main(int argc, char** argv) {
                 SDL_SetWindowTitle(window, (std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
 
                 // image test
-                auto tex = Funkin::Assets::Load<Funkin::Assets::Texture>("images/ui/test.png");
-                if (tex)
-                    LOG_PRINT("Test texture loaded: {}x{}", tex->width, tex->height);
-                else
-                    LOG_ERR("Test texture failed to load");
+                // auto tex = Funkin::Assets::Load<Funkin::Assets::Texture>("images/ui/test.png");
+                // if (tex)
+                //     LOG_PRINT("Test texture loaded: {}x{}", tex->width, tex->height);
+                // else
+                //     LOG_ERR("Test texture failed to load");
 
                 // shader test
                 spriteShader = std::make_unique<Funkin::Shader::Program>(

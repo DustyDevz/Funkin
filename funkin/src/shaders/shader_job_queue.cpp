@@ -37,8 +37,11 @@ namespace Funkin::Shader {
             Cache::ensureCacheDir();
 
             auto suffix  = rendererSuffix();
-            auto vsCache = Cache::resolveCachePath(job.name, "vs", suffix);
-            auto fsCache = Cache::resolveCachePath(job.name, "fs", suffix);
+            uint64_t vsHash = XXH3_64bits(job.shader.vs.c_str(), job.shader.vs.size());
+            uint64_t fsHash = XXH3_64bits(job.shader.fs.c_str(), job.shader.fs.size());
+
+            auto vsCache = Cache::resolveCachePath(job.name, "vs", suffix, vsHash);
+            auto fsCache = Cache::resolveCachePath(job.name, "fs", suffix, fsHash);
 
             auto vsFuture = std::async(std::launch::async, [&]() -> bool {
                 if (Cache::isCached(vsCache)) return true;

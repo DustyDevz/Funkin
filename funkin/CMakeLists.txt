@@ -48,6 +48,7 @@ set(SHADER_SOURCES
 
 set(SHARED_SOURCES
     src/shared/utils.cpp
+    src/shared/xxhash_impl.cpp
 )
 
 set(THIRD_PARTY_SOURCES

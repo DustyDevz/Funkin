@@ -10,9 +10,9 @@ namespace Funkin::Shader::Cache {
             Funkin::Filesystem::resolve("cache://shaders"));
     }
 
-    std::filesystem::path resolveCachePath(const std::string& name, const std::string& stage, const std::string& suffix) {
+    std::filesystem::path resolveCachePath(const std::string& name, const std::string& stage, const std::string& suffix, uint64_t hash) {
         return std::filesystem::path(Funkin::Filesystem::resolve(
-            std::format("cache://shaders/{}_{}_{}_{}.bin", name, stage, suffix, "0")
+            std::format("cache://shaders/{}_{}_{:x}_{}.bin", name, stage, hash, suffix)
         )).make_preferred();
     }
 

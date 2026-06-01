@@ -38,6 +38,7 @@
 #include <emmintrin.h>
 #include <future>
 #include <regex>
+#include <xxhash.h>
 
 #include "log.hpp"
 #include "utils.hpp"

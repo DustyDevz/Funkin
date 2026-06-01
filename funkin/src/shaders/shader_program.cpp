@@ -4,6 +4,8 @@
 #include "shader_program.hpp"
 #include "shader_job_queue.hpp"
 #include "shader_converter.hpp"
+#include "shader_cache.hpp"
+#include "shader_compiler.hpp"
 
 namespace Funkin::Shader {
     Program::Program(const std::string& name, const char* vs, const char* fs, ShaderInputType type)
@@ -46,13 +48,33 @@ namespace Funkin::Shader {
             converted = convertShader(fs, type);
         }
 
+        Cache::ensureCacheDir();
+
+        auto suffix  = rendererSuffix();
+        uint64_t vsHash = XXH3_64bits(converted.vs.c_str(), converted.vs.size());
+        uint64_t fsHash = XXH3_64bits(converted.fs.c_str(), converted.fs.size());
+
+        auto vsCache = Cache::resolveCachePath(m_name, "vs", suffix, vsHash);
+        auto fsCache = Cache::resolveCachePath(m_name, "fs", suffix, fsHash);
+
+        if (Cache::isCached(vsCache) && Cache::isCached(fsCache)) {
+            bgfx::ShaderHandle vs = Cache::loadFromCache(vsCache);
+            bgfx::ShaderHandle fs = Cache::loadFromCache(fsCache);
+
+            if (bgfx::isValid(vs) && bgfx::isValid(fs)) {
+                if (bgfx::isValid(m_handle)) bgfx::destroy(m_handle);
+                m_handle = bgfx::createProgram(vs, fs, true);
+                LOG_PRINT("Shader loaded from cache instantly: {}", m_name);
+                return;
+            }
+        }
+
         submitShaderJob({
             m_name,
             converted,
             [this](bgfx::ProgramHandle prog) {
                 if (bgfx::isValid(prog)) {
-                    if (bgfx::isValid(m_pending))
-                        bgfx::destroy(m_pending);
+                    if (bgfx::isValid(m_pending)) bgfx::destroy(m_pending);
                     m_pending = prog;
                 } else {
                     LOG_ERR("Shader job returned invalid program: {}", m_name);
