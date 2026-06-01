@@ -63,8 +63,11 @@ namespace Funkin::Shader {
         auto cacheDir = Funkin::Filesystem::resolve("cache://shaders");
         std::filesystem::create_directories(cacheDir);
 
+        std::string sType = (std::string(type) == "fragment") ? "fragment" : "vertex";
+        std::string profile = shaderProfile();
+
         auto tempSrcPath = std::filesystem::path(
-            Funkin::Filesystem::resolve("cache://shaders/temp_input.sc")).make_preferred();
+            Funkin::Filesystem::resolve("cache://shaders/temp_" + sType + ".sc")).make_preferred();
         std::ofstream tempFile(tempSrcPath.string(), std::ios::trunc);
         if (!tempFile) {
             LOG_ERR("Failed to write temp shader source: {}", tempSrcPath.string());
@@ -73,8 +76,6 @@ namespace Funkin::Shader {
         tempFile << source;
         tempFile.close();
 
-        std::string sType = (std::string(type) == "fragment") ? "fragment" : "vertex";
-        std::string profile = shaderProfile();
         if (sType == "fragment") {
             if (profile == "vs_5_0") profile = "ps_5_0";
             if (profile == "vs_6_0") profile = "ps_6_0";
@@ -126,28 +127,35 @@ namespace Funkin::Shader {
 
         LOG_PRINT("Loading shader: {} ({})", src.name, suffix);
 
+        bool vsHit = bgfx::isValid(loadFromCache(vsCache.string()));
+        bool fsHit = bgfx::isValid(loadFromCache(fsCache.string()));
+
+        if (!vsHit || !fsHit) {
+            auto vsFuture = std::async(std::launch::async, [&]() -> bool {
+                if (vsHit) return true;
+                LOG_PRINT("Cache miss VS: {}", vsCache.string());
+                return compileShader(src.vs, "vertex", vsCache.string());
+            });
+
+            auto fsFuture = std::async(std::launch::async, [&]() -> bool {
+                if (fsHit) return true;
+                LOG_PRINT("Cache miss FS: {}", fsCache.string());
+                return compileShader(src.fs, "fragment", fsCache.string());
+            });
+
+            if (!vsFuture.get() || !fsFuture.get())
+                return BGFX_INVALID_HANDLE;
+        }
+
         bgfx::ShaderHandle vs = loadFromCache(vsCache.string());
-        if (!bgfx::isValid(vs)) {
-            LOG_PRINT("Cache miss VS: {}", vsCache.string());
-            if (!compileShader(src.vs, "vertex", vsCache.string()))
-                return BGFX_INVALID_HANDLE;
-            vs = loadFromCache(vsCache.string());
-        } else {
-            LOG_PRINT("Cache hit VS: {}", src.name);
-        }
-
         bgfx::ShaderHandle fs = loadFromCache(fsCache.string());
-        if (!bgfx::isValid(fs)) {
-            LOG_PRINT("Cache miss FS: {}", fsCache.string());
-            if (!compileShader(src.fs, "fragment", fsCache.string()))
-                return BGFX_INVALID_HANDLE;
-            fs = loadFromCache(fsCache.string());
-        } else {
-            LOG_PRINT("Cache hit FS: {}", src.name);
-        }
 
-        if (!bgfx::isValid(vs) || !bgfx::isValid(fs)) {
-            LOG_ERR("Failed to load compiled shaders for: {}", src.name);
+        if (!bgfx::isValid(vs)) {
+            LOG_ERR("Compiled VS loaded but invalid: {}", src.name);
+            return BGFX_INVALID_HANDLE;
+        }
+        if (!bgfx::isValid(fs)) {
+            LOG_ERR("Compiled FS loaded but invalid: {}", src.name);
             return BGFX_INVALID_HANDLE;
         }
 

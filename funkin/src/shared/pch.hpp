@@ -36,6 +36,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include <emmintrin.h>
+#include <future>
 
 #include "log.hpp"
 
