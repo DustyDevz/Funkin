@@ -9,9 +9,21 @@ this is just here so my dumbass can rememeber
 * `scoop install ccache` (or download from [ccache.dev](https://ccache.dev))
 
 ---
+## Progress
+## 6 / 2 / 26
+* Shaders
+* Temp project manager
+* File manager
+* Cache
+* Sprites / Animated Sprites
+* Registry
+* Debug
+<img width="1919" height="1033" alt="image" src="https://github.com/user-attachments/assets/cd2bab3b-8018-4b94-a9df-7e8d3eb97851" />
 
+#
 <details>
-<summary>Progress</summary>
+<summary>Archive</summary>
+
 
 ## 5 / 28 / 26
 * Rewrite
