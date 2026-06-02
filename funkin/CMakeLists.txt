@@ -38,12 +38,21 @@ set(ASSET_SOURCES
     src/assets/loaders/font_loader.cpp
 )
 
+set(CACHE_SOURCES
+    src/cache/cache.cpp
+)
+
+set(RENDERER_SOURCES
+    src/renderer/sprite/sprite_batch.cpp
+)
+
 set(SHADER_SOURCES
     src/shaders/shader_compiler.cpp
     src/shaders/shader_converter.cpp
     src/shaders/shader_cache.cpp
     src/shaders/shader_job_queue.cpp
     src/shaders/shader_program.cpp
+    src/shaders/sprites/sprite_shader.cpp
 )
 
 set(SHARED_SOURCES
@@ -63,8 +72,10 @@ target_sources(Funkin PRIVATE
     ${APP_SOURCES}
     ${INPUT_SOURCES}
     ${IMGUI_SOURCES}
+    ${CACHE_SOURCES}
     ${FILESYSTEM_SOURCES}
     ${ASSET_SOURCES}
+    ${RENDERER_SOURCES}
     ${SHADER_SOURCES}
     ${THIRD_PARTY_SOURCES}
     ${SHARED_SOURCES}
@@ -86,6 +97,7 @@ target_include_directories(Funkin PRIVATE
     ${FUNKIN_3RD_PARTY_DIR}/bgfx/bgfx/include
     ${FUNKIN_3RD_PARTY_DIR}/bgfx/bx/include
     ${FUNKIN_3RD_PARTY_DIR}/bgfx/bimg/include
+    ${FUNKIN_3RD_PARTY_DIR}/bgfx/bimg/3rdparty
 )
 
 target_link_libraries(Funkin PRIVATE 
@@ -93,6 +105,7 @@ target_link_libraries(Funkin PRIVATE
     bgfx 
     bx 
     bimg
+    bimg_encode
 )
 
 if(WIN32)

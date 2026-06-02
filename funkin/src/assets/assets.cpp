@@ -1,4 +1,4 @@
-// © 2026 Dusty | https://github.com/DustyDevz/FNFCPP
+// © 2026 Dusty | https://github.com/DustyDevz/Funkin
 // Licensed under GNU GPL v3.0
 
 #include "assets.hpp"
@@ -24,15 +24,27 @@ namespace Funkin::Assets {
     }
 
     void AssetManager::update() {
-        std::lock_guard<std::mutex> lock(m_completionMutex);
-        while (!m_completions.empty()) {
-            m_completions.front()();
-            m_completions.pop();
+        {
+            std::lock_guard<std::mutex> lock(m_uploadMutex);
+            while (!m_pendingUploads.empty()) {
+                auto& pending = m_pendingUploads.front();
+                auto tex = Loaders::uploadPendingTexture(pending.data);
+                pending.onComplete(tex);
+                m_pendingUploads.pop();
+            }
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(m_completionMutex);
+            while (!m_completions.empty()) {
+                m_completions.front()();
+                m_completions.pop();
+            }
         }
     }
 
     std::filesystem::path AssetManager::resolvePath(const std::string& id) {
-        auto loose = Funkin::App::Project::get().assets / id;
+        auto loose = (Funkin::App::Project::get().assets / id).make_preferred();
         if (std::filesystem::exists(loose)) return loose;
         return {};
     }
@@ -74,10 +86,26 @@ namespace Funkin::Assets {
     }
 
     template<>
+    std::shared_ptr<Texture> AssetManager::loadFromDiskRaw<Texture>(
+        const std::filesystem::path& path,
+        const std::string& id,
+        const std::string& group) {
+        return Loaders::loadTexture(path, id, group);
+    }
+
+    template<>
     std::shared_ptr<AudioClip> AssetManager::loadFromDisk<AudioClip>(
         const std::string& id, const std::string& group) {
         auto path = resolvePath(id);
         if (path.empty()) return nullptr;
+        return Loaders::loadAudio(path, id, group);
+    }
+
+    template<>
+    std::shared_ptr<AudioClip> AssetManager::loadFromDiskRaw<AudioClip>(
+        const std::filesystem::path& path,
+        const std::string& id,
+        const std::string& group) {
         return Loaders::loadAudio(path, id, group);
     }
 
@@ -90,10 +118,26 @@ namespace Funkin::Assets {
     }
 
     template<>
+    std::shared_ptr<JsonAsset> AssetManager::loadFromDiskRaw<JsonAsset>(
+        const std::filesystem::path& path,
+        const std::string& id,
+        const std::string& group) {
+        return Loaders::loadJson(path, id, group);
+    }
+
+    template<>
     std::shared_ptr<Font> AssetManager::loadFromDisk<Font>(
         const std::string& id, const std::string& group) {
         auto path = resolvePath(id);
         if (path.empty()) return nullptr;
+        return Loaders::loadFont(path, id, group);
+    }
+
+    template<>
+    std::shared_ptr<Font> AssetManager::loadFromDiskRaw<Font>(
+        const std::filesystem::path& path,
+        const std::string& id,
+        const std::string& group) {
         return Loaders::loadFont(path, id, group);
     }
 

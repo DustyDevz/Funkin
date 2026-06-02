@@ -19,8 +19,24 @@ namespace Funkin::Assets {
     template<typename T>
     class AssetHandle {
     public:
-        virtual ~AssetHandle() = default;
+        AssetHandle() = default;
         explicit AssetHandle(std::shared_ptr<T> ptr) : m_ptr(std::move(ptr)) {}
+        AssetHandle(std::nullptr_t) : m_ptr(nullptr) {}
+
+        AssetHandle(const AssetHandle&)            = default;
+        AssetHandle& operator=(const AssetHandle&) = default;
+        AssetHandle(AssetHandle&&)                 = default;
+        AssetHandle& operator=(AssetHandle&&)      = default;
+
+        AssetHandle& operator=(std::nullptr_t) {
+            m_ptr = nullptr;
+            return *this;
+        }
+
+        AssetHandle& operator=(std::shared_ptr<T> ptr) {
+            m_ptr = std::move(ptr);
+            return *this;
+        }
 
         T* get()        const { return m_ptr.get(); }
         T* operator->() const { return m_ptr.get(); }
@@ -29,6 +45,9 @@ namespace Funkin::Assets {
         bool isValid()           const { return m_ptr != nullptr; }
         explicit operator bool() const { return isValid(); }
         long useCount()          const { return m_ptr.use_count(); }
+
+        bool operator==(const AssetHandle& other) const { return m_ptr == other.m_ptr; }
+        bool operator!=(const AssetHandle& other) const { return m_ptr != other.m_ptr; }
 
         const std::string& id() const {
             static std::string empty;
@@ -39,7 +58,6 @@ namespace Funkin::Assets {
         std::shared_ptr<T> m_ptr;
     };
 
-    // fallback
     template<typename T>
-    AssetHandle<T> NullHandle() { return AssetHandle<T>{nullptr}; }
+    AssetHandle<T> NullHandle() { return AssetHandle<T>{ nullptr }; }
 }

@@ -3,6 +3,7 @@
 
 // holy fucking shit
 // this file is a fucking mess, i'm sorry :(
+// it WILL be fixed soon !!!
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -24,6 +25,9 @@
 #include "shaders/sprites/sprite_shader.hpp"
 #include "shaders/shader_job_queue.hpp"
 #include "shaders/shader_program.hpp"
+#include "cache/cache.hpp"
+#include "renderer/sprite/sprite_batch.hpp"
+#include "renderer/sprite/sprite.hpp"
 
 void DrawFileAssociationModal(bool& showModal) {
     if (showModal) {
@@ -59,8 +63,8 @@ void DrawFileAssociationModal(bool& showModal) {
 }
 
 int main(int argc, char** argv) {
-    std::unique_ptr<Funkin::Shader::Program> spriteShader;
     Funkin::Filesystem::init();
+    Funkin::Cache::init();
 
     bool showAssociationPrompt = false;
     if (Funkin::Filesystem::readString("local://data.json").empty()) {
@@ -117,6 +121,7 @@ int main(int argc, char** argv) {
     
     Funkin::DebugManager::init(window, 255);
     Funkin::Assets::AssetManager::get().init();
+    Funkin::Shader::Sprites::init();
 
     const char* name = bgfx::getRendererName(bgfx::getRendererType());
     LOG_PRINT("bgfx using: {}", name);
@@ -133,6 +138,8 @@ int main(int argc, char** argv) {
 
     bool running = true;
     SDL_Event e;
+    // TEMP
+    Funkin::Renderer::Sprite testSprite;
 
     while (running) {
         while (SDL_PollEvent(&e)) {
@@ -165,6 +172,13 @@ int main(int argc, char** argv) {
         Funkin::Shader::tickShaderJobs();
         Funkin::DebugManager::beginFrame();
 
+        // TEMP
+        int w, h;
+        SDL_GetWindowSize(window, &w, &h);
+        Funkin::Renderer::SpriteBatch::get().begin(0, (uint32_t)w, (uint32_t)h);
+        testSprite.draw();
+        Funkin::Renderer::SpriteBatch::get().end();
+
         if (showAssociationPrompt) {
             DrawFileAssociationModal(showAssociationPrompt);
         }
@@ -173,20 +187,15 @@ int main(int argc, char** argv) {
             if (Funkin::App::RunLauncher()) {
                 LOG_PRINT("Project loaded");
                 SDL_SetWindowTitle(window, (std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
-
-                // image test
-                // auto tex = Funkin::Assets::Load<Funkin::Assets::Texture>("images/ui/test.png");
-                // if (tex)
-                //     LOG_PRINT("Test texture loaded: {}x{}", tex->width, tex->height);
-                // else
-                //     LOG_ERR("Test texture failed to load");
-
-                // shader test
-                spriteShader = std::make_unique<Funkin::Shader::Program>(
-                    "sprite",
-                    Funkin::Shader::Sprites::SpriteVS,
-                    Funkin::Shader::Sprites::SpriteFS
-                );
+                testSprite.loadTextureAsync("images/ui/test.png"); // this shit ass
+                testSprite.x       = 640.0f;
+                testSprite.y       = 360.0f;
+                testSprite.width   = 400.0f;
+                testSprite.height  = 400.0f;
+                testSprite.scaleX  = 6.f;
+                testSprite.scaleY  = 6.f;
+                testSprite.originX = 0.5f;
+                testSprite.originY = 0.5f;
             }
         }
 
@@ -198,6 +207,7 @@ int main(int argc, char** argv) {
 
     Funkin::Assets::AssetManager::get().shutdown();
     Funkin::DebugManager::shutdown();
+    Funkin::Shader::Sprites::shutdown();
     Funkin::Shader::shutdownShaderJobs();
     input.shutdown();
     bgfx::shutdown();

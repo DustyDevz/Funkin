@@ -7,6 +7,23 @@
 #include "../assets_types.hpp"
 
 namespace Funkin::Assets::Loaders {
+    struct PendingTextureUpload {
+        std::string          id;
+        std::string          group;
+        std::vector<uint8_t> bytes;
+        uint32_t             width;
+        uint32_t             height;
+        bool                 isKtx;
+    };
+
+    std::optional<PendingTextureUpload> prepareTexture(
+        const std::filesystem::path& path,
+        const std::string& id,
+        const std::string& group
+    );
+
+    std::shared_ptr<Texture> uploadPendingTexture(PendingTextureUpload& pending);
+
     std::shared_ptr<Texture> loadTexture(
         const std::filesystem::path& path,
         const std::string& id,

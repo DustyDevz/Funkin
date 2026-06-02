@@ -39,6 +39,7 @@
 #include <future>
 #include <regex>
 #include <xxhash.h>
+#include <nlohmann/json.hpp>
 
 #include "log.hpp"
 #include "utils.hpp"

@@ -2,6 +2,7 @@
 // Licensed under GNU GPL v3.0
 
 #pragma once
+#include <bgfx/bgfx.h>
 
 namespace Funkin::Shader::Sprites {
     inline constexpr const char* SpriteVS = R"(
@@ -29,4 +30,8 @@ namespace Funkin::Shader::Sprites {
         gl_FragColor  = texColor * v_color0;
     }
     )";
+
+    void                init();
+    void                shutdown();
+    bgfx::ProgramHandle programHandle();
 }
