@@ -135,6 +135,10 @@ int main(int argc, char** argv) {
     input.setWindow(window);
     input.bind("test", Funkin::Input::KeyCode::G);
     input.bind("debug", Funkin::Input::KeyCode::F1);
+    input.bind("up", Funkin::Input::KeyCode::W);
+    input.bind("down", Funkin::Input::KeyCode::S);
+    input.bind("left", Funkin::Input::KeyCode::A);
+    input.bind("right", Funkin::Input::KeyCode::D);
 
     bool running = true;
     SDL_Event e;
@@ -191,10 +195,27 @@ int main(int argc, char** argv) {
                 LOG_PRINT("Project loaded");
                 SDL_SetWindowTitle(window, (std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
                 testSprite.loadAtlas("images/ui/test.xml", "test");
-                testSprite.addAnimation("idle", "idle", 24.f, true);
+                testSprite.addAnimation("idle",  "idle",  24.f, true);
+                testSprite.addAnimation("left",  "left",  24.f, false);
+                testSprite.addAnimation("down",  "down",  24.f, false);
+                testSprite.addAnimation("up",    "up",    24.f, false);
+                testSprite.addAnimation("right", "right", 24.f, false);
                 testSprite.play("idle");
+
+                testSprite.onAnimComplete = [&](const std::string& name) {
+                    testSprite.play("idle");
+                };
             }
         }
+
+        if (input.justDown("up"))
+            testSprite.play("up", true);
+        else if (input.justDown("down"))
+            testSprite.play("down", true);
+        else if (input.justDown("left"))
+            testSprite.play("left", true);
+        else if (input.justDown("right"))
+            testSprite.play("right", true);
 
         Funkin::DebugManager::endFrame();
 
