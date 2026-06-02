@@ -6,6 +6,7 @@
 #include "loaders/audio_loader.hpp"
 #include "loaders/json_loader.hpp"
 #include "loaders/font_loader.hpp"
+#include "loaders/sparrow_loader.hpp"
 
 namespace Funkin::Assets {
     AssetManager& AssetManager::get() {
@@ -77,6 +78,9 @@ namespace Funkin::Assets {
         return total;
     }
 
+    // Theres a cool book called 'I have no mouth and I must scream'
+    // In it "AM" the allied master supercomputer talks about being in hell
+    // THIS IS HELL
     template<>
     std::shared_ptr<Texture> AssetManager::loadFromDisk<Texture>(
         const std::string& id, const std::string& group) {
@@ -159,5 +163,24 @@ namespace Funkin::Assets {
     template<>
     AssetHandle<Font> AssetManager::getFallback<Font>() {
         return NullHandle<Font>();
+    }
+
+    template<>
+    std::shared_ptr<SparrowAtlas> AssetManager::loadFromDisk<SparrowAtlas>(
+        const std::string& id, const std::string& group) {
+        auto path = resolvePath(id);
+        if (path.empty()) return nullptr;
+        return Loaders::loadSparrow(path, id, group);
+    }
+
+    template<>
+    std::shared_ptr<SparrowAtlas> AssetManager::loadFromDiskRaw<SparrowAtlas>(
+        const std::filesystem::path& path, const std::string& id, const std::string& group) {
+        return Loaders::loadSparrow(path, id, group);
+    }
+
+    template<>
+    AssetHandle<SparrowAtlas> AssetManager::getFallback<SparrowAtlas>() {
+        return NullHandle<SparrowAtlas>();
     }
 }

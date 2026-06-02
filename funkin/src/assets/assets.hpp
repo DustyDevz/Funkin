@@ -108,20 +108,24 @@ namespace Funkin::Assets {
         TextureHandle m_missingTexture;
     };
 
+    // this is fucking awful
     template<> AssetHandle<Texture> AssetManager::getFallback<Texture>();
     template<> AssetHandle<AudioClip> AssetManager::getFallback<AudioClip>();
     template<> AssetHandle<JsonAsset> AssetManager::getFallback<JsonAsset>();
     template<> AssetHandle<Font> AssetManager::getFallback<Font>();
+    template<> AssetHandle<SparrowAtlas> AssetManager::getFallback<SparrowAtlas>();
 
     template<> std::shared_ptr<Texture> AssetManager::loadFromDisk<Texture>(const std::string& id, const std::string& group);
     template<> std::shared_ptr<AudioClip> AssetManager::loadFromDisk<AudioClip>(const std::string& id, const std::string& group);
     template<> std::shared_ptr<JsonAsset> AssetManager::loadFromDisk<JsonAsset>(const std::string& id, const std::string& group);
     template<> std::shared_ptr<Font> AssetManager::loadFromDisk<Font>(const std::string& id, const std::string& group);
+    template<> std::shared_ptr<SparrowAtlas> AssetManager::loadFromDisk<SparrowAtlas>(const std::string& id, const std::string& group);
 
     template<> std::shared_ptr<Texture> AssetManager::loadFromDiskRaw<Texture>(const std::filesystem::path& path, const std::string& id, const std::string& group);
     template<> std::shared_ptr<AudioClip> AssetManager::loadFromDiskRaw<AudioClip>(const std::filesystem::path& path, const std::string& id, const std::string& group);
     template<> std::shared_ptr<JsonAsset> AssetManager::loadFromDiskRaw<JsonAsset>(const std::filesystem::path& path, const std::string& id, const std::string& group);
     template<> std::shared_ptr<Font> AssetManager::loadFromDiskRaw<Font>(const std::filesystem::path& path, const std::string& id, const std::string& group);
+    template<> std::shared_ptr<SparrowAtlas> AssetManager::loadFromDiskRaw<SparrowAtlas>(const std::filesystem::path& path, const std::string& id, const std::string& group);
 
     template<>
     inline void AssetManager::loadAsync<Texture>(const std::string& id, const std::string& group,

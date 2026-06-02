@@ -27,7 +27,7 @@
 #include "shaders/shader_program.hpp"
 #include "cache/cache.hpp"
 #include "renderer/sprite/sprite_batch.hpp"
-#include "renderer/sprite/sprite.hpp"
+#include "renderer/sprite/animated_sprite.hpp"
 
 void DrawFileAssociationModal(bool& showModal) {
     if (showModal) {
@@ -138,18 +138,22 @@ int main(int argc, char** argv) {
 
     bool running = true;
     SDL_Event e;
+    auto lastTime = std::chrono::high_resolution_clock::now();
     // TEMP
-    Funkin::Renderer::Sprite testSprite;
+    Funkin::Renderer::AnimatedSprite testSprite;
 
     while (running) {
-        while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_EVENT_QUIT) running = false;
-            
-            input.handleSDLEvent(e);
-            Funkin::DebugManager::handleEvent(e);
-            Funkin::Assets::AssetManager::get().update();
+        // delta time
+        auto now = std::chrono::high_resolution_clock::now();
+        float dt = std::chrono::duration<float>(now - lastTime).count();
+        lastTime = now;
 
-            if (e.type == SDL_EVENT_WINDOW_RESIZED) {
+        while (SDL_PollEvent(&e)) {
+        if (e.type == SDL_EVENT_QUIT) running = false;
+        input.handleSDLEvent(e);
+        Funkin::DebugManager::handleEvent(e);
+
+        if (e.type == SDL_EVENT_WINDOW_RESIZED) {
                 uint32_t w = (uint32_t)e.window.data1;
                 uint32_t h = (uint32_t)e.window.data2;
                 bgfx::reset(w, h, (appSettings.vsync == Funkin::Settings::VSyncMode::On) ? BGFX_RESET_VSYNC : 0);
@@ -157,7 +161,9 @@ int main(int argc, char** argv) {
             }
         }
 
+        Funkin::Assets::AssetManager::get().update();
         input.update();
+        testSprite.update(dt);
 
         if (input.justDown("test")) {
             uint64_t eventTime = input.getLastTimestamp("test");
@@ -165,37 +171,28 @@ int main(int argc, char** argv) {
             LOG_PRINT("input latency: {:.4f} ms", (double)(now - eventTime) * 1e-6);
         }
 
-        if (input.justDown("debug")) {
+        if (input.justDown("debug"))
             Funkin::DebugManager::toggleDebugStats();
-        }
 
         Funkin::Shader::tickShaderJobs();
         Funkin::DebugManager::beginFrame();
 
-        // TEMP
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
         Funkin::Renderer::SpriteBatch::get().begin(0, (uint32_t)w, (uint32_t)h);
         testSprite.draw();
         Funkin::Renderer::SpriteBatch::get().end();
 
-        if (showAssociationPrompt) {
+        if (showAssociationPrompt)
             DrawFileAssociationModal(showAssociationPrompt);
-        }
 
         if (!Funkin::App::Project::get().isLoaded()) {
             if (Funkin::App::RunLauncher()) {
                 LOG_PRINT("Project loaded");
                 SDL_SetWindowTitle(window, (std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
-                testSprite.loadTextureAsync("images/ui/test.png"); // this shit ass
-                testSprite.x       = 640.0f;
-                testSprite.y       = 360.0f;
-                testSprite.width   = 400.0f;
-                testSprite.height  = 400.0f;
-                testSprite.scaleX  = 6.f;
-                testSprite.scaleY  = 6.f;
-                testSprite.originX = 0.5f;
-                testSprite.originY = 0.5f;
+                testSprite.loadAtlas("images/ui/test.xml", "test");
+                testSprite.addAnimation("idle", "idle", 24.f, true);
+                testSprite.play("idle");
             }
         }
 

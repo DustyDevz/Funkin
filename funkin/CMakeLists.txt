@@ -36,6 +36,7 @@ set(ASSET_SOURCES
     src/assets/loaders/audio_loader.cpp
     src/assets/loaders/json_loader.cpp
     src/assets/loaders/font_loader.cpp
+    src/assets/loaders/sparrow_loader.cpp
 )
 
 set(CACHE_SOURCES
