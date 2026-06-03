@@ -1,25 +1,25 @@
 // © 2026 Dusty | https://github.com/DustyDevz/Funkin
 // Licensed under GNU GPL v3.0
 
-// holy fucking shit
-// this file is a fucking mess, i'm sorry :(
-// it WILL be fixed soon !!!
-#define SDL_MAIN_HANDLED
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include <imgui.h>
+#include <backends/imgui_impl_win32.h>
+#include <dwmapi.h>
 
 #include <QApplication>
-#include <QWindow>
 #include <QWidget>
 #include <QMainWindow>
 #include <QAbstractNativeEventFilter>
 #include <QResizeEvent>
+#include <QDockWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QTimer>
+#include <QPaintEngine>
 
 #include "shared/log.hpp"
 #include "input/input.hpp"
@@ -38,29 +38,82 @@
 #include "renderer/sprite/animated_sprite.hpp"
 #include "platform/win32/win32_input.hpp"
 
-class ViewportResizeFilter : public QObject {
+class ViewportWidget : public QWidget {
 public:
-    bool needsReset = false;
-    int pendingW = 0;
-    int pendingH = 0;
+    explicit ViewportWidget(QWidget* parent = nullptr) : QWidget(parent) {
+        setAttribute(Qt::WA_NativeWindow);
+        setAttribute(Qt::WA_PaintOnScreen);
+        setAttribute(Qt::WA_NoSystemBackground);
+        setAttribute(Qt::WA_OpaquePaintEvent);
+        setAutoFillBackground(false);
+        setFocusPolicy(Qt::StrongFocus);
+    }
+
+    QPaintEngine* paintEngine() const override { return nullptr; }
 
 protected:
-    bool eventFilter(QObject* obj, QEvent* event) override {
-        if (event->type() == QEvent::Resize) {
-            auto* re = static_cast<QResizeEvent*>(event);
-            pendingW = re->size().width();
-            pendingH = re->size().height();
-            needsReset = true; 
+    void paintEvent(QPaintEvent*) override {}
+
+    bool nativeEvent(const QByteArray& eventType, void* message, qintptr* result) override {
+        if (eventType == "windows_generic_MSG") {
+            MSG* msg = static_cast<MSG*>(message);
+            if (msg->message == WM_ERASEBKGND) {
+                *result = 1;
+                return true;
+            }
         }
-        return QObject::eventFilter(obj, event);
+        return QWidget::nativeEvent(eventType, message, result);
     }
 };
 
 class RawInputFilter : public QAbstractNativeEventFilter {
 public:
+    std::function<void()> onRenderFrame;
+    bool windowMoving = false;
+    QWidget* viewportWidget = nullptr;
+
     bool nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result) override {
         if (eventType == "windows_generic_MSG") {
             MSG* msg = static_cast<MSG*>(message);
+
+            if (msg->message == WM_ENTERSIZEMOVE) {
+                windowMoving = true;
+            }
+
+            if (msg->message == WM_EXITSIZEMOVE) {
+                windowMoving = false;
+            }
+
+            if (viewportWidget && viewportWidget->internalWinId()) {
+                HWND vpHwnd = (HWND)viewportWidget->winId();
+                if (msg->hwnd == vpHwnd) {
+                    if (msg->message == WM_ERASEBKGND) {
+                        *result = 1;
+                        return true;
+                    }
+
+                    if (msg->message == WM_SIZE && bgfx::getRendererType() != bgfx::RendererType::Noop) {
+                        int w = LOWORD(msg->lParam);
+                        int h = HIWORD(msg->lParam);
+
+                        if (w > 0 && h > 0) {
+                            bgfx::reset((uint32_t)w, (uint32_t)h, BGFX_RESET_VSYNC);
+                            bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x1a1a1aff, 1.0f, 0);
+                            bgfx::setViewRect(0, 0, 0, (uint16_t)w, (uint16_t)h);
+                            if (onRenderFrame) {
+                                onRenderFrame();
+                            }
+                        }
+                    }
+
+                    if (msg->message == WM_PAINT && windowMoving && bgfx::getRendererType() != bgfx::RendererType::Noop) {
+                        if (onRenderFrame) {
+                            onRenderFrame();
+                        }
+                    }
+                }
+            }
+
             if (msg->message == WM_INPUT) {
                 Funkin::Platform::Input::handleRawInput(
                     (HRAWINPUT)msg->lParam,
@@ -70,6 +123,9 @@ public:
                 );
                 return false;
             }
+
+            extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
+            ImGui_ImplWin32_WndProcHandler(msg->hwnd, msg->message, msg->wParam, msg->lParam);
         }
         return false;
     }
@@ -136,46 +192,39 @@ int main(int argc, char** argv) {
         }
     }
 
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
-        LOG_ERR("SDL init failed: {}", SDL_GetError());
-        return 1;
-    }
-
     Funkin::Settings appSettings;
-    SDL_Window* window = SDL_CreateWindow("FNF CPP | initializing...", appSettings.windowWidth, appSettings.windowHeight, 
-        SDL_WINDOW_RESIZABLE | SDL_WINDOW_BORDERLESS | SDL_WINDOW_HIDDEN
-    );
-
-    if (!window) {
-        LOG_ERR("SDL window failed: {}", SDL_GetError());
-        return 1;
-    }
-
-    LOG_PRINT("SDL window OK");
-
-    SDL_PropertiesID props = SDL_GetWindowProperties(window);
-    void* hwnd = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
-    LOG_PRINT("HWND = {}", hwnd);
     LOG_PRINT("Qt platform: {}", QGuiApplication::platformName().toStdString());
 
     QMainWindow* editorWindow = new QMainWindow();
     editorWindow->setWindowTitle("FNF CPP | initializing...");
     editorWindow->resize(appSettings.windowWidth, appSettings.windowHeight);
 
-    QWindow* sdlQWindow = QWindow::fromWinId((WId)(quintptr)hwnd);
-    editorWindow->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
-
-    QWidget* viewport = QWidget::createWindowContainer(sdlQWindow, editorWindow);    
+    ViewportWidget* viewport = new ViewportWidget(editorWindow);
     editorWindow->setCentralWidget(viewport);
-    viewport->setFocusPolicy(Qt::StrongFocus);
-    viewport->setAttribute(Qt::WA_NativeWindow);
-    viewport->setFocus();
-    //editorWindow->installEventFilter
 
-    ViewportResizeFilter* resizeFilter = new ViewportResizeFilter();
-    viewport->installEventFilter(resizeFilter);
+    rawInputFilter.viewportWidget = viewport;
 
+    QDockWidget* dock = new QDockWidget("test", editorWindow);
+    dock->setWidget(new QPushButton("CLICK ME :3", dock));
+    editorWindow->addDockWidget(Qt::RightDockWidgetArea, dock);
+
+    editorWindow->show();
+    viewport->winId();
+    qtApp.processEvents(QEventLoop::AllEvents);
+    HWND hwnd = (HWND)viewport->winId();
     HWND qtHwnd = (HWND)editorWindow->winId();
+    
+    LONG_PTR vpStyle = GetClassLongPtr(hwnd, GCL_STYLE);
+    vpStyle &= ~(CS_HREDRAW | CS_VREDRAW);
+    SetClassLongPtr(hwnd, GCL_STYLE, vpStyle);
+
+    DWM_BLURBEHIND bb{};
+    bb.dwFlags = DWM_BB_ENABLE;
+    bb.fEnable = FALSE;
+    DwmEnableBlurBehindWindow(qtHwnd, &bb);
+
+    MARGINS margins = { 0, 0, 0, 0 };
+    DwmExtendFrameIntoClientArea(qtHwnd, &margins);
     Funkin::Platform::Input::registerRawInput(qtHwnd);
 
     bgfx::PlatformData pd{};
@@ -187,8 +236,8 @@ int main(int argc, char** argv) {
 
     bgfx::Init init{};
     init.platformData      = pd;
-    init.resolution.width  = appSettings.windowWidth;
-    init.resolution.height = appSettings.windowHeight;
+    init.resolution.width  = (uint32_t)viewport->width();
+    init.resolution.height = (uint32_t)viewport->height();
     init.resolution.reset  = BGFX_RESET_VSYNC;
     init.type              = bgfx::RendererType::Vulkan;
 
@@ -199,10 +248,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    editorWindow->show();
-    //SDL_ShowWindow(window);
-    
-    Funkin::DebugManager::init(window, 255);
+    Funkin::DebugManager::init(hwnd, 255);
     Funkin::Assets::AssetManager::get().init();
     Funkin::Shader::Sprites::init();
 
@@ -211,11 +257,10 @@ int main(int argc, char** argv) {
     editorWindow->setWindowTitle((std::string("FNF [") + name + "]").c_str());
 
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x1a1a1aff, 1.0f, 0);
-    bgfx::setViewRect(0, 0, 0, appSettings.windowWidth, appSettings.windowHeight);
+    bgfx::setViewRect(0, 0, 0, (uint16_t)viewport->width(), (uint16_t)viewport->height());
 
     Funkin::Input::Input& input = Funkin::Input::Input::get();
     input.init();
-    input.setWindow(window);
     input.bind("test", Funkin::Input::KeyCode::G);
     input.bind("debug", Funkin::Input::KeyCode::F1);
     input.bind("up", Funkin::Input::KeyCode::W);
@@ -223,29 +268,17 @@ int main(int argc, char** argv) {
     input.bind("left", Funkin::Input::KeyCode::A);
     input.bind("right", Funkin::Input::KeyCode::D);
 
-    SDL_Event e;
     auto lastTime = std::chrono::high_resolution_clock::now();
-    // TEMP
     Funkin::Renderer::AnimatedSprite testSprite;
 
-    while (running && editorWindow->isVisible()) {
-        // delta time
+    rawInputFilter.onRenderFrame = [&]() {
+        if (!running || !editorWindow->isVisible()) {
+            return;
+        }
+
         auto now = std::chrono::high_resolution_clock::now();
         float dt = std::chrono::duration<float>(now - lastTime).count();
         lastTime = now;
-
-        qtApp.processEvents();
-
-        if (resizeFilter->needsReset) {
-            bgfx::reset((uint32_t)resizeFilter->pendingW, (uint32_t)resizeFilter->pendingH, BGFX_RESET_VSYNC);
-            bgfx::setViewRect(0, 0, 0, (uint16_t)resizeFilter->pendingW, (uint16_t)resizeFilter->pendingH);
-            resizeFilter->needsReset = false;
-        }
-
-        while (SDL_PollEvent(&e)) {
-            input.handleSDLEvent(e);
-            Funkin::DebugManager::handleEvent(e);
-        }
 
         Funkin::Assets::AssetManager::get().update();
         input.update();
@@ -253,8 +286,8 @@ int main(int argc, char** argv) {
 
         if (input.justDown("test")) {
             uint64_t eventTime = input.getLastTimestamp("test");
-            uint64_t now = input.getNow();
-            LOG_PRINT("input latency: {:.4f} ms", (double)(now - eventTime) * 1e-6);
+            uint64_t n = input.getNow();
+            LOG_PRINT("input latency: {:.4f} ms", (double)(n - eventTime) * 1e-6);
         }
 
         if (input.justDown("debug"))
@@ -265,9 +298,11 @@ int main(int argc, char** argv) {
 
         uint32_t w = (uint32_t)viewport->width();
         uint32_t h = (uint32_t)viewport->height();
-        Funkin::Renderer::SpriteBatch::get().begin(0, w, h);
-        testSprite.draw();
-        Funkin::Renderer::SpriteBatch::get().end();
+        if (w > 0 && h > 0) {
+            Funkin::Renderer::SpriteBatch::get().begin(0, w, h);
+            testSprite.draw();
+            Funkin::Renderer::SpriteBatch::get().end();
+        }
 
         if (showAssociationPrompt)
             DrawFileAssociationModal(showAssociationPrompt);
@@ -283,30 +318,36 @@ int main(int argc, char** argv) {
                 testSprite.addAnimation("up",    "up",    24.f, false);
                 testSprite.addAnimation("right", "right", 24.f, false);
                 testSprite.play("idle");
-
                 testSprite.onAnimComplete = [&](const std::string& name) {
                     testSprite.play("idle");
                 };
             }
         }
 
-        if (input.justDown("up"))
-            testSprite.play("up", true);
-        else if (input.justDown("down"))
-            testSprite.play("down", true);
-        else if (input.justDown("left"))
-            testSprite.play("left", true);
-        else if (input.justDown("right"))
-            testSprite.play("right", true);
+        if (input.justDown("up"))    testSprite.play("up", true);
+        else if (input.justDown("down"))  testSprite.play("down", true);
+        else if (input.justDown("left"))  testSprite.play("left", true);
+        else if (input.justDown("right")) testSprite.play("right", true);
 
         Funkin::DebugManager::endFrame();
-
         bgfx::touch(0);
         bgfx::frame();
-    }
+    };
 
-    // stops window flash on exit
-    SDL_HideWindow(window);
+    QTimer renderTimer;
+    renderTimer.setInterval(0);
+
+    QObject::connect(&renderTimer, &QTimer::timeout, [&]() {
+        if (!running || !editorWindow->isVisible()) {
+            renderTimer.stop();
+            qtApp.quit();
+            return;
+        }
+        rawInputFilter.onRenderFrame();
+    });
+
+    renderTimer.start();
+    int result = qtApp.exec();
 
     Funkin::Assets::AssetManager::get().shutdown();
     Funkin::DebugManager::shutdown();
@@ -314,9 +355,7 @@ int main(int argc, char** argv) {
     Funkin::Shader::shutdownShaderJobs();
     input.shutdown();
     bgfx::shutdown();
-    SDL_DestroyWindow(window);
-    SDL_Quit();
     
     delete editorWindow;
-    return 0;
+    return result;
 }

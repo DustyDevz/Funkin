@@ -6,7 +6,7 @@
 #include <bgfx/bgfx.h>
 
 namespace Funkin::DebugManager {
-    void init(SDL_Window* window, bgfx::ViewId viewId);
+    void init(HWND hwnd, bgfx::ViewId viewId);
     void handleEvent(const SDL_Event& e);
     void beginFrame();
     void endFrame();

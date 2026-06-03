@@ -5,7 +5,7 @@
 #include <string>
 #include "shared/log.hpp"
 #include "imgui/imgui_impl_bgfx.hpp"
-#include "imgui/imgui_impl_sdl3.hpp"
+#include <backends/imgui_impl_win32.h>
 
 struct BgfxCallback : public bgfx::CallbackI {
     void fatal(const char* filePath, uint16_t line, bgfx::Fatal::Enum code, const char* str) override {
@@ -39,22 +39,22 @@ namespace Funkin::DebugManager {
     static bool s_enabled = false;
     static bgfx::ViewId s_viewId = 255;
 
-    void init(SDL_Window* window, bgfx::ViewId viewId) {
+    void init(HWND hwnd, bgfx::ViewId viewId) {
         s_viewId = viewId;
 
         ImGui::CreateContext();
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         
-        ImGui_SDL3::init(window);
+        ImGui_ImplWin32_Init(hwnd);
         ImGui_BGFX::init(s_viewId);
     }
 
     void handleEvent(const SDL_Event& e) {
-        ImGui_SDL3::processEvent(e);
+        // ImGui_SDL3::processEvent(e);
     }
 
     void beginFrame() {
-        ImGui_SDL3::newFrame();
+        ImGui_ImplWin32_NewFrame();
         ImGui_BGFX::newFrame();
         ImGui::NewFrame();
 
@@ -69,7 +69,7 @@ namespace Funkin::DebugManager {
 
     void shutdown() {
         ImGui_BGFX::shutdown();
-        ImGui_SDL3::shutdown();
+        ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();
     }
 

@@ -35,7 +35,6 @@ set(INPUT_SOURCES
 )
 
 set(IMGUI_SOURCES
-    src/imgui/imgui_impl_sdl3.cpp
     src/imgui/imgui_impl_bgfx.cpp
 )
 
@@ -71,6 +70,7 @@ set(THIRD_PARTY_SOURCES
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui_tables.cpp
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui_widgets.cpp
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui_demo.cpp
+    ${FUNKIN_3RD_PARTY_DIR}/imgui/backends/imgui_impl_win32.cpp
 )
 
 target_sources(Funkin PRIVATE

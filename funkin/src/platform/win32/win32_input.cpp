@@ -19,7 +19,8 @@
 
             devices[0].usUsagePage = 0x01;
             devices[0].usUsage     = 0x06;
-            devices[0].dwFlags     = RIDEV_NOLEGACY; 
+            //devices[0].dwFlags     = RIDEV_NOLEGACY; 
+            devices[0].dwFlags     = 0;
             devices[0].hwndTarget  = hwnd;
 
             devices[1].usUsagePage = 0x01;
