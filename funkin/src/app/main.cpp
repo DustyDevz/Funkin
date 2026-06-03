@@ -13,6 +13,11 @@
 #include <fstream>
 #include <string>
 #include <imgui.h>
+#include <QApplication>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
 #include "shared/log.hpp"
 #include "input/input.hpp"
 #include "settings.hpp"
@@ -63,6 +68,21 @@ void DrawFileAssociationModal(bool& showModal) {
 }
 
 int main(int argc, char** argv) {
+    QApplication qtApp(argc, argv);
+    QDialog testDialog;
+    testDialog.setWindowTitle("Qt UI Test");
+    testDialog.resize(300, 150);
+
+    QVBoxLayout* layout = new QVBoxLayout(&testDialog);
+    QLabel* label = new QLabel("omg omg omg", &testDialog);
+    QPushButton* btn = new QPushButton("Close", &testDialog);
+
+    layout->addWidget(label);
+    layout->addWidget(btn);
+
+    QObject::connect(btn, &QPushButton::clicked, &testDialog, &QDialog::accept);
+    testDialog.exec();
+
     Funkin::Filesystem::init();
     Funkin::Cache::init();
 
@@ -151,6 +171,8 @@ int main(int argc, char** argv) {
         auto now = std::chrono::high_resolution_clock::now();
         float dt = std::chrono::duration<float>(now - lastTime).count();
         lastTime = now;
+
+        qtApp.processEvents();
 
         while (SDL_PollEvent(&e)) {
         if (e.type == SDL_EVENT_QUIT) running = false;

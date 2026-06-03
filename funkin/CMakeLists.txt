@@ -15,6 +15,19 @@ set(APP_SOURCES
     src/app/projects/launcher.cpp
 )
 
+set(ASSET_SOURCES
+    src/assets/assets.cpp
+    src/assets/loaders/texture_loader.cpp
+    src/assets/loaders/audio_loader.cpp
+    src/assets/loaders/json_loader.cpp
+    src/assets/loaders/font_loader.cpp
+    src/assets/loaders/sparrow_loader.cpp
+)
+
+set(AUDIO_SOURCES
+    src/audio/audio.cpp
+)
+
 set(INPUT_SOURCES
     src/input/input.cpp
     src/platform/win32/win32_input.cpp
@@ -28,15 +41,6 @@ set(IMGUI_SOURCES
 
 set(FILESYSTEM_SOURCES
     src/filesystem/filesystem.cpp
-)
-
-set(ASSET_SOURCES
-    src/assets/assets.cpp
-    src/assets/loaders/texture_loader.cpp
-    src/assets/loaders/audio_loader.cpp
-    src/assets/loaders/json_loader.cpp
-    src/assets/loaders/font_loader.cpp
-    src/assets/loaders/sparrow_loader.cpp
 )
 
 set(CACHE_SOURCES
@@ -76,6 +80,7 @@ target_sources(Funkin PRIVATE
     ${CACHE_SOURCES}
     ${FILESYSTEM_SOURCES}
     ${ASSET_SOURCES}
+    ${AUDIO_SOURCES}
     ${RENDERER_SOURCES}
     ${SHADER_SOURCES}
     ${THIRD_PARTY_SOURCES}
@@ -107,6 +112,9 @@ target_link_libraries(Funkin PRIVATE
     bx 
     bimg
     bimg_encode
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
 )
 
 if(WIN32)
@@ -139,11 +147,20 @@ if(FUNKIN_DEBUG)
     target_compile_definitions(Funkin PRIVATE FUNKIN_DEBUG)
 endif()
 
-add_custom_command(TARGET Funkin POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/assets
-        $<TARGET_FILE_DIR:Funkin>/assets
+if(WIN32)
+    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+    find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+endif()
 
+set_target_properties(Funkin PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/export/$<CONFIG>"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/export/$<CONFIG>"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/export/$<CONFIG>"
+)
+
+
+add_custom_command(TARGET Funkin POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/shaderc.exe
         $<TARGET_FILE_DIR:Funkin>/bin/shaderc.exe
@@ -155,4 +172,7 @@ add_custom_command(TARGET Funkin POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${FUNKIN_3RD_PARTY_DIR}/bgfx/bgfx/src
         $<TARGET_FILE_DIR:Funkin>/bin/shaderc_include
+    
+    ## qt legal!!!
+    COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE:Funkin>" --dir "$<TARGET_FILE_DIR:Funkin>" --no-compiler-runtime --no-translations --no-opengl-sw
 )

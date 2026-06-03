@@ -7,6 +7,7 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/.cmake/${presetName}",
       "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.11.1/msvc2022_64",
         "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_CXX_COMPILER": "cl.exe"
       },
@@ -27,9 +28,7 @@
       "displayName": "Windows Debug",
       "inherits": "windows-base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "PLUS_BUILD_EDITOR": "ON",
-        "PLUS_BUILD_PLUSC": "ON"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
@@ -37,9 +36,7 @@
       "displayName": "Windows Release",
       "inherits": "windows-base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "PLUS_BUILD_EDITOR": "OFF",
-        "PLUS_BUILD_PLUSC": "OFF"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
