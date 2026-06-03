@@ -13,11 +13,18 @@
 #include <fstream>
 #include <string>
 #include <imgui.h>
+
 #include <QApplication>
 #include <QDialog>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QWindow>
+#include <QWidget>
 #include <QPushButton>
+#include <QMainWindow>
+#include <QMouseEvent>
+#include <QPoint>
+
 #include "shared/log.hpp"
 #include "input/input.hpp"
 #include "settings.hpp"
@@ -69,19 +76,6 @@ void DrawFileAssociationModal(bool& showModal) {
 
 int main(int argc, char** argv) {
     QApplication qtApp(argc, argv);
-    QDialog testDialog;
-    testDialog.setWindowTitle("Qt UI Test");
-    testDialog.resize(300, 150);
-
-    QVBoxLayout* layout = new QVBoxLayout(&testDialog);
-    QLabel* label = new QLabel("omg omg omg", &testDialog);
-    QPushButton* btn = new QPushButton("Close", &testDialog);
-
-    layout->addWidget(label);
-    layout->addWidget(btn);
-
-    QObject::connect(btn, &QPushButton::clicked, &testDialog, &QDialog::accept);
-    testDialog.exec();
 
     Funkin::Filesystem::init();
     Funkin::Cache::init();
@@ -106,7 +100,7 @@ int main(int argc, char** argv) {
     }
 
     Funkin::Settings appSettings;
-    SDL_Window* window = SDL_CreateWindow("FNF CPP | initializing...", appSettings.windowWidth, appSettings.windowHeight, SDL_WINDOW_RESIZABLE);
+    SDL_Window* window = SDL_CreateWindow("FNF CPP | initializing...", appSettings.windowWidth, appSettings.windowHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
     if (!window) {
         LOG_ERR("SDL window failed: {}", SDL_GetError());
         return 1;
@@ -117,6 +111,18 @@ int main(int argc, char** argv) {
     SDL_PropertiesID props = SDL_GetWindowProperties(window);
     void* hwnd = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
     LOG_PRINT("HWND = {}", hwnd);
+
+    QMainWindow* editorWindow = new QMainWindow();
+    editorWindow->setWindowTitle("FNF CPP | initializing...");
+    editorWindow->resize(appSettings.windowWidth, appSettings.windowHeight);
+
+    QWindow* sdlQWindow = QWindow::fromWinId((WId)(quintptr)hwnd);
+    editorWindow->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
+
+    QWidget* viewport = QWidget::createWindowContainer(sdlQWindow, editorWindow);
+    editorWindow->setCentralWidget(viewport);
+    //editorWindow->installEventFilter
+    editorWindow->show();
 
     bgfx::PlatformData pd{};
     pd.nwh = hwnd;
@@ -145,7 +151,7 @@ int main(int argc, char** argv) {
 
     const char* name = bgfx::getRendererName(bgfx::getRendererType());
     LOG_PRINT("bgfx using: {}", name);
-    SDL_SetWindowTitle(window, (std::string("FNF [") + name + "]").c_str());
+    editorWindow->setWindowTitle((std::string("FNF [") + name + "]").c_str());
 
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x1a1a1aff, 1.0f, 0);
     bgfx::setViewRect(0, 0, 0, appSettings.windowWidth, appSettings.windowHeight);
@@ -166,7 +172,7 @@ int main(int argc, char** argv) {
     // TEMP
     Funkin::Renderer::AnimatedSprite testSprite;
 
-    while (running) {
+    while (running && editorWindow->isVisible()) {
         // delta time
         auto now = std::chrono::high_resolution_clock::now();
         float dt = std::chrono::duration<float>(now - lastTime).count();
@@ -175,11 +181,12 @@ int main(int argc, char** argv) {
         qtApp.processEvents();
 
         while (SDL_PollEvent(&e)) {
-        if (e.type == SDL_EVENT_QUIT) running = false;
-        input.handleSDLEvent(e);
-        Funkin::DebugManager::handleEvent(e);
+            if (e.type == SDL_EVENT_QUIT) running = false;
+            if (e.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) running = false;
+            input.handleSDLEvent(e);
+            Funkin::DebugManager::handleEvent(e);
 
-        if (e.type == SDL_EVENT_WINDOW_RESIZED) {
+            if (e.type == SDL_EVENT_WINDOW_RESIZED) {
                 uint32_t w = (uint32_t)e.window.data1;
                 uint32_t h = (uint32_t)e.window.data2;
                 bgfx::reset(w, h, (appSettings.vsync == Funkin::Settings::VSyncMode::On) ? BGFX_RESET_VSYNC : 0);
@@ -215,7 +222,7 @@ int main(int argc, char** argv) {
         if (!Funkin::App::Project::get().isLoaded()) {
             if (Funkin::App::RunLauncher()) {
                 LOG_PRINT("Project loaded");
-                SDL_SetWindowTitle(window, (std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
+                editorWindow->setWindowTitle((std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
                 testSprite.loadAtlas("images/ui/test.xml", "test");
                 testSprite.addAnimation("idle",  "idle",  24.f, true);
                 testSprite.addAnimation("left",  "left",  24.f, false);
@@ -254,5 +261,6 @@ int main(int argc, char** argv) {
     SDL_DestroyWindow(window);
     SDL_Quit();
     
+    delete editorWindow;
     return 0;
 }
