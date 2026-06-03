@@ -18,6 +18,7 @@
 #include <QWindow>
 #include <QWidget>
 #include <QMainWindow>
+#include <QAbstractNativeEventFilter>
 
 #include "shared/log.hpp"
 #include "input/input.hpp"
@@ -34,6 +35,26 @@
 #include "cache/cache.hpp"
 #include "renderer/sprite/sprite_batch.hpp"
 #include "renderer/sprite/animated_sprite.hpp"
+#include "platform/win32/win32_input.hpp"
+
+class RawInputFilter : public QAbstractNativeEventFilter {
+public:
+    bool nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result) override {
+        if (eventType == "windows_generic_MSG") {
+            MSG* msg = static_cast<MSG*>(message);
+            if (msg->message == WM_INPUT) {
+                Funkin::Platform::Input::handleRawInput(
+                    (HRAWINPUT)msg->lParam,
+                    Funkin::Input::Input::get().ring(),
+                    Funkin::Input::Input::get().startTime(),
+                    Funkin::Platform::Input::nanoTime()
+                );
+                return false;
+            }
+        }
+        return false;
+    }
+};
 
 void DrawFileAssociationModal(bool& showModal) {
     if (showModal) {
@@ -70,6 +91,8 @@ void DrawFileAssociationModal(bool& showModal) {
 
 int main(int argc, char** argv) {
     QApplication qtApp(argc, argv);
+    RawInputFilter rawInputFilter;
+    qtApp.installNativeEventFilter(&rawInputFilter);
 
     Funkin::Filesystem::init();
     Funkin::Cache::init();
@@ -113,10 +136,16 @@ int main(int argc, char** argv) {
     QWindow* sdlQWindow = QWindow::fromWinId((WId)(quintptr)hwnd);
     editorWindow->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
 
-    QWidget* viewport = QWidget::createWindowContainer(sdlQWindow, editorWindow);
+    QWidget* viewport = QWidget::createWindowContainer(sdlQWindow, editorWindow);    
     editorWindow->setCentralWidget(viewport);
+    viewport->setFocusPolicy(Qt::StrongFocus);
+    viewport->setAttribute(Qt::WA_NativeWindow);
+    viewport->setFocus();
     //editorWindow->installEventFilter
     editorWindow->show();
+
+    HWND qtHwnd = (HWND)editorWindow->winId();
+    Funkin::Platform::Input::registerRawInput(qtHwnd);
 
     bgfx::PlatformData pd{};
     pd.nwh = hwnd;
