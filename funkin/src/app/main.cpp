@@ -15,15 +15,9 @@
 #include <imgui.h>
 
 #include <QApplication>
-#include <QDialog>
-#include <QVBoxLayout>
-#include <QLabel>
 #include <QWindow>
 #include <QWidget>
-#include <QPushButton>
 #include <QMainWindow>
-#include <QMouseEvent>
-#include <QPoint>
 
 #include "shared/log.hpp"
 #include "input/input.hpp"
@@ -100,7 +94,7 @@ int main(int argc, char** argv) {
     }
 
     Funkin::Settings appSettings;
-    SDL_Window* window = SDL_CreateWindow("FNF CPP | initializing...", appSettings.windowWidth, appSettings.windowHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
+    SDL_Window* window = SDL_CreateWindow("FNF CPP | initializing...", appSettings.windowWidth, appSettings.windowHeight, SDL_WINDOW_RESIZABLE);
     if (!window) {
         LOG_ERR("SDL window failed: {}", SDL_GetError());
         return 1;
@@ -187,8 +181,8 @@ int main(int argc, char** argv) {
             Funkin::DebugManager::handleEvent(e);
 
             if (e.type == SDL_EVENT_WINDOW_RESIZED) {
-                uint32_t w = (uint32_t)e.window.data1;
-                uint32_t h = (uint32_t)e.window.data2;
+                uint32_t w = (uint32_t)viewport->width();
+                uint32_t h = (uint32_t)viewport->height();
                 bgfx::reset(w, h, (appSettings.vsync == Funkin::Settings::VSyncMode::On) ? BGFX_RESET_VSYNC : 0);
                 bgfx::setViewRect(0, 0, 0, (uint16_t)w, (uint16_t)h);
             }
@@ -210,9 +204,9 @@ int main(int argc, char** argv) {
         Funkin::Shader::tickShaderJobs();
         Funkin::DebugManager::beginFrame();
 
-        int w, h;
-        SDL_GetWindowSize(window, &w, &h);
-        Funkin::Renderer::SpriteBatch::get().begin(0, (uint32_t)w, (uint32_t)h);
+        uint32_t w = (uint32_t)viewport->width();
+        uint32_t h = (uint32_t)viewport->height();
+        Funkin::Renderer::SpriteBatch::get().begin(0, w, h);
         testSprite.draw();
         Funkin::Renderer::SpriteBatch::get().end();
 
