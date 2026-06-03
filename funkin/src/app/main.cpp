@@ -19,6 +19,7 @@
 #include <QWidget>
 #include <QMainWindow>
 #include <QAbstractNativeEventFilter>
+#include <QResizeEvent>
 
 #include "shared/log.hpp"
 #include "input/input.hpp"
@@ -36,6 +37,19 @@
 #include "renderer/sprite/sprite_batch.hpp"
 #include "renderer/sprite/animated_sprite.hpp"
 #include "platform/win32/win32_input.hpp"
+
+class ViewportResizeFilter : public QObject {
+public:
+    std::function<void(int,int)> onResize;
+protected:
+    bool eventFilter(QObject* obj, QEvent* event) override {
+        if (event->type() == QEvent::Resize) {
+            auto* re = static_cast<QResizeEvent*>(event);
+            if (onResize) onResize(re->size().width(), re->size().height());
+        }
+        return QObject::eventFilter(obj, event);
+    }
+};
 
 class RawInputFilter : public QAbstractNativeEventFilter {
 public:
@@ -90,9 +104,15 @@ void DrawFileAssociationModal(bool& showModal) {
 }
 
 int main(int argc, char** argv) {
+    bool running = true;
+
     QApplication qtApp(argc, argv);
     RawInputFilter rawInputFilter;
     qtApp.installNativeEventFilter(&rawInputFilter);
+
+    QObject::connect(&qtApp, &QGuiApplication::lastWindowClosed, [&]() {
+        running = false;
+    });
 
     Funkin::Filesystem::init();
     Funkin::Cache::init();
@@ -117,7 +137,10 @@ int main(int argc, char** argv) {
     }
 
     Funkin::Settings appSettings;
-    SDL_Window* window = SDL_CreateWindow("FNF CPP | initializing...", appSettings.windowWidth, appSettings.windowHeight, SDL_WINDOW_RESIZABLE);
+    SDL_Window* window = SDL_CreateWindow("FNF CPP | initializing...", appSettings.windowWidth, appSettings.windowHeight, 
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_BORDERLESS | SDL_WINDOW_HIDDEN
+    );
+
     if (!window) {
         LOG_ERR("SDL window failed: {}", SDL_GetError());
         return 1;
@@ -128,6 +151,7 @@ int main(int argc, char** argv) {
     SDL_PropertiesID props = SDL_GetWindowProperties(window);
     void* hwnd = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
     LOG_PRINT("HWND = {}", hwnd);
+    LOG_PRINT("Qt platform: {}", QGuiApplication::platformName().toStdString());
 
     QMainWindow* editorWindow = new QMainWindow();
     editorWindow->setWindowTitle("FNF CPP | initializing...");
@@ -142,7 +166,13 @@ int main(int argc, char** argv) {
     viewport->setAttribute(Qt::WA_NativeWindow);
     viewport->setFocus();
     //editorWindow->installEventFilter
-    editorWindow->show();
+
+    ViewportResizeFilter* resizeFilter = new ViewportResizeFilter();
+    resizeFilter->onResize = [&](int w, int h) {
+        bgfx::reset((uint32_t)w, (uint32_t)h, BGFX_RESET_VSYNC);
+        bgfx::setViewRect(0, 0, 0, (uint16_t)w, (uint16_t)h);
+    };
+    viewport->installEventFilter(resizeFilter);
 
     HWND qtHwnd = (HWND)editorWindow->winId();
     Funkin::Platform::Input::registerRawInput(qtHwnd);
@@ -167,6 +197,9 @@ int main(int argc, char** argv) {
         LOG_CRIT("bgfx init failed");
         return 1;
     }
+
+    editorWindow->show();
+    SDL_ShowWindow(window);
     
     Funkin::DebugManager::init(window, 255);
     Funkin::Assets::AssetManager::get().init();
@@ -189,7 +222,6 @@ int main(int argc, char** argv) {
     input.bind("left", Funkin::Input::KeyCode::A);
     input.bind("right", Funkin::Input::KeyCode::D);
 
-    bool running = true;
     SDL_Event e;
     auto lastTime = std::chrono::high_resolution_clock::now();
     // TEMP
@@ -204,17 +236,8 @@ int main(int argc, char** argv) {
         qtApp.processEvents();
 
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_EVENT_QUIT) running = false;
-            if (e.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) running = false;
             input.handleSDLEvent(e);
             Funkin::DebugManager::handleEvent(e);
-
-            if (e.type == SDL_EVENT_WINDOW_RESIZED) {
-                uint32_t w = (uint32_t)viewport->width();
-                uint32_t h = (uint32_t)viewport->height();
-                bgfx::reset(w, h, (appSettings.vsync == Funkin::Settings::VSyncMode::On) ? BGFX_RESET_VSYNC : 0);
-                bgfx::setViewRect(0, 0, 0, (uint16_t)w, (uint16_t)h);
-            }
         }
 
         Funkin::Assets::AssetManager::get().update();
@@ -274,6 +297,9 @@ int main(int argc, char** argv) {
         bgfx::touch(0);
         bgfx::frame();
     }
+
+    // stops window flash on exit
+    SDL_HideWindow(window);
 
     Funkin::Assets::AssetManager::get().shutdown();
     Funkin::DebugManager::shutdown();
