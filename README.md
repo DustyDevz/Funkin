@@ -18,7 +18,6 @@ this is just here so my dumbass can rememeber
 * Sprites / Animated Sprites
 * Registry
 * Debug
-<img width="1919" height="1033" alt="image" src="https://github.com/user-attachments/assets/cd2bab3b-8018-4b94-a9df-7e8d3eb97851" />
 
 https://github.com/user-attachments/assets/53cf796d-b558-4a2d-9065-84981c669147
 
