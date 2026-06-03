@@ -40,12 +40,17 @@
 
 class ViewportResizeFilter : public QObject {
 public:
-    std::function<void(int,int)> onResize;
+    bool needsReset = false;
+    int pendingW = 0;
+    int pendingH = 0;
+
 protected:
     bool eventFilter(QObject* obj, QEvent* event) override {
         if (event->type() == QEvent::Resize) {
             auto* re = static_cast<QResizeEvent*>(event);
-            if (onResize) onResize(re->size().width(), re->size().height());
+            pendingW = re->size().width();
+            pendingH = re->size().height();
+            needsReset = true; 
         }
         return QObject::eventFilter(obj, event);
     }
@@ -168,10 +173,6 @@ int main(int argc, char** argv) {
     //editorWindow->installEventFilter
 
     ViewportResizeFilter* resizeFilter = new ViewportResizeFilter();
-    resizeFilter->onResize = [&](int w, int h) {
-        bgfx::reset((uint32_t)w, (uint32_t)h, BGFX_RESET_VSYNC);
-        bgfx::setViewRect(0, 0, 0, (uint16_t)w, (uint16_t)h);
-    };
     viewport->installEventFilter(resizeFilter);
 
     HWND qtHwnd = (HWND)editorWindow->winId();
@@ -199,7 +200,7 @@ int main(int argc, char** argv) {
     }
 
     editorWindow->show();
-    SDL_ShowWindow(window);
+    //SDL_ShowWindow(window);
     
     Funkin::DebugManager::init(window, 255);
     Funkin::Assets::AssetManager::get().init();
@@ -234,6 +235,12 @@ int main(int argc, char** argv) {
         lastTime = now;
 
         qtApp.processEvents();
+
+        if (resizeFilter->needsReset) {
+            bgfx::reset((uint32_t)resizeFilter->pendingW, (uint32_t)resizeFilter->pendingH, BGFX_RESET_VSYNC);
+            bgfx::setViewRect(0, 0, 0, (uint16_t)resizeFilter->pendingW, (uint16_t)resizeFilter->pendingH);
+            resizeFilter->needsReset = false;
+        }
 
         while (SDL_PollEvent(&e)) {
             input.handleSDLEvent(e);
