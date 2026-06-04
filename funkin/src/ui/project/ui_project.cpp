@@ -154,7 +154,7 @@ namespace Funkin::UI::Project {
         auto* nameRow = new QHBoxLayout();
         nameRow->addWidget(new QLabel("Name:", tab));
         m_newName = new QLineEdit(tab);
-        m_newName->setPlaceholderText("My FNF Mod");
+        m_newName->setPlaceholderText("My Shitty FNF Mod");
         nameRow->addWidget(m_newName, 1);
         layout->addLayout(nameRow);
 
