@@ -214,10 +214,6 @@ int main(int argc, char** argv) {
     editorWindow->setCentralWidget(viewport);
     rawInputFilter.viewportWidget = viewport;
 
-    QDockWidget* dock = new QDockWidget("test", editorWindow);
-    dock->setWidget(new QPushButton("CLICK ME :3", dock));
-    editorWindow->addDockWidget(Qt::RightDockWidgetArea, dock);
-
     editorWindow->hide();
 
     HWND hwnd = (HWND)viewport->winId();
