@@ -4,6 +4,7 @@
 #include "project.hpp"
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <chrono>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -36,10 +37,12 @@ namespace Funkin::App {
         try {
             std::ifstream f(path);
             auto j = nlohmann::json::parse(f);
+            auto time = std::chrono::system_clock::now();
             for (auto& entry : j["recent"]) {
                 RecentProject rp;
-                rp.name = entry["name"].get<std::string>();
-                rp.path = entry["path"].get<std::string>();
+                rp.name       = entry["name"].get<std::string>();
+                rp.path       = entry["path"].get<std::string>();
+                rp.lastOpened = std::chrono::duration_cast<std::chrono::seconds>(time.time_since_epoch()).count();
                 result.push_back(rp);
             }
         } catch (...) {

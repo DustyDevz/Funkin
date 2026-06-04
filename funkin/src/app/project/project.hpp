@@ -5,12 +5,14 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <cstdint>
 #include "shared/log.hpp"
 
 namespace Funkin::App {
     struct RecentProject {
         std::string name;
         std::string path;
+        int64_t     lastOpened = 0;
     };
 
     struct Project {
@@ -26,7 +28,7 @@ namespace Funkin::App {
 
         bool        isLoaded() const { return m_loaded; }
         void        unload()         { m_loaded = false; }
-        
+
         static std::vector<RecentProject> loadRecent();
         static void                        saveRecent(const std::vector<RecentProject>&);
         static void                        addRecent(const RecentProject&);

@@ -213,7 +213,6 @@ int main(int argc, char** argv) {
     ViewportWidget* viewport = new ViewportWidget(editorWindow);
     editorWindow->setCentralWidget(viewport);
     rawInputFilter.viewportWidget = viewport;
-
     editorWindow->hide();
 
     HWND hwnd = (HWND)viewport->winId();

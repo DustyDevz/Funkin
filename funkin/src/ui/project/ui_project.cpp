@@ -10,6 +10,7 @@
 #include <QVBoxLayout>
 #include <QTabWidget>
 #include <QListWidget>
+#include <QListWidgetItem>
 #include <QLineEdit>
 #include <QLabel>
 #include <QPushButton>
@@ -18,9 +19,28 @@
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
+#include <QMenu>
+#include <QAction>
+#include <QDateTime>
+#include <QStyle>
+#include <fstream>
+#include <nlohmann/json.hpp>
 #include <filesystem>
 
 namespace Funkin::UI::Project {
+
+    static QString formatTimestamp(int64_t ts) {
+        if (ts == 0) return "Unknown";
+        QDateTime dt = QDateTime::fromSecsSinceEpoch(ts);
+        QDateTime now = QDateTime::currentDateTime();
+        int64_t secs = dt.secsTo(now);
+
+        if (secs < 60)          return "Just now";
+        if (secs < 3600)        return QString("%1m ago").arg(secs / 60);
+        if (secs < 86400)       return QString("%1h ago").arg(secs / 3600);
+        if (secs < 86400 * 7)   return QString("%1d ago").arg(secs / 86400);
+        return dt.toString("MMM d, yyyy");
+    }
 
     bool RunLauncher(QWidget* parent) {
         LauncherDialog dlg(parent);
@@ -97,53 +117,43 @@ namespace Funkin::UI::Project {
         layout->setContentsMargins(8, 8, 8, 8);
         layout->setSpacing(6);
 
+        m_emptyLabel = new QLabel(
+            "No projects found — create a new one or import an existing project setup.", tab);
+        m_emptyLabel->setAlignment(Qt::AlignCenter);
+        m_emptyLabel->setWordWrap(true);
+        m_emptyLabel->setStyleSheet("color: gray; padding: 24px;");
+        m_emptyLabel->hide();
+
         m_recentList = new QListWidget(tab);
         m_recentList->setAlternatingRowColors(true);
+        m_recentList->setIconSize(QSize(20, 20));
+        m_recentList->setContextMenuPolicy(Qt::CustomContextMenu);
+        m_recentList->setSpacing(2);
 
-        auto recents = Funkin::App::Project::loadRecent();
-        if (recents.empty()) {
-            auto* placeholder = new QListWidgetItem("No recent projects.");
-            placeholder->setFlags(Qt::NoItemFlags);
-            m_recentList->addItem(placeholder);
-        } else {
-            for (auto& rp : recents) {
-                auto* item = new QListWidgetItem(
-                    QString("%1  —  %2")
-                        .arg(QString::fromStdString(rp.name))
-                        .arg(QString::fromStdString(rp.path))
-                );
-                item->setData(Qt::UserRole, QString::fromStdString(rp.path));
-                m_recentList->addItem(item);
-            }
-        }
-
-        connect(m_recentList, &QListWidget::itemDoubleClicked,
+        connect(m_recentList, &QListWidget::itemActivated,
                 this, &LauncherDialog::onOpenRecent);
+        connect(m_recentList, &QListWidget::customContextMenuRequested,
+                this, &LauncherDialog::onRecentContextMenu);
 
-        layout->addWidget(m_recentList, 1);
+        populateRecentList();
+
+        auto* listContainer = new QWidget(tab);
+        auto* stackLayout   = new QVBoxLayout(listContainer);
+        stackLayout->setContentsMargins(0, 0, 0, 0);
+        stackLayout->addWidget(m_recentList);
+        stackLayout->addWidget(m_emptyLabel);
+
+        layout->addWidget(listContainer, 1);
 
         auto* line = new QFrame(tab);
         line->setFrameShape(QFrame::HLine);
         line->setFrameShadow(QFrame::Sunken);
         layout->addWidget(line);
 
-        layout->addWidget(new QLabel("Open existing project:", tab));
-
-        auto* row = new QHBoxLayout();
-        m_openPath = new QLineEdit(tab);
-        m_openPath->setPlaceholderText("Path to project folder...");
-
-        auto* browseBtn = new QPushButton("Browse", tab);
-        auto* openBtn   = new QPushButton("Open",   tab);
-        openBtn->setDefault(true);
-
-        connect(browseBtn, &QPushButton::clicked, this, &LauncherDialog::onOpenBrowse);
-        connect(openBtn,   &QPushButton::clicked, this, &LauncherDialog::onOpenProject);
-
-        row->addWidget(m_openPath, 1);
-        row->addWidget(browseBtn);
-        row->addWidget(openBtn);
-        layout->addLayout(row);
+        auto* importBtn = new QPushButton("Import Existing Project...", tab);
+        importBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        connect(importBtn, &QPushButton::clicked, this, &LauncherDialog::onOpenProject);
+        layout->addWidget(importBtn);
     }
 
     void LauncherDialog::buildNewTab(QWidget* tab) {
@@ -154,7 +164,7 @@ namespace Funkin::UI::Project {
         auto* nameRow = new QHBoxLayout();
         nameRow->addWidget(new QLabel("Name:", tab));
         m_newName = new QLineEdit(tab);
-        m_newName->setPlaceholderText("My Shitty FNF Mod");
+        m_newName->setPlaceholderText(":3");
         nameRow->addWidget(m_newName, 1);
         layout->addLayout(nameRow);
 
@@ -177,28 +187,110 @@ namespace Funkin::UI::Project {
         layout->addWidget(createBtn);
     }
 
+    void LauncherDialog::populateRecentList() {
+        m_recentList->clear();
+
+        auto recents = Funkin::App::Project::loadRecent();
+
+        if (recents.empty()) {
+            m_recentList->hide();
+            m_emptyLabel->show();
+            return;
+        }
+
+        m_emptyLabel->hide();
+        m_recentList->show();
+
+        QIcon folderIcon = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
+
+        for (auto& rp : recents) {
+            auto* item   = new QListWidgetItem(m_recentList);
+            auto* widget = new QWidget();
+            auto* vbox   = new QVBoxLayout(widget);
+            vbox->setContentsMargins(4, 4, 4, 4);
+            vbox->setSpacing(2);
+
+            auto* nameLabel = new QLabel(QString::fromStdString(rp.name));
+            QFont nameFont  = nameLabel->font();
+            nameFont.setBold(true);
+            nameLabel->setFont(nameFont);
+
+            auto projectFile = std::filesystem::path(rp.path) / "project.funkin";
+            auto displayPath = QString::fromStdString(projectFile.string());
+
+            auto* metaLabel = new QLabel(
+                QString("%1  ·  %2")
+                    .arg(displayPath)
+                    .arg(formatTimestamp(rp.lastOpened))
+            );
+            metaLabel->setStyleSheet("color: gray; font-size: 11px;");
+
+            vbox->addWidget(nameLabel);
+            vbox->addWidget(metaLabel);
+            widget->setLayout(vbox);
+
+            item->setSizeHint(widget->sizeHint());
+            item->setIcon(folderIcon);
+            item->setData(Qt::UserRole, QString::fromStdString(rp.path));
+            item->setToolTip(displayPath);
+
+            m_recentList->setItemWidget(item, widget);
+        }
+    }
+
+    void LauncherDialog::onRecentContextMenu(const QPoint& pos) {
+        QListWidgetItem* item = m_recentList->itemAt(pos);
+        if (!item) return;
+
+        QMenu menu(this);
+        QAction* removeAction = menu.addAction("Remove from recents");
+
+        if (menu.exec(m_recentList->mapToGlobal(pos)) == removeAction) {
+            QString path = item->data(Qt::UserRole).toString();
+
+            auto recents = Funkin::App::Project::loadRecent();
+            recents.erase(
+                std::remove_if(recents.begin(), recents.end(),
+                    [&](const Funkin::App::RecentProject& rp) {
+                        return rp.path == path.toStdString();
+                    }),
+                recents.end()
+            );
+            Funkin::App::Project::saveRecent(recents);
+
+            populateRecentList();
+        }
+    }
+
     void LauncherDialog::onOpenBrowse() {
-        QString dir = QFileDialog::getExistingDirectory(
-            this, "Select Project Folder", QString(),
-            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-        );
-        if (!dir.isEmpty())
-            m_openPath->setText(dir);
     }
 
     void LauncherDialog::onOpenProject() {
         clearError();
-        std::string path = m_openPath->text().trimmed().toStdString();
-        if (path.empty()) {
-            setError("Please enter or browse to a project folder.");
+
+        QString file = QFileDialog::getOpenFileName(
+            this, "Import Project Configuration", QString(),
+            "Funkin Project Files (project.funkin);;All Files (*)"
+        );
+
+        if (file.isEmpty()) return;
+
+        std::filesystem::path projectFile(file.toStdString());
+        if (!std::filesystem::exists(projectFile)) {
+            setError("The specified project file does not exist.");
             return;
         }
 
-        auto projectFile = std::filesystem::path(path) / "project.funkin";
-        if (Funkin::App::Project::get().load(projectFile)) {
-            accept();
-        } else {
-            setError(QString("project.funkin not found in: %1").arg(m_openPath->text()));
+        try {
+            std::ifstream f(projectFile);
+            auto j = nlohmann::json::parse(f);
+            std::string pName = j["name"].get<std::string>();
+            std::string pRoot = projectFile.parent_path().string();
+
+            Funkin::App::Project::get().addRecent({ pName, pRoot });
+            populateRecentList();
+        } catch (...) {
+            setError("Failed to parse the chosen project file structure.");
         }
     }
 
@@ -211,7 +303,7 @@ namespace Funkin::UI::Project {
         if (Funkin::App::Project::get().load(projectFile)) {
             accept();
         } else {
-            setError(QString("Failed to load project: %1").arg(path));
+            setError(QString("Failed to load project at: %1\n\nRight-click to remove it from recents.").arg(QString::fromStdString(projectFile.string())));
         }
     }
 
@@ -220,6 +312,7 @@ namespace Funkin::UI::Project {
             this, "Select Parent Folder", QString(),
             QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
         );
+        
         if (!dir.isEmpty())
             m_newFolder->setText(dir);
     }
@@ -251,7 +344,7 @@ namespace Funkin::UI::Project {
 
     void LauncherDialog::setError(const QString& msg) {
         m_errorLabel->setText(msg);
-        
+
         if (m_errorLabel->isHidden()) {
             m_errorLabel->show();
             auto* anim = new QPropertyAnimation(m_errorEffect, "opacity");
@@ -270,12 +363,12 @@ namespace Funkin::UI::Project {
             anim->setStartValue(m_errorEffect->opacity());
             anim->setEndValue(0.0);
             anim->setEasingCurve(QEasingCurve::InQuad);
-            
+
             connect(anim, &QPropertyAnimation::finished, [this]() {
                 m_errorLabel->hide();
                 m_errorLabel->clear();
             });
-            
+
             anim->start(QAbstractAnimation::DeleteWhenStopped);
         }
     }
