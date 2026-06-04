@@ -11,8 +11,7 @@ set(APP_SOURCES
     src/app/main.cpp
     src/app/debug.cpp
     src/app/registry.cpp
-    src/app/projects/project.cpp
-    src/app/projects/launcher.cpp
+    src/app/project/project.cpp
 )
 
 set(ASSET_SOURCES
@@ -25,7 +24,7 @@ set(ASSET_SOURCES
 )
 
 set(AUDIO_SOURCES
-    src/audio/audio.cpp
+    ##src/audio/audio.cpp
 )
 
 set(INPUT_SOURCES
@@ -64,6 +63,10 @@ set(SHARED_SOURCES
     src/shared/xxhash_impl.cpp
 )
 
+set(UI_SOURCES
+    src/ui/project/ui_project.cpp
+)
+
 set(THIRD_PARTY_SOURCES
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui.cpp
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui_draw.cpp
@@ -85,6 +88,7 @@ target_sources(Funkin PRIVATE
     ${SHADER_SOURCES}
     ${THIRD_PARTY_SOURCES}
     ${SHARED_SOURCES}
+    ${UI_SOURCES}
 )
 
 target_precompile_headers(Funkin PRIVATE
@@ -115,6 +119,8 @@ target_link_libraries(Funkin PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
+    Qt6::Quick
+    Qt6::Qml
 )
 
 if(WIN32)
@@ -159,6 +165,7 @@ set_target_properties(Funkin PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/export/$<CONFIG>"
 )
 
+message(STATUS "Qt version: ${Qt6_VERSION}")
 
 add_custom_command(TARGET Funkin POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy

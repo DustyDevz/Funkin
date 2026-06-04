@@ -25,8 +25,8 @@
 #include "input/input.hpp"
 #include "settings.hpp"
 #include "app/debug.hpp"
-#include "projects/project.hpp"
-#include "projects/launcher.hpp"
+#include "project/project.hpp"
+#include "ui/project/ui_project.hpp"
 #include "registry.hpp"
 #include "filesystem/filesystem.hpp"
 #include "assets/assets.hpp"
@@ -192,25 +192,34 @@ int main(int argc, char** argv) {
         }
     }
 
+    if (!Funkin::App::Project::get().isLoaded()) {
+        if (!Funkin::UI::Project::RunLauncher(nullptr)) {
+            return 0;
+        }
+    }
+
     Funkin::Settings appSettings;
     LOG_PRINT("Qt platform: {}", QGuiApplication::platformName().toStdString());
 
     QMainWindow* editorWindow = new QMainWindow();
-    editorWindow->setWindowTitle("FNF CPP | initializing...");
+    editorWindow->setWindowTitle("Friday Night Funkin Engine");
     editorWindow->resize(appSettings.windowWidth, appSettings.windowHeight);
+    
+    editorWindow->setStyleSheet(
+        "QMainWindow { background-color: #1a1a1a; }"
+        "QDockWidget { background-color: #1a1a1a; color: #ffffff; }"
+    );
 
     ViewportWidget* viewport = new ViewportWidget(editorWindow);
     editorWindow->setCentralWidget(viewport);
-
     rawInputFilter.viewportWidget = viewport;
 
     QDockWidget* dock = new QDockWidget("test", editorWindow);
     dock->setWidget(new QPushButton("CLICK ME :3", dock));
     editorWindow->addDockWidget(Qt::RightDockWidgetArea, dock);
 
-    editorWindow->show();
-    viewport->winId();
-    qtApp.processEvents(QEventLoop::AllEvents);
+    editorWindow->hide();
+
     HWND hwnd = (HWND)viewport->winId();
     HWND qtHwnd = (HWND)editorWindow->winId();
     
@@ -254,10 +263,13 @@ int main(int argc, char** argv) {
 
     const char* name = bgfx::getRendererName(bgfx::getRendererType());
     LOG_PRINT("bgfx using: {}", name);
-    editorWindow->setWindowTitle((std::string("FNF [") + name + "]").c_str());
 
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x1a1a1aff, 1.0f, 0);
     bgfx::setViewRect(0, 0, 0, (uint16_t)viewport->width(), (uint16_t)viewport->height());
+
+    bgfx::touch(0);
+    bgfx::frame();
+    bgfx::frame();
 
     Funkin::Input::Input& input = Funkin::Input::Input::get();
     input.init();
@@ -270,6 +282,19 @@ int main(int argc, char** argv) {
 
     auto lastTime = std::chrono::high_resolution_clock::now();
     Funkin::Renderer::AnimatedSprite testSprite;
+
+    LOG_PRINT("Project loaded: {}", Funkin::App::Project::get().name);
+    editorWindow->setWindowTitle((std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
+    testSprite.loadAtlas("images/ui/test.xml", "test");
+    testSprite.addAnimation("idle",  "idle",  24.f, true);
+    testSprite.addAnimation("left",  "left",  24.f, false);
+    testSprite.addAnimation("down",  "down",  24.f, false);
+    testSprite.addAnimation("up",    "up",    24.f, false);
+    testSprite.addAnimation("right", "right", 24.f, false);
+    testSprite.play("idle");
+    testSprite.onAnimComplete = [&](const std::string& anim) {
+        testSprite.play("idle");
+    };
 
     rawInputFilter.onRenderFrame = [&]() {
         if (!running || !editorWindow->isVisible()) {
@@ -307,24 +332,7 @@ int main(int argc, char** argv) {
         if (showAssociationPrompt)
             DrawFileAssociationModal(showAssociationPrompt);
 
-        if (!Funkin::App::Project::get().isLoaded()) {
-            if (Funkin::App::RunLauncher()) {
-                LOG_PRINT("Project loaded");
-                editorWindow->setWindowTitle((std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
-                testSprite.loadAtlas("images/ui/test.xml", "test");
-                testSprite.addAnimation("idle",  "idle",  24.f, true);
-                testSprite.addAnimation("left",  "left",  24.f, false);
-                testSprite.addAnimation("down",  "down",  24.f, false);
-                testSprite.addAnimation("up",    "up",    24.f, false);
-                testSprite.addAnimation("right", "right", 24.f, false);
-                testSprite.play("idle");
-                testSprite.onAnimComplete = [&](const std::string& name) {
-                    testSprite.play("idle");
-                };
-            }
-        }
-
-        if (input.justDown("up"))    testSprite.play("up", true);
+        if (input.justDown("up"))         testSprite.play("up", true);
         else if (input.justDown("down"))  testSprite.play("down", true);
         else if (input.justDown("left"))  testSprite.play("left", true);
         else if (input.justDown("right")) testSprite.play("right", true);
@@ -346,9 +354,15 @@ int main(int argc, char** argv) {
         rawInputFilter.onRenderFrame();
     });
 
-    renderTimer.start();
-    int result = qtApp.exec();
+    QTimer::singleShot(1500, [&]() {
+        if (running) {
+            editorWindow->show();
+            qtApp.processEvents(QEventLoop::AllEvents);
+            renderTimer.start();
+        }
+    });
 
+    int result = qtApp.exec();
     Funkin::Assets::AssetManager::get().shutdown();
     Funkin::DebugManager::shutdown();
     Funkin::Shader::Sprites::shutdown();

@@ -4,7 +4,7 @@
 #pragma once
 #include "assets_types.hpp"
 #include "shared/log.hpp"
-#include "app/projects/project.hpp"
+#include "app/project/project.hpp"
 #include <unordered_map>
 #include <functional>
 #include <thread>
