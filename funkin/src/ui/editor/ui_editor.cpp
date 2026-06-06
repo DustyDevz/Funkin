@@ -1,4 +1,4 @@
-#include "editor.hpp"
+#include "ui_editor.hpp"
 #include "ui/editor/ui_scene_tree.hpp"
 
 #include <QMenuBar>
@@ -19,8 +19,7 @@
 #include "shared/log.hpp"
 #include "app/project/project.hpp"
 
-namespace Funkin::App::Editor {
-
+namespace Funkin::UI::Editor {
     EditorWindow::EditorWindow(QWidget* parent)
         : QMainWindow(parent)
     {
@@ -102,9 +101,9 @@ namespace Funkin::App::Editor {
             return btn;
         };
 
-        m_btnMinimize = makeBtn("WinBtnMinimize", QWK::WindowAgentBase::Minimize, QString(QChar(0xE949)));
-        m_btnMaximize = makeBtn("WinBtnMaximize", QWK::WindowAgentBase::Maximize, QString(QChar(0xE739)));
-        m_btnClose    = makeBtn("WinBtnClose",    QWK::WindowAgentBase::Close,    QString(QChar(0xE106)));
+        m_btnMinimize = makeBtn("WinBtnMinimize", QWK::WindowAgentBase::Minimize, QString(QChar(0xE921)));
+        m_btnMaximize = makeBtn("WinBtnMaximize", QWK::WindowAgentBase::Maximize, QString(QChar(0xE922)));
+        m_btnClose    = makeBtn("WinBtnClose",    QWK::WindowAgentBase::Close,    QString(QChar(0xE8BB)));
 
         connect(m_btnMinimize, &QPushButton::clicked, this, &QMainWindow::showMinimized);
         connect(m_btnMaximize, &QPushButton::clicked, this, [this]() {
@@ -118,6 +117,17 @@ namespace Funkin::App::Editor {
         m_windowAgent->setHitTestVisible(appIcon, false);
     }
 
+    void EditorWindow::changeEvent(QEvent* event) {
+        QMainWindow::changeEvent(event);
+        if (event->type() == QEvent::WindowStateChange && m_btnMaximize) {
+            m_btnMaximize->setText(
+                isMaximized()
+                    ? QString(QChar(0xE923))
+                    : QString(QChar(0xE922))
+            );
+        }
+    }
+
     void EditorWindow::buildDocks() {
         m_sceneTree = new Funkin::UI::Editor::SceneTreePanel(this);
 
@@ -127,5 +137,4 @@ namespace Funkin::App::Editor {
         m_sceneTreeDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
         addDockWidget(Qt::LeftDockWidgetArea, m_sceneTreeDock);
     }
-
 }

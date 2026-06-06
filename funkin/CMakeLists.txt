@@ -12,7 +12,6 @@ set(APP_SOURCES
     src/app/debug.cpp
     src/app/registry.cpp
     src/app/project/project.cpp
-    src/app/project/editor.cpp
 )
 
 set(ASSET_SOURCES
@@ -67,6 +66,7 @@ set(SHARED_SOURCES
 set(UI_SOURCES
     src/ui/project/ui_project.cpp
     src/ui/editor/ui_scene_tree.cpp
+    src/ui/editor/ui_editor.cpp
 )
 
 set(THIRD_PARTY_SOURCES

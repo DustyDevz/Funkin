@@ -15,11 +15,11 @@ namespace QWK {
 
 namespace Funkin::UI::Editor {
     class SceneTreePanel;
-}
-
-namespace Funkin::App::Editor {
     class EditorWindow : public QMainWindow {
         Q_OBJECT
+    
+    protected:
+        void changeEvent(QEvent* event) override;
 
     public:
         explicit EditorWindow(QWidget* parent = nullptr);

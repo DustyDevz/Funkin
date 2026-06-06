@@ -151,7 +151,6 @@ QPushButton#WinBtnClose {
     color: #cccccc;
     padding: 0;
     margin: 0;
-    qproperty-iconSize: 0px;
 }
 
 QPushButton#WinBtnMinimize:hover,

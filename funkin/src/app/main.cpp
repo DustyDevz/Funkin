@@ -37,7 +37,7 @@
 #include "renderer/sprite/sprite_batch.hpp"
 #include "renderer/sprite/animated_sprite.hpp"
 #include "platform/win32/win32_input.hpp"
-#include "project/editor.hpp"
+#include "ui/editor/ui_editor.hpp"
 
 class ViewportWidget : public QWidget {
 public:
@@ -203,7 +203,7 @@ int main(int argc, char** argv) {
     Funkin::Settings appSettings;
     LOG_PRINT("Qt platform: {}", QGuiApplication::platformName().toStdString());
 
-    QMainWindow* editorWindow = new Funkin::App::Editor::EditorWindow();
+    QMainWindow* editorWindow = new Funkin::UI::Editor::EditorWindow();
     //editorWindow->resize(appSettings.windowWidth, appSettings.windowHeight);
 
     ViewportWidget* viewport = new ViewportWidget(editorWindow);
