@@ -307,9 +307,9 @@ namespace Funkin::UI::Editor {
                     { ".wav",    { "file-music", QColor(0x85, 0x85, 0x85) } },
                     { ".json",   { "file-json",  QColor(0x85, 0x85, 0x85) } },
                     { ".xml",    { "code-xml",   QColor(0x85, 0x85, 0x85) } },
-                    { ".glsl",   { "file-code",  QColor(0x7a, 0xb0, 0x8a) } },
-                    { ".frag",   { "file-code",  QColor(0x7a, 0xb0, 0x8a) } },
-                    { ".vert",   { "file-code",  QColor(0x7a, 0xb0, 0x8a) } },
+                    { ".glsl",   { "file-code",  QColor(0x85, 0x85, 0x85) } },
+                    { ".frag",   { "file-code",  QColor(0x85, 0x85, 0x85) } },
+                    { ".vert",   { "file-code",  QColor(0x85, 0x85, 0x85) } },
                 };
 
                 auto it = extMap.find(ext);
@@ -322,15 +322,7 @@ namespace Funkin::UI::Editor {
             item->setData(0, Qt::UserRole,     QString::fromStdString(p.string()));
             item->setData(0, Qt::UserRole + 1, isDir);
 
-            const std::string ext = p.extension().string();
-            if (isDir)
-                item->setForeground(0, QColor("#cccccc"));
-            else if (ext == ".funkin")
-                item->setForeground(0, QColor("#8fa1b3"));
-            else if (ext == ".glsl" || ext == ".frag" || ext == ".vert")
-                item->setForeground(0, QColor("#7ab08a"));
-            else
-                item->setForeground(0, QColor("#858585"));
+            item->setForeground(0, QColor("#909090"));
 
             return item;
         };

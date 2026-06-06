@@ -24,7 +24,7 @@ QLineEdit#FilterEdit:focus {
 }
 
 QLineEdit#FilterEdit::placeholder {
-    color: #6b6b6b;
+    color: #858585;
 }
 
 QPushButton#ToolbarBtn {
@@ -54,8 +54,8 @@ QTreeWidget#SceneTree {
 }
 
 QTreeWidget#SceneTree::item {
-    height: 22px;
-    padding: 0px;
+    height: 24px;
+    padding-left: 6px;
     border: none;
 }
 
@@ -65,7 +65,7 @@ QTreeWidget#SceneTree::item:alternate {
 
 QTreeWidget#SceneTree::item:hover {
     background-color: #2a2d2e;
-    color: #cccccc;
+    color: #e2e4e7;
 }
 
 QTreeWidget#SceneTree::item:selected:focus {
@@ -75,7 +75,7 @@ QTreeWidget#SceneTree::item:selected:focus {
 
 QTreeWidget#SceneTree::item:selected:!focus {
     background-color: #37373d;
-    color: #cccccc;
+    color: #ffffff;
 }
 
 QTreeWidget#SceneTree::branch {

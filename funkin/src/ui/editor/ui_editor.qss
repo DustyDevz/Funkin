@@ -181,6 +181,7 @@ QPushButton#WinBtnClose:pressed {
 QWidget#CustomTitleBar {
     background-color: #161616;
     min-width: 100%;
+    border-bottom: 1px solid #2d2d2d;
 }
 
 QMenuBar#EditorMenuBar {
