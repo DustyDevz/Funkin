@@ -37,3 +37,6 @@
 [submodule "funkin/third_party/xxhash"]
 	path = funkin/third_party/xxhash
 	url = https://github.com/Cyan4973/xxHash
+[submodule "funkin/third_party/qwindowkit"]
+	path = funkin/third_party/qwindowkit
+	url = https://github.com/stdware/qwindowkit.git
