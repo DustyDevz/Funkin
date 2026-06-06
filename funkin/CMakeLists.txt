@@ -12,6 +12,7 @@ set(APP_SOURCES
     src/app/debug.cpp
     src/app/registry.cpp
     src/app/project/project.cpp
+    src/app/project/editor.cpp
 )
 
 set(ASSET_SOURCES
@@ -65,6 +66,7 @@ set(SHARED_SOURCES
 
 set(UI_SOURCES
     src/ui/project/ui_project.cpp
+    src/ui/editor/ui_scene_tree.cpp
 )
 
 set(THIRD_PARTY_SOURCES
@@ -89,6 +91,9 @@ target_sources(Funkin PRIVATE
     ${THIRD_PARTY_SOURCES}
     ${SHARED_SOURCES}
     ${UI_SOURCES}
+
+    resources_ui.qrc
+    resources.qrc
 )
 
 target_precompile_headers(Funkin PRIVATE
@@ -121,6 +126,8 @@ target_link_libraries(Funkin PRIVATE
     Qt6::Widgets
     Qt6::Quick
     Qt6::Qml
+    Qt6::Svg
+    QWindowKit::Widgets
 )
 
 if(WIN32)

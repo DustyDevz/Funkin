@@ -1,0 +1,226 @@
+QWidget#SceneTreePanel {
+    background-color: #161616;
+}
+
+QLineEdit#FilterEdit {
+    background-color: transparent;
+    color: #cccccc;
+    border: none;
+    border-bottom: 1px solid #3c3c3c;
+    border-radius: 0px;
+    padding: 2px 4px 2px 20px;
+    font-size: 12px;
+    selection-background-color: #094771;
+}
+
+QLineEdit#FilterEdit:focus {
+    border-bottom: 1px solid #007fd4;
+    background-color: transparent;
+}
+
+QLineEdit#FilterEdit::placeholder {
+    color: #6b6b6b;
+}
+
+QPushButton#ToolbarBtn {
+    background-color: transparent;
+    color: #858585;
+    border: none;
+    border-radius: 3px;
+    padding: 2px;
+}
+
+QPushButton#ToolbarBtn:hover {
+    background-color: #2a2d2e;
+    color: #cccccc;
+}
+
+QPushButton#ToolbarBtn:pressed {
+    background-color: #313131;
+}
+
+QTreeWidget#SceneTree {
+    background-color: #161616;
+    color: #cccccc;
+    border: none;
+    font-size: 13px;
+    outline: none;
+    show-decoration-selected: 1;
+}
+
+QTreeWidget#SceneTree::item {
+    height: 22px;
+    padding: 0px;
+    border: none;
+}
+
+QTreeWidget#SceneTree::item:alternate {
+    background-color: #161616;
+}
+
+QTreeWidget#SceneTree::item:hover {
+    background-color: #2a2d2e;
+    color: #cccccc;
+}
+
+QTreeWidget#SceneTree::item:selected:focus {
+    background-color: #094771;
+    color: #ffffff;
+}
+
+QTreeWidget#SceneTree::item:selected:!focus {
+    background-color: #37373d;
+    color: #cccccc;
+}
+
+QTreeWidget#SceneTree::branch {
+    background-color: #161616;
+}
+
+QTreeWidget#SceneTree::branch:hover {
+    background-color: #2a2d2e;
+}
+
+QTreeWidget#SceneTree::branch:selected {
+    background-color: #094771;
+}
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 6px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #424242;
+    border-radius: 3px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #686868;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    height: 0px;
+}
+
+QMenu {
+    background-color: #1f1f1f;
+    color: #cccccc;
+    border: 1px solid #2d2d2d;
+    padding: 2px 0px;
+    font-size: 12px;
+}
+
+QMenu::item {
+    padding: 4px 24px 4px 12px;
+}
+
+QMenu::item:selected {
+    background-color: #094771;
+    color: #ffffff;
+}
+
+QMenu::item:disabled {
+    color: #6b6b6b;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: #2d2d2d;
+    margin: 2px 0px;
+}
+
+QMenu::icon {
+    padding-left: 8px;
+}
+
+/* titlebar */
+QWidget#TitleBar {
+    background-color: #161616;
+    border-bottom: 1px solid #2d2d2d;
+}
+
+QLabel#AppIcon {
+    background: transparent;
+    padding: 0;
+}
+
+QLabel#TitleLabel {
+    color: #8a8a8a;
+    font-size: 12px;
+    background: transparent;
+    padding: 0 8px;
+}
+
+QMenuBar#EditorMenuBar {
+    background: transparent;
+    color: #cccccc;
+    font-size: 12px;
+    padding: 0;
+    border: none;
+}
+
+QMenuBar#EditorMenuBar::item {
+    background: transparent;
+    padding: 4px 8px;
+    color: #cccccc;
+}
+
+QMenuBar#EditorMenuBar::item:selected {
+    background: #2a2d2e;
+    color: #ffffff;
+}
+
+QMenuBar#EditorMenuBar::item:pressed {
+    background: #094771;
+    color: #ffffff;
+}
+
+QPushButton#WinBtnMinimize,
+QPushButton#WinBtnMaximize {
+    background: transparent;
+    border: none;
+    color: #cccccc;
+    font-size: 13px;
+    padding: 0;
+}
+
+QPushButton#WinBtnMinimize:hover,
+QPushButton#WinBtnMaximize:hover {
+    background: #2a2d2e;
+    color: #ffffff;
+}
+
+QPushButton#WinBtnMinimize:pressed,
+QPushButton#WinBtnMaximize:pressed {
+    background: #3c3c3c;
+}
+
+QPushButton#WinBtnClose {
+    background: transparent;
+    border: none;
+    color: #cccccc;
+    font-size: 13px;
+    padding: 0;
+}
+
+QPushButton#WinBtnClose:hover {
+    background: #c42b1c;
+    color: #ffffff;
+}
+
+QPushButton#WinBtnClose:pressed {
+    background: #b22418;
+}

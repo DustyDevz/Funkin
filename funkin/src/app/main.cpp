@@ -37,6 +37,7 @@
 #include "renderer/sprite/sprite_batch.hpp"
 #include "renderer/sprite/animated_sprite.hpp"
 #include "platform/win32/win32_input.hpp"
+#include "project/editor.hpp"
 
 class ViewportWidget : public QWidget {
 public:
@@ -165,6 +166,7 @@ void DrawFileAssociationModal(bool& showModal) {
 }
 
 int main(int argc, char** argv) {
+    QGuiApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
     bool running = true;
 
     QApplication qtApp(argc, argv);
@@ -201,22 +203,18 @@ int main(int argc, char** argv) {
     Funkin::Settings appSettings;
     LOG_PRINT("Qt platform: {}", QGuiApplication::platformName().toStdString());
 
-    QMainWindow* editorWindow = new QMainWindow();
-    editorWindow->setWindowTitle("Friday Night Funkin Engine");
-    editorWindow->resize(appSettings.windowWidth, appSettings.windowHeight);
-    
-    editorWindow->setStyleSheet(
-        "QMainWindow { background-color: #1a1a1a; }"
-        "QDockWidget { background-color: #1a1a1a; color: #ffffff; }"
-    );
+    QMainWindow* editorWindow = new Funkin::App::Editor::EditorWindow();
+    //editorWindow->resize(appSettings.windowWidth, appSettings.windowHeight);
 
     ViewportWidget* viewport = new ViewportWidget(editorWindow);
     editorWindow->setCentralWidget(viewport);
     rawInputFilter.viewportWidget = viewport;
     editorWindow->hide();
+    editorWindow->setWindowState(Qt::WindowMaximized);
 
     HWND hwnd = (HWND)viewport->winId();
     HWND qtHwnd = (HWND)editorWindow->winId();
+    SetClassLongPtr(qtHwnd, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(BLACK_BRUSH));
     
     LONG_PTR vpStyle = GetClassLongPtr(hwnd, GCL_STYLE);
     vpStyle &= ~(CS_HREDRAW | CS_VREDRAW);
@@ -278,8 +276,8 @@ int main(int argc, char** argv) {
     auto lastTime = std::chrono::high_resolution_clock::now();
     Funkin::Renderer::AnimatedSprite testSprite;
 
-    LOG_PRINT("Project loaded: {}", Funkin::App::Project::get().name);
-    editorWindow->setWindowTitle((std::string("FNF - ") + Funkin::App::Project::get().name).c_str());
+    LOG_PRINT("Project loaded: {}", Funkin::App::Project::get().getName());
+    editorWindow->setWindowTitle((std::string("FNF - ") + Funkin::App::Project::get().getName()).c_str());
     testSprite.loadAtlas("images/ui/test.xml", "test");
     testSprite.addAnimation("idle",  "idle",  24.f, true);
     testSprite.addAnimation("left",  "left",  24.f, false);
@@ -349,9 +347,13 @@ int main(int argc, char** argv) {
         rawInputFilter.onRenderFrame();
     });
 
-    QTimer::singleShot(1500, [&]() {
+    // waits for the window and renderer to finish so its not pure white
+    // ill create a checker another time instead of a timer
+    QTimer::singleShot(1250, [&]() {
         if (running) {
             editorWindow->show();
+            editorWindow->showMaximized();
+
             qtApp.processEvents(QEventLoop::AllEvents);
             renderTimer.start();
         }

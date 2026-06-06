@@ -76,7 +76,7 @@ namespace Funkin::App {
         saveRecent(recents);
     }
 
-    bool Project::load(const std::filesystem::path& projectFile) {
+   bool Project::load(const std::filesystem::path& projectFile) {
         if (!std::filesystem::exists(projectFile)) {
             LOG_ERR("Project file not found: {}", projectFile.string());
             return false;
@@ -85,13 +85,13 @@ namespace Funkin::App {
         try {
             std::ifstream f(projectFile);
             auto j = nlohmann::json::parse(f);
-            name    = j["name"].get<std::string>();
-            root    = projectFile.parent_path();
-            assets  = root / "bin" / "assets";
+            m_name   = j["name"].get<std::string>();
+            m_root   = projectFile.parent_path();
+            m_assets = m_root / "bin" / "assets";
             m_loaded = true;
-            LOG_PRINT("Project loaded: {}", name);
-            LOG_PRINT("Project root: {}", root.string());
-            addRecent({ name, root.string() });
+            LOG_PRINT("Project loaded: {}", m_name);
+            LOG_PRINT("Project root: {}", m_root.string());
+            addRecent({ m_name, m_root.string() });
             return true;
         } catch (const std::exception& e) {
             LOG_ERR("Failed to parse project.funkin: {}", e.what());

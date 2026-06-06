@@ -25,11 +25,16 @@ set(SDL_STATIC ON CACHE BOOL "" FORCE)
 set(BGFX_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(BGFX_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
+set(QWINDOWKIT_BUILD_STATIC ON CACHE BOOL "" FORCE)
+set(QWINDOWKIT_BUILD_WIDGETS ON CACHE BOOL "" FORCE)
+set(QWINDOWKIT_BUILD_QUICK OFF CACHE BOOL "" FORCE)
+set(QWINDOWKIT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Quick Qml)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Quick Qml Svg)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(FUNKIN_DEBUG ON CACHE BOOL "" FORCE)
@@ -39,6 +44,7 @@ if(WIN32)
     set(FUNKIN_WIN32_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resource.rc" CACHE INTERNAL "")
 endif()
 
+add_subdirectory(funkin/third_party/qwindowkit)
 add_subdirectory(funkin/third_party/sdl)
 add_subdirectory(funkin/third_party/bgfx)
 add_subdirectory(funkin)

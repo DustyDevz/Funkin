@@ -45,7 +45,7 @@ namespace Funkin::Assets {
     }
 
     std::filesystem::path AssetManager::resolvePath(const std::string& id) {
-        auto loose = (Funkin::App::Project::get().assets / id).make_preferred();
+        auto loose = (Funkin::App::Project::get().getAssets() / id).make_preferred();
         if (std::filesystem::exists(loose)) return loose;
         return {};
     }

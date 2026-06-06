@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/styles">
+        <file>src/ui/editor/ui_scene_tree.qss</file>
+        <file>src/ui/editor/ui_editor.qss</file>
+        <file>assets/images/icon.ico</file>
+    </qresource>
+</RCC>
