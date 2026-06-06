@@ -2,7 +2,7 @@
 .vscode
 .git
 .cmake
-.qtcreator
+**/.qtcreator/
 build
 export
 compile_commands.json
