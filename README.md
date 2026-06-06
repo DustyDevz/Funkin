@@ -6,7 +6,7 @@ I only have this repo public because why not, do not download this (it does NOTH
 
 ## Dependencies
 this is just here so my dumbass can rememeber
-* **Scoop:** [ccache.dev](https://ccache.dev) or `scoop install ccache`
+* **Ccache:** [ccache.dev](https://ccache.dev) or `scoop install ccache`
 * **Qt 6.x:** [QT online installer](https://www.qt.io/download). Ensure you add **MSVC 2022** option during installation.
 
 ---
