@@ -2,6 +2,7 @@
 // Licensed under GNU GPL v3.0
 
 #include "ui_scene_tree.hpp"
+#include "../ui_titlebar.hpp"
 
 #include <QApplication>
 #include <QHeaderView>
@@ -94,28 +95,6 @@ namespace Funkin::UI::Editor {
         viewport()->update();
     }
 
-    SceneTreeTitleBar::SceneTreeTitleBar(QDockWidget* parent)
-        : QWidget(parent)
-    {
-        setFixedHeight(22);
-        setStyleSheet("background-color: #161616;");
-
-        auto* row = new QHBoxLayout(this);
-        row->setContentsMargins(8, 0, 4, 0);
-        row->setSpacing(0);
-
-        auto* title = new QLabel("SCENE TREE", this);
-        title->setStyleSheet(
-            "color: #cccccc;"
-            "font-size: 11px;"
-            "font-weight: 700;"
-            "letter-spacing: 1px;"
-            "background: transparent;"
-        );
-        row->addWidget(title);
-        row->addStretch();
-    }
-
     SceneTreePanel::SceneTreePanel(QWidget* parent)
         : QWidget(parent)
     {
@@ -129,7 +108,7 @@ namespace Funkin::UI::Editor {
 
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         auto* root = new QVBoxLayout(this);
-        root->setContentsMargins(0, 0, 0, 0);
+        root->setContentsMargins(0, Funkin::UI::PanelTitleBar::CONTENT_OFFSET, 0, 0);
         root->setSpacing(0);
 
         auto* filterWrapper = new QWidget(this);

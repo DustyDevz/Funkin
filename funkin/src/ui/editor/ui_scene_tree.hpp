@@ -35,12 +35,6 @@ namespace Funkin::UI::Editor {
         mutable bool m_isHovered { false };
     };
 
-    class SceneTreeTitleBar : public QWidget {
-        Q_OBJECT
-    public:
-        explicit SceneTreeTitleBar(QDockWidget* parent = nullptr);
-    };
-
     class SceneTreePanel : public QWidget {
         Q_OBJECT
 

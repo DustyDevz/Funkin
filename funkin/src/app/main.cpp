@@ -99,7 +99,7 @@ public:
 
                         if (w > 0 && h > 0) {
                             bgfx::reset((uint32_t)w, (uint32_t)h, BGFX_RESET_VSYNC);
-                            bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x1a1a1aff, 1.0f, 0);
+                            bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x000000ff, 1.0f, 0);
                             bgfx::setViewRect(0, 0, 0, (uint16_t)w, (uint16_t)h);
                             if (onRenderFrame) {
                                 onRenderFrame();
@@ -203,14 +203,26 @@ int main(int argc, char** argv) {
     Funkin::Settings appSettings;
     LOG_PRINT("Qt platform: {}", QGuiApplication::platformName().toStdString());
 
-    QMainWindow* editorWindow = new Funkin::UI::Editor::EditorWindow();
+    Funkin::UI::Editor::EditorWindow* editorWindow = new Funkin::UI::Editor::EditorWindow();
     //editorWindow->resize(appSettings.windowWidth, appSettings.windowHeight);
 
     ViewportWidget* viewport = new ViewportWidget(editorWindow);
-    editorWindow->setCentralWidget(viewport);
     rawInputFilter.viewportWidget = viewport;
+
+    editorWindow->setGameViewport(viewport);
     editorWindow->hide();
     editorWindow->setWindowState(Qt::WindowMaximized);
+
+    // game is the ONLY tab we should be rendering for now
+    QObject::connect(editorWindow, &Funkin::UI::Editor::EditorWindow::activeTabChanged,
+    [&](const QString& tabName) {
+        bool isGame = (tabName == "Game");
+        viewport->setVisible(isGame);
+        editorWindow->blankWidget()->setVisible(!isGame);
+    });
+
+    // editorWindow->blankWidget()->setVisible(true);
+    // viewport->setVisible(false);
 
     HWND hwnd = (HWND)viewport->winId();
     HWND qtHwnd = (HWND)editorWindow->winId();
@@ -257,12 +269,8 @@ int main(int argc, char** argv) {
     const char* name = bgfx::getRendererName(bgfx::getRendererType());
     LOG_PRINT("bgfx using: {}", name);
 
-    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x1a1a1aff, 1.0f, 0);
+    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x000000ff, 1.0f, 0);
     bgfx::setViewRect(0, 0, 0, (uint16_t)viewport->width(), (uint16_t)viewport->height());
-
-    bgfx::touch(0);
-    bgfx::frame();
-    bgfx::frame();
 
     Funkin::Input::Input& input = Funkin::Input::Input::get();
     input.init();
