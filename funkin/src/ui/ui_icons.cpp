@@ -15,7 +15,7 @@ namespace Funkin::UI::Icons {
         if (cache.contains(cacheKey))
             return cache.value(cacheKey);
 
-        QString path = QStringLiteral(":/icons/assets/images/icons/") + iconId + QStringLiteral(".svg");
+        QString path = QStringLiteral(":/icons/") + iconId;
         QSvgRenderer renderer(path);
         if (!renderer.isValid()) return QIcon();
 

@@ -72,6 +72,11 @@ set(UI_SOURCES
     src/ui/ui_titlebar.cpp
 )
 
+set(QT_SOURCES
+    qt/icons.qrc
+    qt/ui.qrc
+)
+
 set(THIRD_PARTY_SOURCES
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui.cpp
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui_draw.cpp
@@ -94,9 +99,7 @@ target_sources(Funkin PRIVATE
     ${THIRD_PARTY_SOURCES}
     ${SHARED_SOURCES}
     ${UI_SOURCES}
-
-    resources_ui.qrc
-    resources.qrc
+    ${QT_SOURCES}
 )
 
 target_precompile_headers(Funkin PRIVATE

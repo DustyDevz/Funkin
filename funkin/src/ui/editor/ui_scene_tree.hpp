@@ -42,8 +42,6 @@ namespace Funkin::UI::Editor {
         explicit SceneTreePanel(QWidget* parent = nullptr);
         void refresh();
 
-        static QIcon getIcon(const QString& iconId, const QColor& color = QColor(Qt::white));
-
     signals:
         void itemSelected(const QString& path, bool isDirectory);
         void fileActivated(const QString& path);

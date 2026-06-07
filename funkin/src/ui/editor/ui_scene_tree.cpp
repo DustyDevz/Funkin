@@ -4,6 +4,7 @@
 #include "ui_scene_tree.hpp"
 #include "../ui_titlebar.hpp"
 #include "../ui_style.hpp"
+#include "../ui_icons.hpp"
 
 #include <QApplication>
 #include <QHeaderView>
@@ -115,7 +116,7 @@ namespace Funkin::UI::Editor {
         filterRow->setSpacing(0);
 
         auto* searchIconLabel = new QLabel(filterWrapper);
-        searchIconLabel->setPixmap(getIcon("search", QColor(0x6b, 0x6b, 0x6b)).pixmap(12, 12));
+        searchIconLabel->setPixmap(UI::Icons::get("search", QColor(0x6b, 0x6b, 0x6b)).pixmap(12, 12));
         searchIconLabel->setFixedSize(16, 16);
         searchIconLabel->setStyleSheet("background: transparent;");
         filterRow->addWidget(searchIconLabel);
@@ -150,11 +151,11 @@ namespace Funkin::UI::Editor {
         connect(m_tree, &QTreeWidget::itemDoubleClicked, this, &SceneTreePanel::onItemDoubleClicked);
         connect(m_tree, &QTreeWidget::itemExpanded, this, [this](QTreeWidgetItem* item) {
             if (item->data(0, Qt::UserRole + 1).toBool())
-                item->setIcon(0, getIcon("folder-open", QColor(0xdc, 0xb6, 0x7a)));
+                item->setIcon(0, UI::Icons::get("folder-open", QColor(0xdc, 0xb6, 0x7a)));
         });
         connect(m_tree, &QTreeWidget::itemCollapsed, this, [this](QTreeWidgetItem* item) {
             if (item->data(0, Qt::UserRole + 1).toBool())
-                item->setIcon(0, getIcon("folder", QColor(0xdc, 0xb6, 0x7a)));
+                item->setIcon(0, UI::Icons::get("folder", QColor(0xdc, 0xb6, 0x7a)));
         });
         connect(m_tree, &QTreeWidget::customContextMenuRequested, this, &SceneTreePanel::onContextMenu);
 
@@ -162,13 +163,13 @@ namespace Funkin::UI::Editor {
     }
 
     void SceneTreePanel::loadIcons() {
-        m_iconFolder     = getIcon("folder",      QColor(0xdc, 0xb6, 0x7a));
-        m_iconFolderOpen = getIcon("folder-open", QColor(0xdc, 0xb6, 0x7a));
-        m_iconFile       = getIcon("file",        QColor(0x85, 0x85, 0x85));
-        m_iconScene      = getIcon("file-code",   QColor(0x8f, 0xa1, 0xb3));
-        m_iconAudio      = getIcon("file-music",  QColor(0x85, 0x85, 0x85));
-        m_iconImage      = getIcon("image",       QColor(0x85, 0x85, 0x85));
-        m_iconScript     = getIcon("file",        QColor(0x85, 0x85, 0x85));
+        m_iconFolder     = UI::Icons::get("folder",      QColor(0xdc, 0xb6, 0x7a));
+        m_iconFolderOpen = UI::Icons::get("folder-open", QColor(0xdc, 0xb6, 0x7a));
+        m_iconFile       = UI::Icons::get("file",        QColor(0x85, 0x85, 0x85));
+        m_iconScene      = UI::Icons::get("file-code",   QColor(0x8f, 0xa1, 0xb3));
+        m_iconAudio      = UI::Icons::get("file-music",  QColor(0x85, 0x85, 0x85));
+        m_iconImage      = UI::Icons::get("image",       QColor(0x85, 0x85, 0x85));
+        m_iconScript     = UI::Icons::get("file",        QColor(0x85, 0x85, 0x85));
     }
 
     bool SceneTreePanel::eventFilter(QObject* obj, QEvent* event) {
@@ -212,33 +213,6 @@ namespace Funkin::UI::Editor {
             onFilterChanged(m_filterEdit->text());
     }
 
-    QIcon SceneTreePanel::getIcon(const QString& iconId, const QColor& color) {
-        QString cacheKey = iconId + color.name();
-        static QHash<QString, QIcon> iconCache;
-        if (iconCache.contains(cacheKey))
-            return iconCache.value(cacheKey);
-
-        QString rccPath = QStringLiteral(":/icons/assets/images/icons/") + iconId + QStringLiteral(".svg");
-        QSvgRenderer renderer(rccPath);
-
-        if (!renderer.isValid())
-            return QIcon();
-
-        QImage baseImage(24, 24, QImage::Format_ARGB32_Premultiplied);
-        baseImage.fill(Qt::transparent);
-
-        QPainter imgPainter(&baseImage);
-        imgPainter.setRenderHint(QPainter::Antialiasing, true);
-        renderer.render(&imgPainter);
-        imgPainter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-        imgPainter.fillRect(baseImage.rect(), color);
-        imgPainter.end();
-
-        QIcon finalizedIcon(QPixmap::fromImage(baseImage));
-        iconCache.insert(cacheKey, finalizedIcon);
-        return finalizedIcon;
-    }
-
     void SceneTreePanel::populateNode(const std::filesystem::path& dir, QTreeWidgetItem* parentItem) {
         std::vector<std::filesystem::directory_entry> dirs, files;
         std::error_code ec;
@@ -267,7 +241,7 @@ namespace Funkin::UI::Editor {
 
             QIcon itemIcon;
             if (isDir) {
-                itemIcon = getIcon("folder", QColor(0xdc, 0xb6, 0x7a));
+                itemIcon = UI::Icons::get("folder", QColor(0xdc, 0xb6, 0x7a));
             } else {
                 const std::string ext = p.extension().string();
 
@@ -289,8 +263,8 @@ namespace Funkin::UI::Editor {
 
                 auto it = extMap.find(ext);
                 itemIcon = (it != extMap.end())
-                    ? getIcon(it->second.id, it->second.color)
-                    : getIcon("file", QColor(0x85, 0x85, 0x85));
+                    ? UI::Icons::get(it->second.id, it->second.color)
+                    : UI::Icons::get("file", QColor(0x85, 0x85, 0x85));
             }
 
             item->setIcon(0, itemIcon);
