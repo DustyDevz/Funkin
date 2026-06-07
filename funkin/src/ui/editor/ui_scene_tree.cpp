@@ -3,6 +3,7 @@
 
 #include "ui_scene_tree.hpp"
 #include "../ui_titlebar.hpp"
+#include "../ui_style.hpp"
 
 #include <QApplication>
 #include <QHeaderView>
@@ -99,12 +100,7 @@ namespace Funkin::UI::Editor {
         : QWidget(parent)
     {
         setObjectName("SceneTreePanel");
-
-        QFile styleFile(":/styles/src/ui/editor/ui_scene_tree.qss");
-        if (styleFile.open(QFile::ReadOnly | QFile::Text)) {
-            setStyleSheet(QLatin1String(styleFile.readAll()));
-            styleFile.close();
-        }
+        Funkin::UI::UIStyle::load(this, ":/ui/scene_tree");
 
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         auto* root = new QVBoxLayout(this);

@@ -25,11 +25,11 @@ namespace Funkin::UI::Editor {
     {
         setObjectName("Inspector");
 
-        QFile styleFile(":/styles/src/ui/editor/ui_inspector.qss");
-        if (styleFile.open(QFile::ReadOnly | QFile::Text)) {
-            setStyleSheet(QLatin1String(styleFile.readAll()));
-            styleFile.close();
-        }
+        // QFile styleFile(":/ui/inspector");
+        // if (styleFile.open(QFile::ReadOnly | QFile::Text)) {
+        //     setStyleSheet(QLatin1String(styleFile.readAll()));
+        //     styleFile.close();
+        // }
     }
 
     void InspectorPanel::onItemSelected(const QString& path, bool isDirectory)

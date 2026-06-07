@@ -6,6 +6,7 @@
 #include "ui_inspector.hpp"
 #include "../ui_icons.hpp"
 #include "../ui_titlebar.hpp"
+#include "../ui_style.hpp"
 
 #include <QMenuBar>
 #include <QMenu>
@@ -37,7 +38,7 @@ namespace Funkin::UI::Editor {
         m_windowAgent = new QWK::WidgetWindowAgent(this);
         m_windowAgent->setup(this);
 
-        applyTheme();
+        Funkin::UI::UIStyle::load(this, ":/ui/editor");
         buildTitleBar();
         buildDocks();
 
@@ -45,14 +46,6 @@ namespace Funkin::UI::Editor {
         if (hwnd) {
             BOOL dark = TRUE;
             DwmSetWindowAttribute(hwnd, 20, &dark, sizeof(dark));
-        }
-    }
-
-    void EditorWindow::applyTheme() {
-        QFile styleFile(":/styles/src/ui/editor/ui_editor.qss");
-        if (styleFile.open(QFile::ReadOnly | QFile::Text)) {
-            setStyleSheet(styleFile.readAll());
-            styleFile.close();
         }
     }
 
@@ -75,7 +68,7 @@ namespace Funkin::UI::Editor {
         appIcon->setObjectName("AppIcon");
         appIcon->setFixedSize(32, 32);
         appIcon->setAlignment(Qt::AlignCenter);
-        QPixmap iconPx(":/styles/assets/images/icon.ico");
+        QPixmap iconPx(":/ui/icon");
         if (!iconPx.isNull())
             appIcon->setPixmap(iconPx.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation));
         layout->addWidget(appIcon);

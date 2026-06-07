@@ -1,0 +1,206 @@
+/*
+ * © 2026 Dusty | https://github.com/DustyDevz/Funkin
+ * Licensed under GNU GPL v3.0
+ */
+
+/* titlebar */
+
+QWidget#CustomTitleBar {
+    background-color: #161616;
+    border-bottom: 1px solid #2d2d2d;
+}
+
+QLabel#AppIcon {
+    background: transparent;
+    padding: 0;
+}
+
+QLabel#TitleLabel {
+    color: #8a8a8a;
+    font-size: 12px;
+    background: transparent;
+    padding: 0 8px;
+}
+
+QMenuBar#EditorMenuBar {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    color: #cccccc;
+}
+
+QMenuBar#EditorMenuBar::item {
+    padding: 6px 10px;
+    background: transparent;
+    color: #cccccc;
+}
+
+QMenuBar#EditorMenuBar::item:selected {
+    background-color: #2a2a2a;
+}
+
+QMenuBar#EditorMenuBar::item:pressed {
+    background-color: #1a1a1a;
+}
+
+QPushButton#WinBtnMinimize,
+QPushButton#WinBtnMaximize,
+QPushButton#WinBtnClose {
+    background: transparent;
+    border: none;
+    font-family: "Segoe MDL2 Assets";
+    font-size: 10px;
+    color: #cccccc;
+    padding: 0;
+    margin: 0;
+}
+
+QPushButton#WinBtnMinimize:hover,
+QPushButton#WinBtnMaximize:hover {
+    background: #2a2d2e;
+    color: #ffffff;
+}
+
+QPushButton#WinBtnClose:hover {
+    background: #c42b1c;
+    color: #ffffff;
+}
+
+QPushButton#WinBtnMinimize:pressed,
+QPushButton#WinBtnMaximize:pressed {
+    background: #3c3c3c;
+}
+
+QPushButton#WinBtnClose:pressed {
+    background: #b22418;
+}
+
+/* editor */
+
+QMainWindow {
+    background-color: #1a1a1a;
+}
+
+QMainWindow::separator {
+    background-color: #2a2a2a;
+    width: 1px;
+    height: 1px;
+}
+
+QMainWindow::separator:hover {
+    background-color: #3a3a3a;
+}
+
+QWidget#CentralWrapper {
+    border-top: 1px solid #2a2a2a;
+}
+
+QDockWidget {
+    color: #cccccc;
+    font-size: 12px;
+    titlebar-close-icon: none;
+    titlebar-normal-icon: none;
+    border: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+QDockWidget > QWidget {
+    background-color: #161616;
+    border: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+QDockWidget::title {
+    background-color: #161616;
+    border: none;
+    height: 0px;
+    padding: 0px;
+    margin: 0px;
+}
+
+QTabWidget#EditorTabWidget {
+    border: none;
+    background: transparent;
+}
+
+QTabWidget#EditorTabWidget::pane {
+    border: none;
+    background: transparent;
+}
+
+QTabBar {
+    background-color: #161616;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+QTabBar::tab {
+    background-color: #1e1e1e;
+    color: #888888;
+    padding: 4px 20px;
+    border: none;
+    border-right: 1px solid #2a2a2a;
+    border-bottom: 2px solid transparent;
+    border-top: 1px solid transparent;
+    font-size: 12px;
+    min-width: 60px;
+}
+
+QTabBar::tab:selected {
+    background-color: #141414;
+    color: #ffffff;
+    border-bottom: 2px solid #ff2d78;
+    border-top: 1px solid #ff2d78;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #252525;
+    color: #cccccc;
+}
+
+QTabBar::tab:first {
+    border-left: 1px solid #2a2a2a;
+}
+
+QTabBar::close-button {
+    image: none;
+    width: 0;
+    height: 0;
+}
+
+QPushButton#TabCloseBtn {
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    padding: 0;
+}
+
+QPushButton#TabCloseBtn:hover {
+    background: #3a3a3a;
+}
+
+QMenu {
+    background-color: #222222;
+    color: #cccccc;
+    border: 1px solid #2e2e2e;
+    padding: 2px 0px;
+    font-size: 12px;
+}
+
+QMenu::item {
+    padding: 4px 24px 4px 12px;
+}
+
+QMenu::item:selected {
+    background-color: #2e2e2e;
+    color: #ffffff;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: #2e2e2e;
+    margin: 2px 0px;
+}
