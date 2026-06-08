@@ -185,10 +185,6 @@ add_custom_command(TARGET Funkin POST_BUILD
         ${CMAKE_CURRENT_SOURCE_DIR}/tools/shaderc.exe
         $<TARGET_FILE_DIR:Funkin>/bin/shaderc.exe
 
-    COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/tools/varying.def.sc
-        $<TARGET_FILE_DIR:Funkin>/bin/varying.def.sc
-
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${FUNKIN_3RD_PARTY_DIR}/bgfx/bgfx/src
         $<TARGET_FILE_DIR:Funkin>/bin/shaderc_include
