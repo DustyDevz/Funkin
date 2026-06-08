@@ -221,9 +221,6 @@ int main(int argc, char** argv) {
         editorWindow->blankWidget()->setVisible(!isGame);
     });
 
-    // editorWindow->blankWidget()->setVisible(true);
-    // viewport->setVisible(false);
-
     HWND hwnd = (HWND)viewport->winId();
     HWND qtHwnd = (HWND)editorWindow->winId();
     SetClassLongPtr(qtHwnd, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(BLACK_BRUSH));

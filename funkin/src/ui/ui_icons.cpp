@@ -9,8 +9,8 @@
 #include <QPixmap>
 
 namespace Funkin::UI::Icons {
-    QIcon get(const QString& iconId, const QColor& color) {
-        QString cacheKey = iconId + color.name();
+    QIcon get(const QString& iconId, const QColor& color, int size) {
+        QString cacheKey = iconId + color.name() + QString::number(size);
         static QHash<QString, QIcon> cache;
         if (cache.contains(cacheKey))
             return cache.value(cacheKey);
@@ -19,7 +19,7 @@ namespace Funkin::UI::Icons {
         QSvgRenderer renderer(path);
         if (!renderer.isValid()) return QIcon();
 
-        QImage img(24, 24, QImage::Format_ARGB32_Premultiplied);
+        QImage img(size, size, QImage::Format_ARGB32_Premultiplied);
         img.fill(Qt::transparent);
 
         QPainter p(&img);

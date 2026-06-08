@@ -54,7 +54,7 @@ namespace Funkin::UI::Editor {
         QDockWidget*                        m_inspectorDock  { nullptr };
         Funkin::UI::Editor::InspectorPanel* m_inspector      { nullptr };
 
-        QTabWidget* m_tabWidget { nullptr };
+        QTabBar* m_tabBar { nullptr };
         QWidget* m_blankWidget  { nullptr };
 
         QWK::WidgetWindowAgent* m_windowAgent { nullptr };

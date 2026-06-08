@@ -11,6 +11,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QDockWidget>
+#include <QTabBar>
 #include <QFile>
 #include <QApplication>
 #include <QHBoxLayout>
@@ -123,19 +124,24 @@ namespace Funkin::UI::Editor {
         m_windowAgent->setHitTestVisible(m_menuBar, true);
         m_windowAgent->setHitTestVisible(appIcon, false);
 
-        m_tabWidget = new QTabWidget(this);
-        m_tabWidget->setObjectName("EditorTabWidget");
-        m_tabWidget->setDocumentMode(true);
-        m_tabWidget->setTabsClosable(true);
-        m_tabWidget->setMovable(true);
-        m_tabWidget->setFixedHeight(30);
+        m_tabBar = new QTabBar(this);
+        m_tabBar->setObjectName("EditorTabBar");
+        m_tabBar->setDocumentMode(false);
+        m_tabBar->setTabsClosable(true);
+        m_tabBar->setMovable(true);
+        m_tabBar->setFixedHeight(30);
+        m_tabBar->setExpanding(false);
+        m_tabBar->setDrawBase(false);
+        
+        m_tabBar->addTab("Game");
+        m_tabBar->addTab("Test");
+        m_tabBar->setTabButton(0, QTabBar::RightSide, nullptr);
 
-        m_tabWidget->addTab(new QWidget(), "Game");
-        m_tabWidget->addTab(new QWidget(), "Test");
-        m_tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, nullptr); // 0 = game
+        m_tabBar->setTabIcon(0, Funkin::UI::Icons::get("gamepad-2", QColor(0x66, 0x66, 0x66), 16));
+        m_tabBar->setIconSize(QSize(16, 16));
 
         auto makeCloseBtn = [&](int tabIndex) {
-            auto* btn = new QPushButton(m_tabWidget);
+            auto* btn = new QPushButton(m_tabBar);
             btn->setFixedSize(14, 14);
             btn->setFlat(true);
             btn->setObjectName("TabCloseBtn");
@@ -143,22 +149,21 @@ namespace Funkin::UI::Editor {
             btn->setIconSize(QSize(10, 10));
 
             connect(btn, &QPushButton::clicked, this, [this, btn]() {
-                for (int i = 0; i < m_tabWidget->count(); i++) {
-                    if (m_tabWidget->tabBar()->tabButton(i, QTabBar::RightSide) == btn) {
-                        m_tabWidget->removeTab(i);
+                for (int i = 0; i < m_tabBar->count(); i++) {
+                    if (m_tabBar->tabButton(i, QTabBar::RightSide) == btn) {
+                        m_tabBar->removeTab(i);
                         return;
                     }
                 }
             });
 
-            m_tabWidget->tabBar()->setTabButton(tabIndex, QTabBar::RightSide, btn);
+            m_tabBar->setTabButton(tabIndex, QTabBar::RightSide, btn);
         };
 
         makeCloseBtn(1);
 
-        connect(m_tabWidget, &QTabWidget::tabCloseRequested, m_tabWidget, &QTabWidget::removeTab);
-        connect(m_tabWidget, &QTabWidget::currentChanged, this, [this](int index) {
-            emit activeTabChanged(m_tabWidget->tabText(index));
+        connect(m_tabBar, &QTabBar::currentChanged, this, [this](int index) {
+            emit activeTabChanged(m_tabBar->tabText(index));
         });
     }
 
@@ -168,11 +173,12 @@ namespace Funkin::UI::Editor {
         auto* wrapLayout = new QVBoxLayout(wrapper);
         wrapLayout->setContentsMargins(0, 0, 0, 0);
         wrapLayout->setSpacing(0);
-        wrapLayout->addWidget(m_tabWidget);
+        wrapLayout->addWidget(m_tabBar);
 
         m_blankWidget = new QWidget(wrapper);
         m_blankWidget->setObjectName("BlankArea");
         m_blankWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_blankWidget->setVisible(false);
 
         wrapLayout->addWidget(m_blankWidget, 1);
         wrapLayout->addWidget(viewport, 1);

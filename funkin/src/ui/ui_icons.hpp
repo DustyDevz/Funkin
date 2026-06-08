@@ -7,5 +7,5 @@
 #include <QString>
 
 namespace Funkin::UI::Icons {
-    QIcon get(const QString& iconId, const QColor& color);
+    QIcon get(const QString& iconId, const QColor& color, int size = 24);
 }
