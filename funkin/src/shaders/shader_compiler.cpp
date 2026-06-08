@@ -51,30 +51,48 @@ namespace Funkin::Shader {
         tempFile << source;
         tempFile.close();
 
+        auto varyingDefPath = std::filesystem::path(
+            Funkin::Filesystem::resolve("cache://shaders/varying.def.sc")).make_preferred();
+
+        std::ofstream varyingFile(varyingDefPath.string(), std::ios::trunc);
+        if (!varyingFile) {
+            LOG_ERR("Failed to write inline varying definitions: {}", varyingDefPath.string());
+            std::remove(tempSrcPath.string().c_str());
+            return false;
+        }
+        varyingFile << "vec2 v_texcoord0 : TEXCOORD0 = vec2(0.0, 0.0);\n"
+                    << "vec4 v_color0    : COLOR0    = vec4(1.0, 1.0, 1.0, 1.0);\n\n"
+                    << "vec3 a_position  : POSITION;\n"
+                    << "vec2 a_texcoord0 : TEXCOORD0;\n"
+                    << "vec4 a_color0    : COLOR0;\n";
+        varyingFile.close();
+
         auto toolsExePath = (std::filesystem::path(SDL_GetBasePath()) / "bin" / "shaderc.exe").make_preferred();
         if (!std::filesystem::exists(toolsExePath)) {
             LOG_ERR("shaderc.exe not found at: {}", toolsExePath.string());
+            std::remove(tempSrcPath.string().c_str());
+            std::remove(varyingDefPath.string().c_str());
             return false;
         }
 
         auto bgfxInclude = (std::filesystem::path(SDL_GetBasePath()) / "bin" / "shaderc_include").make_preferred();
-        auto varyingDef  = (std::filesystem::path(SDL_GetBasePath()) / "bin" / "varying.def.sc").make_preferred();
         auto outNormal   = std::filesystem::path(outPath).make_preferred();
 
         std::string command =
             "\"\"" + toolsExePath.string() + "\""
-            " -f \""       + tempSrcPath.string() + "\""
-            " -o \""       + outNormal.string()   + "\""
-            " --type "     + sType                +
+            " -f \""           + tempSrcPath.string() + "\""
+            " -o \""           + outNormal.string()   + "\""
+            " --type "         + sType                +
             " --platform windows"
-            " -p "         + profile              +
-            " --varyingdef \"" + varyingDef.string() + "\""
-            " -i \""       + bgfxInclude.string() + "\"\"";
+            " -p "             + profile              +
+            " --varyingdef \"" + varyingDefPath.string() + "\""
+            " -i \""           + bgfxInclude.string() + "\"\"";
 
         LOG_PRINT("Compiling {} shader: {}", sType, outNormal.string());
 
         int result = std::system(command.c_str());
         std::remove(tempSrcPath.string().c_str());
+        std::remove(varyingDefPath.string().c_str());
 
         if (result != 0) {
             LOG_ERR("Shader compile failed (exit {}): {}", result, outNormal.string());
