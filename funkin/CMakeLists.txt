@@ -190,5 +190,11 @@ add_custom_command(TARGET Funkin POST_BUILD
         $<TARGET_FILE_DIR:Funkin>/bin/shaderc_include
     
     ## qt legal!!!
-    COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE:Funkin>" --dir "$<TARGET_FILE_DIR:Funkin>" --no-compiler-runtime --no-translations --no-opengl-sw
+    COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE:Funkin>"
+        --dir "$<TARGET_FILE_DIR:Funkin>"
+        --plugindir "$<TARGET_FILE_DIR:Funkin>/bin/qt/plugins"
+        --no-compiler-runtime --no-translations --no-opengl-sw
+
+    COMMAND ${CMAKE_COMMAND} -E echo "[Paths]"          > $<TARGET_FILE_DIR:Funkin>/qt.conf
+    COMMAND ${CMAKE_COMMAND} -E echo "Prefix = bin/qt" >> $<TARGET_FILE_DIR:Funkin>/qt.conf
 )
