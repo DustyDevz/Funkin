@@ -14,7 +14,7 @@ namespace QWK {
 }
 
 namespace Funkin::UI::Editor {
-    class SceneTreePanel;
+    class AssetsPanel;
     class InspectorPanel;
 
     class EditorWindow : public QMainWindow {
@@ -32,8 +32,8 @@ namespace Funkin::UI::Editor {
 
         QWidget* blankWidget() const { return m_blankWidget; }
         void setGameViewport(QWidget* viewport);
-        Funkin::UI::Editor::SceneTreePanel* sceneTree()  const { return m_sceneTree;  }
-        Funkin::UI::Editor::InspectorPanel* inspector()  const { return m_inspector;  }
+        Funkin::UI::Editor::AssetsPanel*    assets()    const { return m_assets;     }
+        Funkin::UI::Editor::InspectorPanel* inspector() const { return m_inspector;  }
 
     private:
         void buildMenuBar();
@@ -48,8 +48,8 @@ namespace Funkin::UI::Editor {
         QPushButton* m_btnMaximize { nullptr };
         QPushButton* m_btnClose    { nullptr };
 
-        QDockWidget*                        m_sceneTreeDock  { nullptr };
-        Funkin::UI::Editor::SceneTreePanel* m_sceneTree      { nullptr };
+        QDockWidget*                      m_assetsDock  { nullptr };
+        Funkin::UI::Editor::AssetsPanel*  m_assets      { nullptr };
 
         QDockWidget*                        m_inspectorDock  { nullptr };
         Funkin::UI::Editor::InspectorPanel* m_inspector      { nullptr };

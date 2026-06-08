@@ -2,7 +2,7 @@
 // Licensed under GNU GPL v3.0
 
 #include "ui_editor.hpp"
-#include "ui/editor/ui_scene_tree.hpp"
+#include "ui/editor/ui_assets.hpp"
 #include "ui_inspector.hpp"
 #include "../ui_icons.hpp"
 #include "../ui_titlebar.hpp"
@@ -192,14 +192,14 @@ namespace Funkin::UI::Editor {
     }
 
     void EditorWindow::buildDocks() {
-        m_sceneTree = new Funkin::UI::Editor::SceneTreePanel(this);
-        m_sceneTreeDock = new QDockWidget("Scene Tree", this);
-        m_sceneTreeDock->setObjectName("SceneTreeDock");
-        m_sceneTreeDock->setWidget(m_sceneTree);
-        m_sceneTreeDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-        m_sceneTreeDock->setMinimumWidth(200);
-        m_sceneTreeDock->setTitleBarWidget(new Funkin::UI::PanelTitleBar("Scene Tree", m_sceneTreeDock));
-        addDockWidget(Qt::LeftDockWidgetArea, m_sceneTreeDock);
+        m_assets = new Funkin::UI::Editor::AssetsPanel(this);
+        m_assetsDock = new QDockWidget("Scene Tree", this);
+        m_assetsDock->setObjectName("SceneTreeDock");
+        m_assetsDock->setWidget(m_assets);
+        m_assetsDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+        m_assetsDock->setMinimumWidth(200);
+        m_assetsDock->setTitleBarWidget(new Funkin::UI::PanelTitleBar("Assets", m_assetsDock));
+        addDockWidget(Qt::LeftDockWidgetArea, m_assetsDock);
 
         m_inspector = new Funkin::UI::Editor::InspectorPanel(this);
         m_inspectorDock = new QDockWidget("Inspector", this);
@@ -210,6 +210,6 @@ namespace Funkin::UI::Editor {
         m_inspectorDock->setTitleBarWidget(new Funkin::UI::PanelTitleBar("Inspector", m_inspectorDock));
         addDockWidget(Qt::RightDockWidgetArea, m_inspectorDock);
 
-        resizeDocks({m_sceneTreeDock, m_inspectorDock}, {220, 280}, Qt::Horizontal);
+        resizeDocks({m_assetsDock, m_inspectorDock}, {220, 280}, Qt::Horizontal);
     }
 }

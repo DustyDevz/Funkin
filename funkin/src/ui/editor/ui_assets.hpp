@@ -35,11 +35,11 @@ namespace Funkin::UI::Editor {
         mutable bool m_isHovered { false };
     };
 
-    class SceneTreePanel : public QWidget {
+    class AssetsPanel : public QWidget {
         Q_OBJECT
 
     public:
-        explicit SceneTreePanel(QWidget* parent = nullptr);
+        explicit AssetsPanel(QWidget* parent = nullptr);
         void refresh();
 
     signals:

@@ -1,7 +1,7 @@
 // © 2026 Dusty | https://github.com/DustyDevz/Funkin
 // Licensed under GNU GPL v3.0
 
-#include "ui_scene_tree.hpp"
+#include "ui_assets.hpp"
 #include "../ui_titlebar.hpp"
 #include "../ui_style.hpp"
 #include "../ui_icons.hpp"
@@ -97,11 +97,11 @@ namespace Funkin::UI::Editor {
         viewport()->update();
     }
 
-    SceneTreePanel::SceneTreePanel(QWidget* parent)
+    AssetsPanel::AssetsPanel(QWidget* parent)
         : QWidget(parent)
     {
-        setObjectName("SceneTreePanel");
-        Funkin::UI::UIStyle::load(this, ":/ui/scene_tree");
+        setObjectName("AssetsPanel");
+        Funkin::UI::UIStyle::load(this, ":/ui/assets");
 
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         auto* root = new QVBoxLayout(this);
@@ -146,9 +146,9 @@ namespace Funkin::UI::Editor {
 
         m_tree->viewport()->installEventFilter(this);
 
-        connect(m_filterEdit, &QLineEdit::textChanged, this, &SceneTreePanel::onFilterChanged);
-        connect(m_tree, &QTreeWidget::itemClicked, this, &SceneTreePanel::onItemClicked);
-        connect(m_tree, &QTreeWidget::itemDoubleClicked, this, &SceneTreePanel::onItemDoubleClicked);
+        connect(m_filterEdit, &QLineEdit::textChanged, this, &AssetsPanel::onFilterChanged);
+        connect(m_tree, &QTreeWidget::itemClicked, this, &AssetsPanel::onItemClicked);
+        connect(m_tree, &QTreeWidget::itemDoubleClicked, this, &AssetsPanel::onItemDoubleClicked);
         connect(m_tree, &QTreeWidget::itemExpanded, this, [this](QTreeWidgetItem* item) {
             if (item->data(0, Qt::UserRole + 1).toBool())
                 item->setIcon(0, UI::Icons::get("folder-open", QColor(0xdc, 0xb6, 0x7a)));
@@ -157,12 +157,12 @@ namespace Funkin::UI::Editor {
             if (item->data(0, Qt::UserRole + 1).toBool())
                 item->setIcon(0, UI::Icons::get("folder", QColor(0xdc, 0xb6, 0x7a)));
         });
-        connect(m_tree, &QTreeWidget::customContextMenuRequested, this, &SceneTreePanel::onContextMenu);
+        connect(m_tree, &QTreeWidget::customContextMenuRequested, this, &AssetsPanel::onContextMenu);
 
         refresh();
     }
 
-    void SceneTreePanel::loadIcons() {
+    void AssetsPanel::loadIcons() {
         m_iconFolder     = UI::Icons::get("folder",      QColor(0xdc, 0xb6, 0x7a));
         m_iconFolderOpen = UI::Icons::get("folder-open", QColor(0xdc, 0xb6, 0x7a));
         m_iconFile       = UI::Icons::get("file",        QColor(0x85, 0x85, 0x85));
@@ -172,7 +172,7 @@ namespace Funkin::UI::Editor {
         m_iconScript     = UI::Icons::get("file",        QColor(0x85, 0x85, 0x85));
     }
 
-    bool SceneTreePanel::eventFilter(QObject* obj, QEvent* event) {
+    bool AssetsPanel::eventFilter(QObject* obj, QEvent* event) {
         if (obj == m_tree->viewport()) {
             if (event->type() == QEvent::MouseButtonPress) {
                 auto* me = static_cast<QMouseEvent*>(event);
@@ -185,11 +185,11 @@ namespace Funkin::UI::Editor {
         return QWidget::eventFilter(obj, event);
     }
 
-    QIcon SceneTreePanel::iconForPath(const std::filesystem::path&, bool isDir) const {
+    QIcon AssetsPanel::iconForPath(const std::filesystem::path&, bool isDir) const {
         return isDir ? m_iconFolder : m_iconFile;
     }
 
-    void SceneTreePanel::refresh() {
+    void AssetsPanel::refresh() {
         m_tree->clear();
 
         const std::filesystem::path& rootPath = Funkin::App::Project::get().getRoot();
@@ -213,7 +213,7 @@ namespace Funkin::UI::Editor {
             onFilterChanged(m_filterEdit->text());
     }
 
-    void SceneTreePanel::populateNode(const std::filesystem::path& dir, QTreeWidgetItem* parentItem) {
+    void AssetsPanel::populateNode(const std::filesystem::path& dir, QTreeWidgetItem* parentItem) {
         std::vector<std::filesystem::directory_entry> dirs, files;
         std::error_code ec;
 
@@ -280,12 +280,12 @@ namespace Funkin::UI::Editor {
         for (auto& e : files) { makeItem(e.path(), false); }
     }
 
-    void SceneTreePanel::onFilterChanged(const QString& text) {
+    void AssetsPanel::onFilterChanged(const QString& text) {
         for (int i = 0; i < m_tree->topLevelItemCount(); ++i)
             applyFilter(m_tree->topLevelItem(i), text);
     }
 
-    bool SceneTreePanel::applyFilter(QTreeWidgetItem* item, const QString& filter) {
+    bool AssetsPanel::applyFilter(QTreeWidgetItem* item, const QString& filter) {
         if (!item) return false;
 
         bool selfMatch = filter.isEmpty() || item->text(0).contains(filter, Qt::CaseInsensitive);
@@ -300,7 +300,7 @@ namespace Funkin::UI::Editor {
         return visible;
     }
 
-    void SceneTreePanel::onItemClicked(QTreeWidgetItem* item, int) {
+    void AssetsPanel::onItemClicked(QTreeWidgetItem* item, int) {
         if (!item) return;
         QString path  = item->data(0, Qt::UserRole).toString();
         bool    isDir = item->data(0, Qt::UserRole + 1).toBool();
@@ -309,17 +309,17 @@ namespace Funkin::UI::Editor {
         emit itemSelected(path, isDir);
     }
 
-    void SceneTreePanel::onItemDoubleClicked(QTreeWidgetItem* item, int) {
+    void AssetsPanel::onItemDoubleClicked(QTreeWidgetItem* item, int) {
         if (!item) return;
         if (!item->data(0, Qt::UserRole + 1).toBool())
             emit fileActivated(item->data(0, Qt::UserRole).toString());
     }
 
-    void SceneTreePanel::onRefreshClicked() {
+    void AssetsPanel::onRefreshClicked() {
         refresh();
     }
 
-    void SceneTreePanel::onContextMenu(const QPoint& pos) {
+    void AssetsPanel::onContextMenu(const QPoint& pos) {
         QTreeWidgetItem* item = m_tree->itemAt(pos);
         QMenu menu(this);
 
