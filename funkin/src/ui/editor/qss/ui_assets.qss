@@ -4,47 +4,50 @@
  * UI_ASSETS
  */
 
-QWidget#SceneTreePanel {
+QWidget#AssetsPanel {
     background-color: #161616;
+}
+
+QWidget#FilterWrapper {
+    background-color: #161616;
+    border-bottom: 1px solid #2a2a2a;
 }
 
 QLineEdit#FilterEdit {
     background-color: transparent;
     color: #cccccc;
     border: none;
-    border-bottom: 1px solid #3c3c3c;
-    border-radius: 0px;
-    padding: 2px 4px 2px 20px;
+    padding: 2px 4px 2px 4px;
     font-size: 12px;
     selection-background-color: #094771;
 }
 
 QLineEdit#FilterEdit:focus {
-    border-bottom: 1px solid #007fd4;
     background-color: transparent;
 }
 
 QLineEdit#FilterEdit::placeholder {
-    color: #858585;
+    color: #555555;
 }
 
 QTreeWidget#SceneTree {
     background-color: #161616;
     color: #cccccc;
     border: none;
-    font-size: 13px;
+    font-size: 12px;
     outline: none;
     show-decoration-selected: 1;
 }
 
 QTreeWidget#SceneTree::item {
-    height: 24px;
-    padding-left: 6px;
+    height: 22px;
+    padding-left: 2px;
     border: none;
+    color: #aaaaaa;
 }
 
 QTreeWidget#SceneTree::item:hover {
-    background-color: #2a2d2e;
+    background-color: #1e1e1e;
     color: #e2e4e7;
 }
 
@@ -54,16 +57,16 @@ QTreeWidget#SceneTree::item:selected:focus {
 }
 
 QTreeWidget#SceneTree::item:selected:!focus {
-    background-color: #37373d;
-    color: #ffffff;
+    background-color: #2a2a2a;
+    color: #cccccc;
 }
 
 QTreeWidget#SceneTree::branch {
-    background-color: #161616;
+    background-color: transparent;
 }
 
 QTreeWidget#SceneTree::branch:hover {
-    background-color: #2a2d2e;
+    background-color: #1e1e1e;
 }
 
 QTreeWidget#SceneTree::branch:selected {
@@ -77,7 +80,7 @@ QScrollBar:vertical {
 }
 
 QScrollBar::handle:vertical {
-    background: #424242;
+    background: #3a3a3a;
     border-radius: 3px;
     min-height: 20px;
 }

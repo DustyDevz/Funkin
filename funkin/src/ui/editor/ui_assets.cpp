@@ -109,8 +109,9 @@ namespace Funkin::UI::Editor {
         root->setSpacing(0);
 
         auto* filterWrapper = new QWidget(this);
-        filterWrapper->setFixedHeight(24);
-        filterWrapper->setStyleSheet("background-color: #161616;");
+        filterWrapper->setObjectName("FilterWrapper");
+        filterWrapper->setFixedHeight(28);
+
         auto* filterRow = new QHBoxLayout(filterWrapper);
         filterRow->setContentsMargins(8, 1, 8, 1);
         filterRow->setSpacing(0);
@@ -166,10 +167,10 @@ namespace Funkin::UI::Editor {
         m_iconFolder     = UI::Icons::get("folder",      QColor(0xdc, 0xb6, 0x7a));
         m_iconFolderOpen = UI::Icons::get("folder-open", QColor(0xdc, 0xb6, 0x7a));
         m_iconFile       = UI::Icons::get("file",        QColor(0x85, 0x85, 0x85));
-        m_iconScene      = UI::Icons::get("file-code",   QColor(0x8f, 0xa1, 0xb3));
-        m_iconAudio      = UI::Icons::get("file-music",  QColor(0x85, 0x85, 0x85));
-        m_iconImage      = UI::Icons::get("image",       QColor(0x85, 0x85, 0x85));
-        m_iconScript     = UI::Icons::get("file",        QColor(0x85, 0x85, 0x85));
+        m_iconScene      = UI::Icons::get("file-code",   QColor(0xe0, 0x6c, 0x75));
+        m_iconAudio      = UI::Icons::get("file-music",  QColor(0x98, 0xc3, 0x79));
+        m_iconImage      = UI::Icons::get("image",       QColor(0x61, 0xaf, 0xef));
+        m_iconScript     = UI::Icons::get("file",        QColor(0xe5, 0xc0, 0x7b));
     }
 
     bool AssetsPanel::eventFilter(QObject* obj, QEvent* event) {
@@ -248,14 +249,15 @@ namespace Funkin::UI::Editor {
                 struct IconSpec { QString id; QColor color; };
                 static const std::unordered_map<std::string, IconSpec> extMap = {
                     { ".funkin", { "file-code",  QColor(0x8f, 0xa1, 0xb3) } },
-                    { ".png",    { "image",      QColor(0x85, 0x85, 0x85) } },
-                    { ".jpg",    { "image",      QColor(0x85, 0x85, 0x85) } },
-                    { ".jpeg",   { "image",      QColor(0x85, 0x85, 0x85) } },
-                    { ".ogg",    { "file-music", QColor(0x85, 0x85, 0x85) } },
-                    { ".mp3",    { "file-music", QColor(0x85, 0x85, 0x85) } },
-                    { ".wav",    { "file-music", QColor(0x85, 0x85, 0x85) } },
-                    { ".json",   { "file-json",  QColor(0x85, 0x85, 0x85) } },
-                    { ".xml",    { "code-xml",   QColor(0x85, 0x85, 0x85) } },
+                    { ".png",    { "image",      QColor(0x61, 0xaf, 0xef) } },
+                    { ".jpg",    { "image",      QColor(0x61, 0xaf, 0xef) } },
+                    { ".jpeg",   { "image",      QColor(0x61, 0xaf, 0xef) } },
+                    { ".ogg",    { "file-music", QColor(0x98, 0xc3, 0x79) } },
+                    { ".mp3",    { "file-music", QColor(0x98, 0xc3, 0x79) } },
+                    { ".wav",    { "file-music", QColor(0x98, 0xc3, 0x79) } },
+                    { ".json",   { "file-json",  QColor(0xe5, 0xc0, 0x7b) } },
+                    { ".xml",    { "code-xml",   QColor(0xe5, 0xc0, 0x7b) } },
+                    { ".funkin", { "file-code",  QColor(0xe0, 0x6c, 0x75) } },
                     { ".glsl",   { "file-code",  QColor(0x85, 0x85, 0x85) } },
                     { ".frag",   { "file-code",  QColor(0x85, 0x85, 0x85) } },
                     { ".vert",   { "file-code",  QColor(0x85, 0x85, 0x85) } },
@@ -271,7 +273,10 @@ namespace Funkin::UI::Editor {
             item->setData(0, Qt::UserRole,     QString::fromStdString(p.string()));
             item->setData(0, Qt::UserRole + 1, isDir);
 
-            item->setForeground(0, QColor("#909090"));
+            if (isDir)
+                item->setForeground(0, QColor("#cccccc"));
+            else
+                item->setForeground(0, QColor("#aaaaaa"));
 
             return item;
         };
