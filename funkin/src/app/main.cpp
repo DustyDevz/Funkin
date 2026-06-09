@@ -36,8 +36,12 @@
 #include "cache/cache.hpp"
 #include "renderer/sprite/sprite_batch.hpp"
 #include "renderer/sprite/animated_sprite.hpp"
+#include "renderer/sprite/sprite.hpp"
 #include "platform/win32/win32_input.hpp"
 #include "ui/editor/ui_editor.hpp"
+
+#include <psapi.h>
+#pragma comment(lib, "psapi.lib")
 
 class ViewportWidget : public QWidget {
 public:
@@ -259,6 +263,8 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    editorWindow->setRendererLabel(bgfx::getRendererName(bgfx::getRendererType()));
+
     Funkin::DebugManager::init(hwnd, 255);
     Funkin::Assets::AssetManager::get().init();
     Funkin::Shader::Sprites::init();
@@ -280,18 +286,26 @@ int main(int argc, char** argv) {
 
     auto lastTime = std::chrono::high_resolution_clock::now();
     Funkin::Renderer::AnimatedSprite testSprite;
-
+    Funkin::Renderer::Sprite         bgTest;
     LOG_PRINT("Project loaded: {}", Funkin::App::Project::get().getName());
-    editorWindow->setWindowTitle((std::string("FNF - ") + Funkin::App::Project::get().getName()).c_str());
-    testSprite.loadAtlas("images/ui/test.xml", "test");
-    testSprite.addAnimation("idle",  "idle",  24.f, true);
-    testSprite.addAnimation("left",  "left",  24.f, false);
-    testSprite.addAnimation("down",  "down",  24.f, false);
-    testSprite.addAnimation("up",    "up",    24.f, false);
-    testSprite.addAnimation("right", "right", 24.f, false);
+
+    bgTest.loadTexture("images/ui/thing.png");
+    bgTest.setScale(5.f);
+    bgTest.x -= 300;
+    
+    testSprite.loadAtlas("images/ui/bf.xml", "test");
+    testSprite.addAnimation("idle",  "BF IDLE instance",  24.f, true);
+    testSprite.addAnimation("left",  "BF LEFT NOTE instance",  24.f, false);
+    testSprite.addAnimation("down",  "BF DOWN NOTE instance",  24.f, false);
+    testSprite.addAnimation("up",    "BF UP NOTE instance",    24.f, false);
+    testSprite.addAnimation("right", "BF RIGHT NOTE instance", 24.f, false);
     testSprite.play("idle");
+    testSprite.setScale(6.f);
+    testSprite.pixel = true;
     testSprite.onAnimComplete = [&](const std::string& anim) {
-        testSprite.play("idle");
+        if (!input.isDown("up") && !input.isDown("down") && !input.isDown("left") && !input.isDown("right")) {
+            testSprite.play("idle");
+        }
     };
 
     rawInputFilter.onRenderFrame = [&]() {
@@ -323,6 +337,7 @@ int main(int argc, char** argv) {
         uint32_t h = (uint32_t)viewport->height();
         if (w > 0 && h > 0) {
             Funkin::Renderer::SpriteBatch::get().begin(0, w, h);
+            bgTest.draw();
             testSprite.draw();
             Funkin::Renderer::SpriteBatch::get().end();
         }
@@ -334,6 +349,18 @@ int main(int argc, char** argv) {
         else if (input.justDown("down"))  testSprite.play("down", true);
         else if (input.justDown("left"))  testSprite.play("left", true);
         else if (input.justDown("right")) testSprite.play("right", true);
+
+        const bgfx::Stats* stats = bgfx::getStats();
+        double cpuFreq = (double)stats->cpuTimerFreq;
+        float fps = cpuFreq > 0 ? (float)(cpuFreq / (stats->cpuTimeEnd - stats->cpuTimeBegin)) : 0.f;
+        float vram = stats->gpuMemoryUsed / (1024.f * 1024.f);
+
+        PROCESS_MEMORY_COUNTERS_EX pmc{};
+        pmc.cb = sizeof(pmc);
+        GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+        float memMB = pmc.WorkingSetSize / (1024.f * 1024.f);
+
+        editorWindow->updateStats(fps, vram, memMB);
 
         Funkin::DebugManager::endFrame();
         bgfx::touch(0);

@@ -21,12 +21,24 @@
 #include <windows.h>
 #include <QWidget>
 #include <dwmapi.h>
+#include <QStatusBar>
 #include <QWKWidgets/widgetwindowagent.h>
+#include <bgfx/bgfx.h>
 
 #pragma comment(lib, "dwmapi.lib")
 
 #include "shared/log.hpp"
 #include "app/project/project.hpp"
+
+class StatusBar : public QStatusBar {
+protected:
+    void paintEvent(QPaintEvent* e) override {
+        QPainter p(this);
+        p.fillRect(rect(), QColor("#161616"));
+        p.setPen(QColor("#2a2a2a"));
+        p.drawLine(0, 0, width(), 0);
+    }
+};
 
 namespace Funkin::UI::Editor {
     EditorWindow::EditorWindow(QWidget* parent)
@@ -89,7 +101,7 @@ namespace Funkin::UI::Editor {
         centerLayout->setContentsMargins(0, 0, 0, 0);
         auto* titleLabel = new QLabel(centerWidget);
         titleLabel->setObjectName("TitleLabel");
-        titleLabel->setText("Funkin Editor");
+        titleLabel->setText("Funkin Editor - " + QString::fromStdString(Funkin::App::Project::get().getName()));
         titleLabel->setAlignment(Qt::AlignCenter);
         titleLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
         centerLayout->addWidget(titleLabel);
@@ -167,6 +179,16 @@ namespace Funkin::UI::Editor {
         });
     }
 
+    void EditorWindow::setRendererLabel(const char* name) {
+        if (m_statusRenderer) m_statusRenderer->setText(name);
+    }
+
+    void EditorWindow::updateStats(float fps, float vramMB, float memMB) {
+        if (m_statusFPS)    m_statusFPS->setText(QString::number((int)fps) + " FPS");
+        if (m_statusVRAM)   m_statusVRAM->setText(QString::number(vramMB, 'f', 1) + " MB VRAM");
+        if (m_statusMemory) m_statusMemory->setText(QString::number(memMB, 'f', 1) + " MB");
+    }
+
     void EditorWindow::setGameViewport(QWidget* viewport) {
         auto* wrapper = new QWidget(this);
         wrapper->setObjectName("CentralWrapper");
@@ -183,6 +205,45 @@ namespace Funkin::UI::Editor {
         wrapLayout->addWidget(m_blankWidget, 1);
         wrapLayout->addWidget(viewport, 1);
 
+        // status bar
+        auto* statusBar = new FunkinStatusBar(this);
+        statusBar->setObjectName("StatusBar");
+        statusBar->setFixedHeight(24);
+        statusBar->setSizeGripEnabled(false);
+        statusBar->setStyleSheet("border: none;");
+
+        auto makeStatusLabel = [&](const QString& text, const QString& color = "#858585") -> QLabel* {
+            auto* label = new QLabel(text, statusBar);
+            label->setStyleSheet(QString("color: %1; font-size: 11px; background: transparent;").arg(color));
+            label->setContentsMargins(6, 0, 6, 0);
+            return label;
+        };
+
+        auto makeSeparator = [&]() -> QWidget* {
+            auto* sep = new QWidget(statusBar);
+            sep->setFixedWidth(1);
+            sep->setFixedHeight(12);
+            sep->setStyleSheet("background: #3a3a3a;");
+            return sep;
+        };
+
+        m_statusVersion = makeStatusLabel("v0.0.1 -dev", "#555555");
+        m_statusRenderer = makeStatusLabel("...", "#555555");
+        m_statusFPS = makeStatusLabel("0 FPS", "#98c379");
+        m_statusMemory = makeStatusLabel("0 MB", "#858585");
+        m_statusVRAM = makeStatusLabel("0 MB VRAM", "#858585");
+
+        statusBar->addPermanentWidget(m_statusFPS);
+        statusBar->addPermanentWidget(makeSeparator());
+        statusBar->addPermanentWidget(m_statusMemory);
+        statusBar->addPermanentWidget(makeSeparator());
+        statusBar->addPermanentWidget(m_statusVRAM);
+        statusBar->addPermanentWidget(makeSeparator());
+        statusBar->addPermanentWidget(m_statusRenderer);
+        statusBar->addPermanentWidget(makeSeparator());
+        statusBar->addPermanentWidget(m_statusVersion);
+
+        setStatusBar(statusBar);
         setCentralWidget(wrapper);
     }
 

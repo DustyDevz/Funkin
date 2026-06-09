@@ -9,6 +9,11 @@ class QMenuBar;
 class QDockWidget;
 class QPushButton;
 
+#include <QMainWindow>
+#include <QStatusBar>
+#include <QPainter>
+#include <QTabBar>
+
 namespace QWK {
     class WidgetWindowAgent;
 }
@@ -16,6 +21,22 @@ namespace QWK {
 namespace Funkin::UI::Editor {
     class AssetsPanel;
     class InspectorPanel;
+
+    class FunkinStatusBar : public QStatusBar {
+        Q_OBJECT
+    public:
+        explicit FunkinStatusBar(QWidget* parent = nullptr) : QStatusBar(parent) {
+            setSizeGripEnabled(false);
+            setFixedHeight(24);
+        }
+    protected:
+        void paintEvent(QPaintEvent*) override {
+            QPainter p(this);
+            p.fillRect(rect(), QColor("#161616"));
+            p.setPen(QColor("#2a2a2a"));
+            p.drawLine(0, 0, width(), 0);
+        }
+    };
 
     class EditorWindow : public QMainWindow {
         Q_OBJECT
@@ -31,7 +52,11 @@ namespace Funkin::UI::Editor {
         ~EditorWindow() override = default;
 
         QWidget* blankWidget() const { return m_blankWidget; }
+
         void setGameViewport(QWidget* viewport);
+        void setRendererLabel(const char* name);
+        void updateStats(float fps, float vramMB, float memMB);
+
         Funkin::UI::Editor::AssetsPanel*    assets()    const { return m_assets;     }
         Funkin::UI::Editor::InspectorPanel* inspector() const { return m_inspector;  }
 
@@ -48,6 +73,12 @@ namespace Funkin::UI::Editor {
         QPushButton* m_btnMaximize { nullptr };
         QPushButton* m_btnClose    { nullptr };
 
+        QLabel* m_statusVersion  { nullptr };
+        QLabel* m_statusFPS      { nullptr };
+        QLabel* m_statusMemory   { nullptr };
+        QLabel* m_statusVRAM     { nullptr };
+        QLabel* m_statusRenderer { nullptr };
+
         QDockWidget*                      m_assetsDock  { nullptr };
         Funkin::UI::Editor::AssetsPanel*  m_assets      { nullptr };
 
@@ -57,6 +88,7 @@ namespace Funkin::UI::Editor {
         QTabBar* m_tabBar { nullptr };
         QWidget* m_blankWidget  { nullptr };
 
+        FunkinStatusBar* m_statusBar = nullptr;
         QWK::WidgetWindowAgent* m_windowAgent { nullptr };
     };
 }

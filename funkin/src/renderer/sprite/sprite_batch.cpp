@@ -133,7 +133,7 @@ namespace Funkin::Renderer {
         memcpy(tvb.data, m_vertices.data(), numVerts * sizeof(SpriteVertex));
         memcpy(tib.data, m_indices.data(),  numIdx   * sizeof(uint16_t));
 
-        bgfx::setTexture(0, m_uTexture, tex->handle);
+        bgfx::setTexture(0, m_uTexture, tex->handle, m_samplerFlags);
         bgfx::setVertexBuffer(0, &tvb);
         bgfx::setIndexBuffer(&tib);
         bgfx::setState(

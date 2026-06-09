@@ -22,19 +22,20 @@ namespace Funkin::Renderer {
 
     class AnimatedSprite {
     public:
-        float    x        = 0.0f;
-        float    y        = 0.0f;
-        float    scaleX   = 1.0f;
-        float    scaleY   = 1.0f;
-        float    rotation = 0.0f;
-        float    originX  = 0.0f;
-        float    originY  = 0.0f;
-        uint32_t color    = 0xFFFFFFFF;
-        bool     visible  = true;
-        float    width    = 0.0f;
-        float    height   = 0.0f;
-        float    alpha    = 1.0f;
+        float    x            = 0.0f;
+        float    y            = 0.0f;
+        float    scaleX       = 1.0f;
+        float    scaleY       = 1.0f;
+        float    rotation     = 0.0f;
+        float    originX      = 0.0f;
+        float    originY      = 0.0f;
+        uint32_t color        = 0xFFFFFFFF;
+        bool     visible      = true;
+        float    width        = 0.0f;
+        float    height       = 0.0f;
+        float    alpha        = 1.0f;
         float    playbackRate = 1.0f;
+        bool     pixel        = false;
 
         std::function<void(const std::string&)> onAnimComplete;
 
@@ -150,6 +151,11 @@ namespace Funkin::Renderer {
         void draw() {
             if (!visible || !m_atlas || !m_atlas->texture) return;
             uint32_t c = (color & 0xFFFFFF00) | (uint32_t)(alpha * 255.0f);
+            uint32_t sampler = pixel
+                ? (BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT | BGFX_SAMPLER_MIP_POINT)
+                : 0;
+
+            SpriteBatch::get().setSamplerFlags(sampler);
             SpriteBatch::get().draw({
                 m_atlas->texture,
                 x + m_frameOffsetX * scaleX,

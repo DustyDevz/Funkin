@@ -47,6 +47,7 @@ namespace Funkin::Renderer {
 
         void begin(uint16_t viewId, uint32_t screenWidth, uint32_t screenHeight);
         void draw(const SpriteQuad& quad);
+        void setSamplerFlags(uint32_t flags) { m_samplerFlags = flags; }
         void end();
 
         static SpriteBatch& get();
@@ -65,6 +66,7 @@ namespace Funkin::Renderer {
         uint16_t    m_viewId        { 0 };
         uint32_t    m_screenWidth   { 1280 };
         uint32_t    m_screenHeight  { 720 };
+        uint32_t    m_samplerFlags = BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT;
         float       m_proj[16]      {};
 
         static constexpr uint32_t MAX_QUADS = 4096;
