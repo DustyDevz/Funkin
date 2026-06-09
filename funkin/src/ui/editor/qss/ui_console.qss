@@ -1,0 +1,82 @@
+QWidget#ConsolePanel {
+    background-color: #161616;
+}
+
+QWidget#ConsoleToolbar {
+    background-color: #161616;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+QListWidget#ConsoleList {
+    background-color: #161616;
+    color: #858585;
+    border: none;
+    font-size: 12px;
+    font-family: "Consolas", monospace;
+    outline: none;
+}
+
+QListWidget#ConsoleList::item {
+    padding: 1px 8px;
+    min-height: 18px;
+    max-height: 18px;
+    border: none;
+}
+
+QListWidget#ConsoleList::item:alternate {
+    background-color: #191919;
+}
+
+QListWidget#ConsoleList::item:hover {
+    background-color: #1e1e1e;
+}
+
+QListWidget#ConsoleList::item:selected {
+    background-color: #094771;
+    color: #ffffff;
+}
+
+QLineEdit#ConsoleFilter {
+    background-color: #1e1e1e;
+    color: #cccccc;
+    border: 1px solid #3a3a3a;
+    border-radius: 3px;
+    padding: 0 6px;
+    font-size: 11px;
+    selection-background-color: #094771;
+}
+
+QLineEdit#ConsoleFilter:focus {
+    border-color: #007fd4;
+}
+
+QPushButton#ConsoleClear {
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+}
+
+QPushButton#ConsoleClear:hover {
+    background: #2a2a2a;
+}
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 6px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #3a3a3a;
+    border-radius: 3px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #686868;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}

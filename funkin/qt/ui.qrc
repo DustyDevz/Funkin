@@ -3,5 +3,6 @@
         <file alias="icon">../assets/images/icon.ico</file>
         <file alias="editor">../src/ui/editor/qss/ui_editor.qss</file>
         <file alias="assets">../src/ui/editor/qss/ui_assets.qss</file>
+        <file alias="console">../src/ui/editor/qss/ui_console.qss</file>
     </qresource>
 </RCC>

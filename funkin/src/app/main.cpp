@@ -39,6 +39,7 @@
 #include "renderer/sprite/sprite.hpp"
 #include "platform/win32/win32_input.hpp"
 #include "ui/editor/ui_editor.hpp"
+#include "ui/ui_log.hpp"
 
 #include <psapi.h>
 #pragma comment(lib, "psapi.lib")
@@ -225,10 +226,10 @@ int main(int argc, char** argv) {
         editorWindow->blankWidget()->setVisible(!isGame);
     });
 
-    HWND hwnd = (HWND)viewport->winId();
+    HWND hwnd   = (HWND)viewport->winId();
     HWND qtHwnd = (HWND)editorWindow->winId();
-    SetClassLongPtr(qtHwnd, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(BLACK_BRUSH));
-    
+    SetClassLongPtr(qtHwnd, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(NULL_BRUSH));
+        
     LONG_PTR vpStyle = GetClassLongPtr(hwnd, GCL_STYLE);
     vpStyle &= ~(CS_HREDRAW | CS_VREDRAW);
     SetClassLongPtr(hwnd, GCL_STYLE, vpStyle);
@@ -307,6 +308,35 @@ int main(int argc, char** argv) {
             testSprite.play("idle");
         }
     };
+
+    // TEMP DEBUGGING
+    QTimer* testConsoleTimer = new QTimer(&qtApp);
+    testConsoleTimer->setInterval(1000);
+
+    QObject::connect(testConsoleTimer, &QTimer::timeout, []() {
+        // is this smart? fuck no wtf
+        static const char* words[] = {
+            "asdiosadn", "fkljsdhf", "xzqwerty", "ploiuyt", "mnbvcxz",
+            "qazwsxedc", "rfvtgbyhn", "ujmkilop", "sdfjkhsd", "zxcvbnm"
+        };
+        static const char* prefixes[] = {
+            "Loading", "Failed to load", "Initializing", "Destroyed", "Created",
+            "Updating", "Skipping", "Processing", "Compiling", "Unloading"
+        };
+
+        int wordCount = sizeof(words) / sizeof(words[0]);
+        int prefixCount = sizeof(prefixes) / sizeof(prefixes[0]);
+
+        std::string msg = std::string(prefixes[rand() % prefixCount]) + " " + words[rand() % wordCount];
+
+        switch (rand() % 3) {
+            case 0: UI_LOG_INFO(msg);  break;
+            case 1: UI_LOG_WARN(msg);  break;
+            case 2: UI_LOG_ERROR(msg); break;
+        }
+    });
+
+    testConsoleTimer->start();
 
     rawInputFilter.onRenderFrame = [&]() {
         if (!running || !editorWindow->isVisible()) {

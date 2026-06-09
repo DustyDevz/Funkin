@@ -13,6 +13,14 @@ class QPushButton;
 #include <QStatusBar>
 #include <QPainter>
 #include <QTabBar>
+#include <QEvent>
+
+#include "ui/editor/ui_assets.hpp"
+#include "ui_inspector.hpp"
+#include "ui_console.hpp"
+#include "../ui_icons.hpp"
+#include "../ui_titlebar.hpp"
+#include "../ui_style.hpp"
 
 namespace QWK {
     class WidgetWindowAgent;
@@ -42,6 +50,7 @@ namespace Funkin::UI::Editor {
         Q_OBJECT
 
     protected:
+        void paintEvent(QPaintEvent*) override {}
         void changeEvent(QEvent* event) override;
 
     signals:
@@ -84,6 +93,9 @@ namespace Funkin::UI::Editor {
 
         QDockWidget*                        m_inspectorDock  { nullptr };
         Funkin::UI::Editor::InspectorPanel* m_inspector      { nullptr };
+
+        QDockWidget*                      m_consoleDock { nullptr };
+        Funkin::UI::Editor::ConsolePanel* m_console     { nullptr };
 
         QTabBar* m_tabBar { nullptr };
         QWidget* m_blankWidget  { nullptr };

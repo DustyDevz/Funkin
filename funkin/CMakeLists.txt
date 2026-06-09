@@ -68,6 +68,7 @@ set(UI_SOURCES
     src/ui/editor/ui_assets.cpp
     src/ui/editor/ui_editor.cpp
     src/ui/editor/ui_inspector.cpp
+    src/ui/editor/ui_console.cpp
     src/ui/ui_icons.cpp
     src/ui/ui_titlebar.cpp
 )

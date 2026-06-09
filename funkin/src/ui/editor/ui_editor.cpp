@@ -2,11 +2,6 @@
 // Licensed under GNU GPL v3.0
 
 #include "ui_editor.hpp"
-#include "ui/editor/ui_assets.hpp"
-#include "ui_inspector.hpp"
-#include "../ui_icons.hpp"
-#include "../ui_titlebar.hpp"
-#include "../ui_style.hpp"
 
 #include <QMenuBar>
 #include <QMenu>
@@ -277,6 +272,16 @@ namespace Funkin::UI::Editor {
         m_inspectorDock->setTitleBarWidget(new Funkin::UI::PanelTitleBar("Inspector", m_inspectorDock));
         addDockWidget(Qt::RightDockWidgetArea, m_inspectorDock);
 
+        m_console = new Funkin::UI::Editor::ConsolePanel(this);
+        m_consoleDock = new QDockWidget("Console", this);
+        m_consoleDock->setObjectName("ConsoleDock");
+        m_consoleDock->setWidget(m_console);
+        m_consoleDock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+        m_consoleDock->setTitleBarWidget(new Funkin::UI::PanelTitleBar("Console", m_consoleDock));
+        addDockWidget(Qt::BottomDockWidgetArea, m_consoleDock);
+
+        setCorner(Qt::BottomLeftCorner,  Qt::LeftDockWidgetArea);
+        setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
         resizeDocks({m_assetsDock, m_inspectorDock}, {220, 280}, Qt::Horizontal);
     }
 }
