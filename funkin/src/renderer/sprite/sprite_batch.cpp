@@ -33,7 +33,7 @@ namespace Funkin::Renderer {
             0.0f, 1000.0f,
             0.0f, bgfx::getCaps()->homogeneousDepth);
 
-        bgfx::setViewTransform(m_viewId, nullptr, m_proj);
+        // bgfx::setViewTransform(m_viewId, nullptr, m_proj);
         bgfx::setViewRect(m_viewId, 0, 0, (uint16_t)screenWidth, (uint16_t)screenHeight);
 
         m_vertices.clear();

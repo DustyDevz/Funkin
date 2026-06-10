@@ -2,82 +2,45 @@ if(WIN32)
     list(APPEND FUNKIN_WIN32_RESOURCES ${FUNKIN_WIN32_RESOURCE})
 endif()
 
-add_executable(Funkin
-    src/shaders/shader_uniform.cpp)
-
 set(FUNKIN_3RD_PARTY_DIR "${CMAKE_SOURCE_DIR}/funkin/third_party")
 
-set(APP_SOURCES
-    src/app/main.cpp
-    src/app/debug.cpp
-    src/app/registry.cpp
-    src/app/project/project.cpp
+file(GLOB APP_SOURCES CONFIGURE_DEPENDS 
+    "src/app/*.cpp"
+    "src/app/project/*.cpp"
 )
 
-set(ASSET_SOURCES
-    src/assets/assets.cpp
-    src/assets/loaders/texture_loader.cpp
-    src/assets/loaders/audio_loader.cpp
-    src/assets/loaders/json_loader.cpp
-    src/assets/loaders/font_loader.cpp
-    src/assets/loaders/sparrow_loader.cpp
+file(GLOB ASSET_SOURCES CONFIGURE_DEPENDS 
+    "src/assets/*.cpp"
+    "src/assets/loaders/*.cpp"
 )
 
-set(AUDIO_SOURCES
-    ##src/audio/audio.cpp
+file(GLOB INPUT_SOURCES CONFIGURE_DEPENDS 
+    "src/input/*.cpp"
+    "src/platform/win32/*.cpp"
 )
 
-set(INPUT_SOURCES
-    src/input/input.cpp
-    src/platform/win32/win32_input.cpp
-    ${FUNKIN_WIN32_RESOURCES}
+file(GLOB IMGUI_SOURCES CONFIGURE_DEPENDS "src/imgui/*.cpp")
+file(GLOB FILESYSTEM_SOURCES CONFIGURE_DEPENDS "src/filesystem/*.cpp")
+file(GLOB CACHE_SOURCES CONFIGURE_DEPENDS "src/cache/*.cpp")
+file(GLOB RENDERER_SOURCES CONFIGURE_DEPENDS 
+    "src/renderer/sprite/*.cpp"
+    "src/renderer/camera/*.cpp"
 )
 
-set(IMGUI_SOURCES
-    src/imgui/imgui_impl_bgfx.cpp
+file(GLOB SHADER_SOURCES CONFIGURE_DEPENDS 
+    "src/shaders/*.cpp"
+    "src/shaders/sprites/*.cpp"
 )
 
-set(FILESYSTEM_SOURCES
-    src/filesystem/filesystem.cpp
+file(GLOB SHARED_SOURCES CONFIGURE_DEPENDS "src/shared/*.cpp")
+
+file(GLOB UI_SOURCES CONFIGURE_DEPENDS 
+    "src/ui/*.cpp"
+    "src/ui/project/*.cpp"
+    "src/ui/editor/*.cpp"
 )
 
-set(CACHE_SOURCES
-    src/cache/cache.cpp
-)
-
-set(RENDERER_SOURCES
-    src/renderer/sprite/sprite_batch.cpp
-)
-
-set(SHADER_SOURCES
-    src/shaders/shader_compiler.cpp
-    src/shaders/shader_converter.cpp
-    src/shaders/shader_cache.cpp
-    src/shaders/shader_job_queue.cpp
-    src/shaders/shader_program.cpp
-    src/shaders/sprites/sprite_shader.cpp
-)
-
-set(SHARED_SOURCES
-    src/shared/utils.cpp
-    src/shared/xxhash_impl.cpp
-)
-
-set(UI_SOURCES
-    src/ui/project/ui_project.cpp
-    src/ui/editor/ui_assets.cpp
-    src/ui/editor/ui_editor.cpp
-    src/ui/editor/ui_inspector.cpp
-    src/ui/editor/ui_console.cpp
-    src/ui/ui_icons.cpp
-    src/ui/ui_titlebar.cpp
-    src/ui/ui_contextmenu.cpp
-)
-
-set(QT_SOURCES
-    qt/icons.qrc
-    qt/ui.qrc
-)
+file(GLOB QT_SOURCES CONFIGURE_DEPENDS "qt/*.qrc")
 
 set(THIRD_PARTY_SOURCES
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui.cpp
@@ -88,20 +51,20 @@ set(THIRD_PARTY_SOURCES
     ${FUNKIN_3RD_PARTY_DIR}/imgui/backends/imgui_impl_win32.cpp
 )
 
-target_sources(Funkin PRIVATE
+add_executable(Funkin
     ${APP_SOURCES}
     ${INPUT_SOURCES}
     ${IMGUI_SOURCES}
     ${CACHE_SOURCES}
     ${FILESYSTEM_SOURCES}
     ${ASSET_SOURCES}
-    ${AUDIO_SOURCES}
     ${RENDERER_SOURCES}
     ${SHADER_SOURCES}
     ${THIRD_PARTY_SOURCES}
     ${SHARED_SOURCES}
     ${UI_SOURCES}
     ${QT_SOURCES}
+    ${FUNKIN_WIN32_RESOURCES}
 )
 
 target_precompile_headers(Funkin PRIVATE
@@ -190,7 +153,7 @@ add_custom_command(TARGET Funkin POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${FUNKIN_3RD_PARTY_DIR}/bgfx/bgfx/src
         $<TARGET_FILE_DIR:Funkin>/bin/shaderc_include
-    
+        
     ## qt legal!!!
     COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE:Funkin>"
         --dir "$<TARGET_FILE_DIR:Funkin>"

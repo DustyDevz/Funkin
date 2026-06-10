@@ -40,6 +40,7 @@
 #include "platform/win32/win32_input.hpp"
 #include "ui/editor/ui_editor.hpp"
 #include "ui/ui_log.hpp"
+#include "renderer/camera/camera.hpp"
 
 #include <psapi.h>
 #pragma comment(lib, "psapi.lib")
@@ -270,6 +271,9 @@ int main(int argc, char** argv) {
     Funkin::Assets::AssetManager::get().init();
     Funkin::Shader::Sprites::init();
 
+    auto& camera = Funkin::Renderer::Camera::CameraManager::get();
+    camera.addLayer("editor", 0, &camera.editor());
+
     const char* name = bgfx::getRendererName(bgfx::getRendererType());
     LOG_PRINT("bgfx using: {}", name);
 
@@ -347,9 +351,31 @@ int main(int argc, char** argv) {
         float dt = std::chrono::duration<float>(now - lastTime).count();
         lastTime = now;
 
+        uint32_t w = (uint32_t)viewport->width();
+        uint32_t h = (uint32_t)viewport->height();
+
         Funkin::Assets::AssetManager::get().update();
         input.update();
         testSprite.update(dt);
+
+        // camera
+        if (input.isDown("up"))    camera.editor().onKeyPan(0.f, -1.f, dt);
+        if (input.isDown("down"))  camera.editor().onKeyPan(0.f, 1.f, dt);
+        if (input.isDown("left"))  camera.editor().onKeyPan(-1.f, 0.f, dt);
+        if (input.isDown("right")) camera.editor().onKeyPan(1.f, 0.f, dt);
+
+        if (input.state().scrollY != 0.0f) {
+            QPoint localMouse = viewport->mapFromGlobal(QCursor::pos());
+            camera.editor().onScroll(
+                input.state().scrollY, 
+                (float)localMouse.x(), 
+                (float)localMouse.y(), 
+                (float)w, 
+                (float)h
+            );
+        }
+
+        camera.update(dt);
 
         if (input.justDown("test")) {
             uint64_t eventTime = input.getLastTimestamp("test");
@@ -363,9 +389,8 @@ int main(int argc, char** argv) {
         Funkin::Shader::tickShaderJobs();
         Funkin::DebugManager::beginFrame();
 
-        uint32_t w = (uint32_t)viewport->width();
-        uint32_t h = (uint32_t)viewport->height();
         if (w > 0 && h > 0) {
+            camera.applyAll(w, h);
             Funkin::Renderer::SpriteBatch::get().begin(0, w, h);
             bgTest.draw();
             testSprite.draw();
@@ -375,10 +400,10 @@ int main(int argc, char** argv) {
         if (showAssociationPrompt)
             DrawFileAssociationModal(showAssociationPrompt);
 
-        if (input.justDown("up"))         testSprite.play("up", true);
-        else if (input.justDown("down"))  testSprite.play("down", true);
-        else if (input.justDown("left"))  testSprite.play("left", true);
-        else if (input.justDown("right")) testSprite.play("right", true);
+        // if (input.justDown("up"))         testSprite.play("up", true);
+        // else if (input.justDown("down"))  testSprite.play("down", true);
+        // else if (input.justDown("left"))  testSprite.play("left", true);
+        // else if (input.justDown("right")) testSprite.play("right", true);
 
         const bgfx::Stats* stats = bgfx::getStats();
         double cpuFreq = (double)stats->cpuTimerFreq;
