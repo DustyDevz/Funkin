@@ -2,7 +2,6 @@
 // Licensed under GNU GPL v3.0
 
 #pragma once
-
 #ifdef _WIN32
     #include <windows.h>
     #include <xinput.h>
