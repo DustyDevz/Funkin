@@ -3,7 +3,7 @@
 
 #include <QApplication>
 #include <QGuiApplication>
-#include "app/app.hpp"
+#include "app.hpp"
 
 int main(int argc, char** argv) {
     QGuiApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
