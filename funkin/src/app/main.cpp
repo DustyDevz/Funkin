@@ -330,9 +330,9 @@ int main(int argc, char** argv) {
         std::string msg = std::string(prefixes[rand() % prefixCount]) + " " + words[rand() % wordCount];
 
         switch (rand() % 3) {
-            case 0: UI_LOG_INFO(msg);  break;
-            case 1: UI_LOG_WARN(msg);  break;
-            case 2: UI_LOG_ERROR(msg); break;
+            case 0: UI_ENGINE_INFO(msg);  break;
+            case 1: UI_ENGINE_WARN(msg);  break;
+            case 2: UI_ENGINE_ERROR(msg); break;
         }
     });
 

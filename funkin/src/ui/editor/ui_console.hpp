@@ -6,6 +6,7 @@
 #include <QListWidget>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QTreeWidget>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -17,14 +18,14 @@ namespace Funkin::UI::Editor {
     public:
         explicit ConsolePanel(QWidget* parent = nullptr);
         void appendEntry(const ConsoleEntry& e);
-        void updateCounts();
 
     private:
         void buildToolbar();
         void applyFilter();
+        void updateCounts();
 
-        QListWidget* m_list     { nullptr };
-        QLineEdit*   m_filter   { nullptr };
+        QTreeWidget* m_tree    { nullptr };
+        QLineEdit*   m_filter  { nullptr };
         QPushButton* m_btnInfo  { nullptr };
         QPushButton* m_btnWarn  { nullptr };
         QPushButton* m_btnError { nullptr };

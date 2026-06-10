@@ -10,6 +10,63 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QMetaObject>
+#include <QHeaderView>
+#include <QPainter>
+
+class ConsoleTreeWidget : public QTreeWidget {
+public:
+    explicit ConsoleTreeWidget(QWidget* parent = nullptr) : QTreeWidget(parent) {
+        setMouseTracking(true);
+    }
+
+    void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override {
+        QTreeWidgetItem* item = itemFromIndex(index);
+        if (!item || item->childCount() == 0) return;
+
+        painter->save();
+        const bool open = item->isExpanded();
+        const int cellW = indentation();
+        const int cellX = rect.right() - cellW;
+        const QRect cell(cellX, rect.top(), cellW, rect.height());
+
+        const float cx = cell.x() + cell.width()  * 0.5f;
+        const float cy = cell.y() + cell.height()  * 0.5f;
+
+        const QPoint cursorVp = viewport()->mapFromGlobal(QCursor::pos());
+        const bool rowHover   = visualItemRect(item).contains(cursorVp);
+        const bool selected   = item->isSelected();
+
+        const QColor arrowColor = (rowHover || selected)
+            ? QColor(0xcc, 0xcc, 0xcc)
+            : QColor(0x55, 0x55, 0x55);
+
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        QPen pen(arrowColor);
+        pen.setWidthF(1.3f);
+        pen.setCapStyle(Qt::RoundCap);
+        pen.setJoinStyle(Qt::RoundJoin);
+        painter->setPen(pen);
+        painter->setBrush(Qt::NoBrush);
+
+        const float s = 3.0f;
+        if (open) {
+            QPointF pts[3] = {
+                { cx - s,        cy - s * 0.4f },
+                { cx,            cy + s * 0.7f },
+                { cx + s,        cy - s * 0.4f }
+            };
+            painter->drawPolyline(pts, 3);
+        } else {
+            QPointF pts[3] = {
+                { cx - s * 0.4f, cy - s        },
+                { cx + s * 0.7f, cy            },
+                { cx - s * 0.4f, cy + s        }
+            };
+            painter->drawPolyline(pts, 3);
+        }
+        painter->restore();
+    }
+};
 
 namespace Funkin::UI::Editor {
     ConsolePanel::ConsolePanel(QWidget* parent)
@@ -25,36 +82,41 @@ namespace Funkin::UI::Editor {
 
         buildToolbar();
 
-        m_list = new QListWidget(this);
-        m_list->setObjectName("ConsoleList");
-        m_list->setSelectionMode(QAbstractItemView::SingleSelection);
-        m_list->setContextMenuPolicy(Qt::CustomContextMenu);
-        m_list->setSpacing(0);
-        m_list->setIconSize(QSize(12, 12));
-        m_list->setUniformItemSizes(true);
-        m_list->setAlternatingRowColors(true);
-        m_list->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-        root->addWidget(m_list, 1);
+        m_tree = new ConsoleTreeWidget(this);
+        m_tree->setObjectName("ConsoleTree");
+        m_tree->setHeaderHidden(true);
+        m_tree->setColumnCount(1);
+        m_tree->setRootIsDecorated(true);
+        m_tree->setIndentation(16);
+        m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
+        m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
+        m_tree->setIconSize(QSize(12, 12));
+        m_tree->setUniformRowHeights(false);
+        m_tree->setAlternatingRowColors(false);
+        m_tree->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+        m_tree->setAnimated(false);
+        m_tree->header()->setStretchLastSection(true);
+        root->addWidget(m_tree, 1);
 
-        connect(m_list, &QListWidget::customContextMenuRequested, this, [this](const QPoint& pos) {
-            auto* item = m_list->itemAt(pos);
-            
+        connect(m_tree, &QTreeWidget::customContextMenuRequested, this, [this](const QPoint& pos) {
+            auto* item = m_tree->itemAt(pos);
             Funkin::UI::ContextMenu menu(this);
 
             if (item) {
-                menu.addItem("Copy", "copy", QKeySequence::Copy, [this, item]() {
-                    QApplication::clipboard()->setText(item->text());
+                auto* top = item->parent() ? item->parent() : item;
+                menu.addItem("Copy Message", "copy", QKeySequence::Copy, [top]() {
+                    QApplication::clipboard()->setText(top->text(0));
                 });
-                menu.addItem("Copy All", "clipboard-list", {}, [this]() {
+                menu.addItem("Copy All Details", "clipboard-list", {}, [top]() {
                     QStringList lines;
-                    for (int i = 0; i < m_list->count(); i++)
-                        if (!m_list->item(i)->isHidden())
-                            lines << m_list->item(i)->text();
+                    lines << top->text(0);
+                    for (int i = 0; i < top->childCount(); i++)
+                        lines << "  " + top->child(i)->text(0);
                     QApplication::clipboard()->setText(lines.join("\n"));
                 });
                 menu.addDivider();
-                menu.addItem("Filter by This Level", "filter", {}, [this, item]() {
-                    QString level = item->data(Qt::UserRole).toString();
+                menu.addItem("Filter by This Level", "list-filter", {}, [this, top]() {
+                    QString level = top->data(0, Qt::UserRole).toString();
                     m_btnInfo->setChecked(level == "info");
                     m_btnWarn->setChecked(level == "warn");
                     m_btnError->setChecked(level == "error");
@@ -64,25 +126,26 @@ namespace Funkin::UI::Editor {
             }
 
             menu.addItem("Select All", "check-check", QKeySequence::SelectAll, [this]() {
-                m_list->selectAll();
+                m_tree->selectAll();
             });
             menu.addItem("Clear Console", "trash-2", {}, [this]() {
                 ConsoleLog::get().clear();
-                m_list->clear();
+                m_tree->clear();
                 updateCounts();
             });
 
             if (item) {
                 menu.addDivider();
                 menu.addItem("Scroll to Top", "arrow-up-to-line", {}, [this]() {
-                    m_list->scrollToTop();
+                    m_tree->scrollToTop();
                 });
                 menu.addItem("Scroll to Bottom", "arrow-down-to-line", {}, [this]() {
-                    m_list->scrollToBottom();
+                    m_tree->scrollToItem(m_tree->invisibleRootItem()->child(
+                        m_tree->invisibleRootItem()->childCount() - 1));
                 });
             }
 
-            menu.exec(m_list->viewport()->mapToGlobal(pos));
+            menu.exec(m_tree->viewport()->mapToGlobal(pos));
         });
 
         ConsoleLog::get().addSink([this](const ConsoleEntry& e) {
@@ -93,19 +156,6 @@ namespace Funkin::UI::Editor {
 
         for (auto& e : ConsoleLog::get().entries())
             appendEntry(e);
-    }
-
-    void ConsolePanel::updateCounts() {
-        int info = 0, warn = 0, error = 0;
-        for (int i = 0; i < m_list->count(); i++) {
-            QString level = m_list->item(i)->data(Qt::UserRole).toString();
-            if      (level == "info")  info++;
-            else if (level == "warn")  warn++;
-            else if (level == "error") error++;
-        }
-        m_btnInfo->setText(QString("Info %1").arg(info));
-        m_btnWarn->setText(QString("Warn %1").arg(warn));
-        m_btnError->setText(QString("Error %1").arg(error));
     }
 
     void ConsolePanel::buildToolbar() {
@@ -153,72 +203,114 @@ namespace Funkin::UI::Editor {
         m_btnLock->setCheckable(true);
         m_btnLock->setChecked(true);
         m_btnLock->setFlat(true);
-        m_btnLock->setFixedSize(18, 18);
-        m_btnLock->setIcon(Funkin::UI::Icons::get("lock", QColor(0x85, 0x85, 0x85), 12));
-        m_btnLock->setIconSize(QSize(12, 12));
+        m_btnLock->setFixedSize(24, 20);
+        m_btnLock->setIcon(Funkin::UI::Icons::get("lock", QColor(0x61, 0xaf, 0xef), 14));
+        m_btnLock->setIconSize(QSize(14, 14));
         m_btnLock->setToolTip("Lock scroll to bottom");
         layout->addWidget(m_btnLock);
 
-        qobject_cast<QVBoxLayout*>(this->layout())->insertWidget(0, toolbar);
-        connect(m_filter,   &QLineEdit::textChanged, this, &ConsolePanel::applyFilter);
-        connect(m_btnInfo,  &QPushButton::toggled, this, [this](bool v) { m_showInfo  = v; applyFilter(); });
-        connect(m_btnWarn,  &QPushButton::toggled, this, [this](bool v) { m_showWarn  = v; applyFilter(); });
-        connect(m_btnError, &QPushButton::toggled, this, [this](bool v) { m_showError = v; applyFilter(); });
-        connect(m_btnLock,  &QPushButton::toggled, this, [this](bool locked) {
+        connect(m_btnLock, &QPushButton::toggled, this, [this](bool locked) {
             m_btnLock->setIcon(Funkin::UI::Icons::get(
                 locked ? "lock" : "lock-open",
                 locked ? QColor(0x61, 0xaf, 0xef) : QColor(0x85, 0x85, 0x85),
                 14
             ));
-            if (locked) m_list->scrollToBottom();
+            if (locked) m_tree->scrollToBottom();
         });
+
+        qobject_cast<QVBoxLayout*>(this->layout())->insertWidget(0, toolbar);
+
+        connect(m_filter,   &QLineEdit::textChanged, this, &ConsolePanel::applyFilter);
+        connect(m_btnInfo,  &QPushButton::toggled, this, [this](bool v) { m_showInfo  = v; applyFilter(); });
+        connect(m_btnWarn,  &QPushButton::toggled, this, [this](bool v) { m_showWarn  = v; applyFilter(); });
+        connect(m_btnError, &QPushButton::toggled, this, [this](bool v) { m_showError = v; applyFilter(); });
     }
 
     void ConsolePanel::appendEntry(const ConsoleEntry& e) {
-        auto* item = new QListWidgetItem();
+        auto* top = new QTreeWidgetItem(m_tree);
+
+        QColor fg;
+        QColor bg;
+        QString levelStr;
+        QString iconId;
+        QColor  iconColor;
 
         switch (e.level) {
+            case ConsoleLevel::Info:
+                fg        = QColor("#aaaaaa");
+                bg        = QColor(0, 0, 0, 0);
+                levelStr  = "info";
+                iconId    = "info";
+                iconColor = QColor(0x85, 0x85, 0x85);
+                break;
             case ConsoleLevel::Warn:
-                item->setText(QString::fromStdString(e.message));
-                item->setIcon(Funkin::UI::Icons::get("triangle-alert", QColor(0xe5, 0xc0, 0x7b), 12));
-                item->setForeground(QColor("#e5c07b"));
-                item->setBackground(QColor("#2a2510"));
-                item->setData(Qt::UserRole, "warn");
+                fg        = QColor("#e5c07b");
+                bg        = QColor("#2a2510");
+                levelStr  = "warn";
+                iconId    = "triangle-alert";
+                iconColor = QColor(0xe5, 0xc0, 0x7b);
                 break;
             case ConsoleLevel::Error:
-                item->setText(QString::fromStdString(e.message));
-                item->setIcon(Funkin::UI::Icons::get("circle-x", QColor(0xe0, 0x6c, 0x75), 12));
-                item->setForeground(QColor("#e06c75"));
-                item->setBackground(QColor("#2a1515"));
-                item->setData(Qt::UserRole, "error");
-                break;
-            case ConsoleLevel::Info:
-                item->setText(QString::fromStdString(e.message));
-                item->setIcon(Funkin::UI::Icons::get("info", QColor(0x85, 0x85, 0x85), 12));
-                item->setForeground(QColor("#aaaaaa"));
-                item->setData(Qt::UserRole, "info");
+                fg        = QColor("#e06c75");
+                bg        = QColor("#2a1515");
+                levelStr  = "error";
+                iconId    = "circle-x";
+                iconColor = QColor(0xe0, 0x6c, 0x75);
                 break;
         }
 
-        m_list->addItem(item);
+        top->setText(0, QString::fromStdString(e.message));
+        top->setIcon(0, Funkin::UI::Icons::get(iconId, iconColor, 12));
+        top->setForeground(0, fg);
+        if (bg.alpha() > 0) top->setBackground(0, bg);
+        top->setData(0, Qt::UserRole, levelStr);
+
+        auto* timeItem = new QTreeWidgetItem(top);
+        timeItem->setText(0, QString::fromStdString(e.timestamp));
+        timeItem->setForeground(0, QColor("#555555"));
+        timeItem->setIcon(0, Funkin::UI::Icons::get("clock", QColor(0x55, 0x55, 0x55), 12));
+        timeItem->setToolTip(0, "Log Timestamp");
+
+        if (!e.engineId.empty()) {
+            auto* idItem = new QTreeWidgetItem(top);
+            idItem->setText(0, QString::fromStdString(e.engineId));
+            idItem->setForeground(0, QColor("#4a4a4a"));
+            idItem->setIcon(0, Funkin::UI::Icons::get("cpu", QColor(0x4a, 0x4a, 0x4a), 12));
+        }
+
         if (m_btnLock && m_btnLock->isChecked())
-            m_list->scrollToBottom();
-            
+            m_tree->scrollToItem(top);
+
         updateCounts();
         applyFilter();
     }
 
+    void ConsolePanel::updateCounts() {
+        int info = 0, warn = 0, error = 0;
+        auto* root = m_tree->invisibleRootItem();
+        for (int i = 0; i < root->childCount(); i++) {
+            QString level = root->child(i)->data(0, Qt::UserRole).toString();
+            if      (level == "info")  info++;
+            else if (level == "warn")  warn++;
+            else if (level == "error") error++;
+        }
+        m_btnInfo->setText(QString("Info %1").arg(info));
+        m_btnWarn->setText(QString("Warn %1").arg(warn));
+        m_btnError->setText(QString("Error %1").arg(error));
+    }
+
     void ConsolePanel::applyFilter() {
         const QString filter = m_filter ? m_filter->text() : "";
-        for (int i = 0; i < m_list->count(); i++) {
-            auto* item = m_list->item(i);
-            const QString level = item->data(Qt::UserRole).toString();
+        auto* root = m_tree->invisibleRootItem();
+        for (int i = 0; i < root->childCount(); i++) {
+            auto* item = root->child(i);
+            const QString level = item->data(0, Qt::UserRole).toString();
             bool levelVisible =
                 (level == "info"  && m_showInfo)  ||
                 (level == "warn"  && m_showWarn)  ||
                 (level == "error" && m_showError);
             bool textVisible = filter.isEmpty() ||
-                item->text().contains(filter, Qt::CaseInsensitive);
+                item->text(0).contains(filter, Qt::CaseInsensitive);
             item->setHidden(!levelVisible || !textVisible);
         }
     }
