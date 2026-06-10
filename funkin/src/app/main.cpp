@@ -359,20 +359,22 @@ int main(int argc, char** argv) {
         testSprite.update(dt);
 
         // camera
-        if (input.isDown("up"))    camera.editor().onKeyPan(0.f, -1.f, dt);
-        if (input.isDown("down"))  camera.editor().onKeyPan(0.f, 1.f, dt);
-        if (input.isDown("left"))  camera.editor().onKeyPan(-1.f, 0.f, dt);
-        if (input.isDown("right")) camera.editor().onKeyPan(1.f, 0.f, dt);
+        if (viewport->underMouse()) {
+            if (input.isDown("up"))    camera.editor().onKeyPan(0.f, -1.f, dt);
+            if (input.isDown("down"))  camera.editor().onKeyPan(0.f, 1.f, dt);
+            if (input.isDown("left"))  camera.editor().onKeyPan(-1.f, 0.f, dt);
+            if (input.isDown("right")) camera.editor().onKeyPan(1.f, 0.f, dt);
 
-        if (input.state().scrollY != 0.0f) {
-            QPoint localMouse = viewport->mapFromGlobal(QCursor::pos());
-            camera.editor().onScroll(
-                input.state().scrollY, 
-                (float)localMouse.x(), 
-                (float)localMouse.y(), 
-                (float)w, 
-                (float)h
-            );
+            if (input.state().scrollY != 0.0f) {
+                QPoint localMouse = viewport->mapFromGlobal(QCursor::pos());
+                camera.editor().onScroll(
+                    input.state().scrollY, 
+                    (float)localMouse.x(), 
+                    (float)localMouse.y(), 
+                    (float)w, 
+                    (float)h
+                );
+            }
         }
 
         camera.update(dt);
