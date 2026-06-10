@@ -56,13 +56,17 @@ QLineEdit#ConsoleFilter:focus {
     border-color: #007fd4;
 }
 
-QPushButton#ConsoleClear {
+QPushButton#ConsoleLock {
     background: transparent;
     border: none;
     border-radius: 3px;
 }
 
-QPushButton#ConsoleClear:hover {
+QPushButton#ConsoleLock:checked {
+    background: #1a3a4a;
+}
+
+QPushButton#ConsoleLock:hover {
     background: #2a2a2a;
 }
 

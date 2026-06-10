@@ -71,6 +71,7 @@ set(UI_SOURCES
     src/ui/editor/ui_console.cpp
     src/ui/ui_icons.cpp
     src/ui/ui_titlebar.cpp
+    src/ui/ui_contextmenu.cpp
 )
 
 set(QT_SOURCES

@@ -28,7 +28,7 @@ namespace Funkin::UI {
                 LOG_WARN("Style file at path is empty: {}", path.toStdString());
             }
 
-            widget->setStyleSheet(data);
+            widget->setStyleSheet(widget->styleSheet() + "\n" + QString::fromUtf8(data));
             file.close();
 
             LOG_PRINT("Successfully loaded stylesheet: {} ({} bytes) onto target: {}", 

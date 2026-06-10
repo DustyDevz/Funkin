@@ -1,0 +1,49 @@
+/*
+ * © 2026 Dusty | https://github.com/DustyDevz/Funkin
+ * Licensed under GNU GPL v3.0
+ * UI_CONTEXTMENU
+ */
+
+QMenu#ContextMenu {
+    background-color: #1f1f1f;
+    color: #cccccc;
+    border: 1px solid #2d2d2d;
+    border-radius: 4px;
+    padding: 4px 0px;
+    font-size: 12px;
+}
+
+QMenu#ContextMenu::item {
+    padding: 5px 32px 5px 12px;
+    border-radius: 3px;
+    margin: 1px 4px;
+}
+
+QMenu#ContextMenu::item:selected {
+    background-color: #094771;
+    color: #ffffff;
+}
+
+QMenu#ContextMenu::item[danger="true"] {
+    color: #e06c75;
+}
+
+QMenu#ContextMenu::item[danger="true"]:selected {
+    background-color: #5a1d1d;
+    color: #e06c75;
+}
+
+QMenu#ContextMenu::separator {
+    height: 1px;
+    background: #2d2d2d;
+    margin: 3px 0px;
+}
+
+QMenu#ContextMenu::icon {
+    padding-left: 8px;
+}
+
+QMenu#ContextMenu::right-arrow {
+    image: none;
+    width: 8px;
+}
