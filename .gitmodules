@@ -40,3 +40,6 @@
 [submodule "funkin/third_party/qwindowkit"]
 	path = funkin/third_party/qwindowkit
 	url = https://github.com/stdware/qwindowkit.git
+[submodule "funkin/third_party/lz4"]
+	path = funkin/third_party/lz4
+	url = https://github.com/lz4/lz4
