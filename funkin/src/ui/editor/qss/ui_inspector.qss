@@ -3,3 +3,37 @@
  * Licensed under GNU GPL v3.0
  * UI_INSPECTOR
  */
+
+QWidget#InspectorPanel {
+    background-color: #161616;
+}
+
+QWidget#InspectorContent {
+    background-color: #161616;
+}
+
+QScrollArea#InspectorScroll {
+    background-color: #161616;
+    border: none;
+}
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 6px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #3a3a3a;
+    border-radius: 3px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #686868;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}

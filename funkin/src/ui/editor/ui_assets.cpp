@@ -309,14 +309,15 @@ namespace Funkin::UI::Editor {
         if (!item) return;
         QString path  = item->data(0, Qt::UserRole).toString();
         bool    isDir = item->data(0, Qt::UserRole + 1).toBool();
-        if (isDir)
-            item->setExpanded(!item->isExpanded());
         emit itemSelected(path, isDir);
     }
 
     void AssetsPanel::onItemDoubleClicked(QTreeWidgetItem* item, int) {
         if (!item) return;
-        if (!item->data(0, Qt::UserRole + 1).toBool())
+        bool isDir = item->data(0, Qt::UserRole + 1).toBool();
+        if (isDir)
+            item->setExpanded(!item->isExpanded());
+        else
             emit fileActivated(item->data(0, Qt::UserRole).toString());
     }
 

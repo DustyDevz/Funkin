@@ -76,7 +76,7 @@ namespace Funkin::App {
         saveRecent(recents);
     }
 
-   bool Project::load(const std::filesystem::path& projectFile) {
+    bool Project::load(const std::filesystem::path& projectFile) {
         if (!std::filesystem::exists(projectFile)) {
             LOG_ERR("Project file not found: {}", projectFile.string());
             return false;
@@ -88,9 +88,15 @@ namespace Funkin::App {
             m_name   = j["name"].get<std::string>();
             m_root   = projectFile.parent_path();
             m_assets = m_root / "bin" / "assets";
+
+            m_cacheDir  = m_root / ".funkin";
+            m_firstRun  = !std::filesystem::exists(m_cacheDir / "cache.json");
+            std::filesystem::create_directories(m_cacheDir / "cache" / "textures");
+
             m_loaded = true;
             LOG_PRINT("Project loaded: {}", m_name);
             LOG_PRINT("Project root: {}", m_root.string());
+            LOG_PRINT("First run: {}", m_firstRun ? "yes" : "no");
             addRecent({ m_name, m_root.string() });
             return true;
         } catch (const std::exception& e) {

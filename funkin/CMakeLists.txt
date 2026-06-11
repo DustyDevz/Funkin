@@ -49,6 +49,7 @@ set(THIRD_PARTY_SOURCES
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui_widgets.cpp
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui_demo.cpp
     ${FUNKIN_3RD_PARTY_DIR}/imgui/backends/imgui_impl_win32.cpp
+    ${FUNKIN_3RD_PARTY_DIR}/lz4/lib/lz4.c
 )
 
 add_executable(Funkin
@@ -68,7 +69,7 @@ add_executable(Funkin
 )
 
 target_precompile_headers(Funkin PRIVATE
-    src/shared/pch.hpp
+    "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/src/shared/pch.hpp>"
 )
 
 target_include_directories(Funkin PRIVATE
@@ -79,6 +80,7 @@ target_include_directories(Funkin PRIVATE
     ${FUNKIN_3RD_PARTY_DIR}/stb
     ${FUNKIN_3RD_PARTY_DIR}/miniaudio
     ${FUNKIN_3RD_PARTY_DIR}/xxhash
+    ${FUNKIN_3RD_PARTY_DIR}/lz4/lib
     ${FUNKIN_3RD_PARTY_DIR}/bgfx/bgfx/3rdparty
     ${FUNKIN_3RD_PARTY_DIR}/bgfx/bgfx/include
     ${FUNKIN_3RD_PARTY_DIR}/bgfx/bx/include

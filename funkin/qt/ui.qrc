@@ -4,6 +4,7 @@
         <file alias="editor">../src/ui/editor/qss/ui_editor.qss</file>
         <file alias="assets">../src/ui/editor/qss/ui_assets.qss</file>
         <file alias="console">../src/ui/editor/qss/ui_console.qss</file>
+        <file alias="inspector">../src/ui/editor/qss/ui_inspector.qss</file>
         <file alias="contextmenu">../src/ui/qss/ui_contextmenu.qss</file>
     </qresource>
 </RCC>

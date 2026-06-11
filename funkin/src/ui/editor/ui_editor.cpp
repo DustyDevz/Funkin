@@ -283,5 +283,8 @@ namespace Funkin::UI::Editor {
         setCorner(Qt::BottomLeftCorner,  Qt::LeftDockWidgetArea);
         setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
         resizeDocks({m_assetsDock, m_inspectorDock}, {220, 280}, Qt::Horizontal);
+
+        connect(m_assets, &AssetsPanel::itemSelected,
+                m_inspector, &InspectorPanel::onItemSelected);
     }
 }

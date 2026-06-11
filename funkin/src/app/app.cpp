@@ -12,6 +12,7 @@
 
 #include <QTimer>
 #include <QCursor>
+#include <QProgressBar>
 
 #include "shared/log.hpp"
 #include "app/debug.hpp"
@@ -33,6 +34,7 @@
 #include "ui/editor/ui_editor.hpp"
 #include "ui/ui_log.hpp"
 #include "settings.hpp"
+#include "cache/project_cache.hpp"
 
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>
@@ -132,6 +134,57 @@ int run(int argc, char** argv, QApplication& qtApp) {
     if (!initProject(argc, argv))
         return 0;
 
+    if (Funkin::App::Project::get().isFirstRun()) {
+        auto& cache = Funkin::Cache::ProjectCache::get();
+
+        QDialog loadingDialog;
+        loadingDialog.setWindowTitle("Preparing Project");
+        loadingDialog.setFixedSize(380, 90);
+        loadingDialog.setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
+
+        auto* layout   = new QVBoxLayout(&loadingDialog);
+        auto* label    = new QLabel("Building texture cache...", &loadingDialog);
+        auto* bar      = new QProgressBar(&loadingDialog);
+        auto* fileLabel = new QLabel("", &loadingDialog);
+
+        label->setAlignment(Qt::AlignCenter);
+        fileLabel->setAlignment(Qt::AlignCenter);
+        fileLabel->setStyleSheet("color: #666666; font-size: 10px;");
+        bar->setRange(0, 100);
+        bar->setValue(0);
+        bar->setTextVisible(false);
+
+        layout->addWidget(label);
+        layout->addWidget(bar);
+        layout->addWidget(fileLabel);
+        
+        QTimer pollTimer;
+        pollTimer.setInterval(50);
+        QObject::connect(&pollTimer, &QTimer::timeout, [&]() {
+            auto& p = cache.progress();
+            bar->setValue((int)p.percent());
+
+            {
+                std::lock_guard lk(p.mutex);
+                if (!p.currentFile.empty())
+                    fileLabel->setText(QString::fromStdString(p.currentFile));
+            }
+
+            if (p.done.load()) {
+                pollTimer.stop();
+                loadingDialog.accept();
+            }
+        });
+
+        cache.warmAsync(
+            Funkin::App::Project::get().getAssets(),
+            Funkin::App::Project::get().getCacheDir()
+        );
+
+        pollTimer.start();
+        loadingDialog.exec();
+    }
+
     bool showAssociationPrompt = Funkin::Filesystem::readString("local://data.json").empty();
 
     Funkin::Settings appSettings;
@@ -218,20 +271,20 @@ int run(int argc, char** argv, QApplication& qtApp) {
     };
 
     // TEMP DEBUGGING
-    QTimer* testTimer = new QTimer(&qtApp);
-    testTimer->setInterval(1000);
-    QObject::connect(testTimer, &QTimer::timeout, []() {
-        // is this smart? fuck no wtf
-        static const char* words[]    = { "asdiosadn", "fkljsdhf", "xzqwerty", "ploiuyt", "mnbvcxz" };
-        static const char* prefixes[] = { "Loading", "Failed to load", "Initializing", "Destroyed", "Created" };
-        std::string msg = std::string(prefixes[rand() % 5]) + " " + words[rand() % 5];
-        switch (rand() % 3) {
-            case 0: UI_ENGINE_INFO(msg);  break;
-            case 1: UI_ENGINE_WARN(msg);  break;
-            case 2: UI_ENGINE_ERROR(msg); break;
-        }
-    });
-    testTimer->start();
+    // QTimer* testTimer = new QTimer(&qtApp);
+    // testTimer->setInterval(1000);
+    // QObject::connect(testTimer, &QTimer::timeout, []() {
+    //     // is this smart? fuck no wtf
+    //     static const char* words[]    = { "asdiosadn", "fkljsdhf", "xzqwerty", "ploiuyt", "mnbvcxz" };
+    //     static const char* prefixes[] = { "Loading", "Failed to load", "Initializing", "Destroyed", "Created" };
+    //     std::string msg = std::string(prefixes[rand() % 5]) + " " + words[rand() % 5];
+    //     switch (rand() % 3) {
+    //         case 0: UI_ENGINE_INFO(msg);  break;
+    //         case 1: UI_ENGINE_WARN(msg);  break;
+    //         case 2: UI_ENGINE_ERROR(msg); break;
+    //     }
+    // });
+    // testTimer->start();
 
     rawInputFilter.onRenderFrame = [&]() {
         if (!running || !editorWindow->isVisible()) return;

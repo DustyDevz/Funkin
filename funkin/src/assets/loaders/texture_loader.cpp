@@ -2,6 +2,7 @@
 // Licensed under GNU GPL v3.0
 
 #include "texture_loader.hpp"
+#include "cache/project_cache.hpp"
 #include <fstream>
 #include <vector>
 
@@ -15,6 +16,7 @@
 #include <bimg/bimg.h>
 #include <bimg/encode.h>
 #include <bgfx/bgfx.h>
+#include <lz4.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -123,6 +125,46 @@ namespace Funkin::Assets::Loaders {
             return uploadPendingTexture(pending);
         }
 
+        auto cachedPath = Funkin::Cache::ProjectCache::get().getCachedPath(path);
+        if (!cachedPath.empty()) {
+            std::ifstream f(cachedPath, std::ios::binary);
+            if (f) {
+                uint8_t magic[4]; uint8_t version; int w, h;
+                f.read(reinterpret_cast<char*>(magic),   4);
+                f.read(reinterpret_cast<char*>(&version),1);
+                f.read(reinterpret_cast<char*>(&w),      4);
+                f.read(reinterpret_cast<char*>(&h),      4);
+
+               if (magic[0]=='F' && magic[1]=='K' && magic[2]=='T' && magic[3]=='X' && w > 0 && h > 0) {
+                int rawSize, compressedSize;
+                f.read(reinterpret_cast<char*>(&rawSize),        4);
+                f.read(reinterpret_cast<char*>(&compressedSize), 4);
+
+                std::vector<uint8_t> compressed(compressedSize);
+                f.read(reinterpret_cast<char*>(compressed.data()), compressedSize);
+
+                if (f) {
+                    std::vector<uint8_t> pixels(rawSize);
+                    int result = LZ4_decompress_safe(
+                        reinterpret_cast<const char*>(compressed.data()),
+                        reinterpret_cast<char*>(pixels.data()),
+                        compressedSize,
+                        rawSize
+                    );
+
+                    if (result == rawSize) {
+                        LOG_PRINT("cache hit {}", path.filename().string());
+                        PendingTextureUpload pending{ id, group, std::move(pixels), (uint32_t)w, (uint32_t)h, false };
+                        return uploadPendingTexture(pending);
+                    }
+                    LOG_WARN("lz4 decompress failed for {}", path.filename().string());
+                }
+            }
+                LOG_WARN("cache file corrupt, falling back: {}", cachedPath.string());
+            }
+        }
+
+        LOG_PRINT("cache miss, decoding {}", path.filename().string());
         auto pending = prepareTexture(path, id, group);
         if (!pending) return nullptr;
         return uploadPendingTexture(*pending);

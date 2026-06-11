@@ -15,12 +15,8 @@
 namespace Funkin::UI::Editor {
     class InspectorPanel : public QWidget {
         Q_OBJECT
-
     public:
         explicit InspectorPanel(QWidget* parent = nullptr);
-
-    signals:
-        void inspectorCleared();
 
     public slots:
         void onItemSelected(const QString& path, bool isDirectory);
@@ -28,9 +24,16 @@ namespace Funkin::UI::Editor {
     private:
         void showEmpty();
         void showFolder(const QString& path);
+        void showImage(const QString& path);
+        void showXml(const QString& path);
+        void clearContent();
 
-        QScrollArea* m_scrollArea    { nullptr };
-        QWidget*     m_contentWidget { nullptr };
-        QVBoxLayout* m_contentLayout { nullptr };
+        QWidget*     m_content { nullptr };
+        QVBoxLayout* m_layout  { nullptr };
+
+        QLabel* makeLabel(const QString& text, bool dim = false);
+        QLabel* makeValue(const QString& text);
+        QWidget* makeRow(const QString& key, const QString& value);
+        QFrame* makeDivider();
     };
 }
