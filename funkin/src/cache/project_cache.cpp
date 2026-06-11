@@ -74,7 +74,7 @@ namespace Funkin::Cache {
         uint64_t hash = hashFile(srcPath);
         if (hash == 0) return {};
         
-        auto thumb = Funkin::App::Project::get().getCacheDir() / "cache" / "textures"
+        auto thumb = Funkin::App::Project::get().getCacheDir() / "cache" / "thumbnail"
                     / std::format("{:x}.thumb", hash);
                     
         return std::filesystem::exists(thumb) ? thumb : std::filesystem::path{};
@@ -86,12 +86,21 @@ namespace Funkin::Cache {
         std::function<void()> onComplete)
     {
         auto textureDir   = cacheDir / "cache" / "textures";
+        auto thumbnailDir = cacheDir / "cache" / "thumbnail";
         auto manifestPath = cacheDir / "cache.json";
 
         std::error_code ec;
         std::filesystem::create_directories(textureDir, ec);
         if (ec) {
-            LOG_ERR("failed to create {}: {}", textureDir.string(), ec.message());
+            LOG_ERR("Failed to create {}: {}", textureDir.string(), ec.message());
+            m_progress.done = true;
+            if (onComplete) onComplete();
+            return;
+        }
+
+        std::filesystem::create_directories(thumbnailDir, ec);
+        if (ec) {
+            LOG_ERR("Failed to create {}: {}", thumbnailDir.string(), ec.message());
             m_progress.done = true;
             if (onComplete) onComplete();
             return;
@@ -127,115 +136,128 @@ namespace Funkin::Cache {
             }
         }
 
-        for (auto& imgPath : images) {
-            {
-                std::lock_guard lk(m_progress.mutex);
-                m_progress.currentFile = imgPath.filename().string();
-            }
+        std::atomic<int> index{ 0 };
+        int threadCount = std::max(1u, std::thread::hardware_concurrency() - 1);
+        std::vector<std::thread> workers;
+        std::mutex manifestMutex;
 
-            uint64_t hash = hashFile(imgPath);
-            if (hash == 0) {
-                LOG_WARN("Hash failed: {}", imgPath.string());
-                m_progress.completed++;
-                continue;
-            }
+        for (int t = 0; t < threadCount; t++) {
+            workers.emplace_back([&]() {
+                while (true) {
+                    int i = index.fetch_add(1);
+                    if (i >= (int)images.size()) break;
 
-            std::string hashStr = std::format("{:x}", hash);
-            auto outPath = textureDir / (hashStr + ".fktx");
-            auto thumbPath = textureDir / (hashStr + ".thumb");
+                    auto& imgPath = images[i];
 
-            if (std::filesystem::exists(outPath) && std::filesystem::exists(thumbPath) && manifest.contains(hashStr)) {
-                m_progress.completed++;
-                continue;
-            }
-
-            int w, h, ch;
-            uint8_t* px = stbi_load(imgPath.string().c_str(), &w, &h, &ch, 4);
-            if (!px) {
-                LOG_WARN("Stb_image failed: {} ({})",
-                    imgPath.filename().string(), stbi_failure_reason());
-                m_progress.completed++;
-                continue;
-            }
-
-            bool wrote = false;
-            {
-                int rawSize = w * h * 4;
-                int maxCompressed = LZ4_compressBound(rawSize);
-                std::vector<char> compressed(maxCompressed);
-
-                int compressedSize = LZ4_compress_default(
-                    reinterpret_cast<const char*>(px),
-                    compressed.data(),
-                    rawSize,
-                    maxCompressed
-                );
-
-                if (compressedSize > 0) {
-                    std::ofstream out(outPath, std::ios::binary);
-                    if (out) {
-                        out.write(reinterpret_cast<const char*>(CACHE_MAGIC), 4);
-                        out.write(reinterpret_cast<const char*>(&CACHE_VERSION), 1);
-                        out.write(reinterpret_cast<const char*>(&w),              4);
-                        out.write(reinterpret_cast<const char*>(&h),              4);
-                        out.write(reinterpret_cast<const char*>(&rawSize),        4);
-                        out.write(reinterpret_cast<const char*>(&compressedSize), 4);
-                        out.write(compressed.data(), compressedSize);
-                        wrote = out.good();
+                    {
+                        std::lock_guard lk(m_progress.mutex);
+                        m_progress.currentFile = imgPath.filename().string();
                     }
-                }
-            }
 
-            if (!wrote) {
-                LOG_WARN("Write failed for {}", outPath.string());
-                std::filesystem::remove(outPath);
-                stbi_image_free(px);
-                m_progress.completed++;
-                continue;
-            }
+                    uint64_t hash = hashFile(imgPath);
+                    if (hash == 0) { m_progress.completed++; continue; }
 
-            {
-                int tw, th;
-                float aspect = (float)w / (float)h;
-                if (aspect > (200.f / 110.f)) { tw = 200; th = (int)(200.f / aspect); }
-                else                           { th = 110; tw = (int)(110.f * aspect); }
-                tw = std::max(tw, 1);
-                th = std::max(th, 1);
+                    std::string hashStr = std::format("{:x}", hash);
+                    auto outPath   = textureDir   / (hashStr + ".fktx");
+                    auto thumbPath = thumbnailDir / (hashStr + ".thumb");
 
-                std::vector<uint8_t> thumbBuf(tw * th * 4);
-                for (int ty = 0; ty < th; ty++) {
-                    for (int tx = 0; tx < tw; tx++) {
-                        int sx = std::min((int)((float)tx / tw * w), w - 1);
-                        int sy = std::min((int)((float)ty / th * h), h - 1);
-                        int si = (sy * w + sx) * 4;
-                        int di = (ty * tw + tx) * 4;
-                        thumbBuf[di+0] = px[si+0];
-                        thumbBuf[di+1] = px[si+1];
-                        thumbBuf[di+2] = px[si+2];
-                        thumbBuf[di+3] = px[si+3];
+                    {
+                        std::lock_guard lk(manifestMutex);
+                        if (std::filesystem::exists(outPath) &&
+                            std::filesystem::exists(thumbPath) &&
+                            manifest.contains(hashStr)) {
+                            m_progress.completed++;
+                            continue;
+                        }
                     }
+
+                    int w, h, ch;
+                    uint8_t* px = stbi_load(imgPath.string().c_str(), &w, &h, &ch, 4);
+                    if (!px) { m_progress.completed++; continue; }
+
+                    for (int j = 0; j < w * h; ++j) {
+                        if (px[j * 4 + 3] == 0) {
+                            px[j * 4 + 0] = 0;
+                            px[j * 4 + 1] = 0;
+                            px[j * 4 + 2] = 0;
+                        }
+                    }
+
+                    int rawSize       = w * h * 4;
+                    int maxCompressed = LZ4_compressBound(rawSize);
+                    std::vector<char> compressed(maxCompressed);
+                    int compressedSize = LZ4_compress_default(
+                        reinterpret_cast<const char*>(px),
+                        compressed.data(), rawSize, maxCompressed);
+
+                    if (compressedSize > 0) {
+                        std::ofstream out(outPath, std::ios::binary);
+                        if (out) {
+                            out.write(reinterpret_cast<const char*>(CACHE_MAGIC), 4);
+                            out.write(reinterpret_cast<const char*>(&CACHE_VERSION), 1);
+                            out.write(reinterpret_cast<const char*>(&w),              4);
+                            out.write(reinterpret_cast<const char*>(&h),              4);
+                            out.write(reinterpret_cast<const char*>(&rawSize),        4);
+                            out.write(reinterpret_cast<const char*>(&compressedSize), 4);
+                            out.write(compressed.data(), compressedSize);
+                        }
+                    }
+
+                    int tw, th;
+                    float aspect = (float)w / (float)h;
+                    if (aspect > (200.f / 110.f)) { tw = 200; th = (int)(200.f / aspect); }
+                    else                           { th = 110; tw = (int)(110.f * aspect); }
+                    tw = std::max(tw, 1); th = std::max(th, 1);
+
+                    std::vector<uint8_t> thumbBuf(tw * th * 4);
+                    for (int ty = 0; ty < th; ty++) {
+                        for (int tx = 0; tx < tw; tx++) {
+                            int sx = std::min((int)((float)tx / tw * w), w - 1);
+                            int sy = std::min((int)((float)ty / th * h), h - 1);
+                            int si = (sy * w + sx) * 4;
+                            int di = (ty * tw + tx) * 4;
+                            thumbBuf[di+0] = px[si+0];
+                            thumbBuf[di+1] = px[si+1];
+                            thumbBuf[di+2] = px[si+2];
+                            thumbBuf[di+3] = px[si+3];
+                        }
+                    }
+
+                    bool thumbWrote = false;
+                    std::ofstream tout(thumbPath, std::ios::binary);
+                    if (tout) {
+                        tout.write(reinterpret_cast<const char*>(&tw), 4);
+                        tout.write(reinterpret_cast<const char*>(&th), 4);
+                        tout.write(reinterpret_cast<const char*>(thumbBuf.data()), thumbBuf.size());
+                        thumbWrote = tout.good();
+                    }
+
+                    stbi_image_free(px);
+                    LOG_PRINT("Cached {} ({}x{})", imgPath.filename().string(), w, h);
+
+                    {
+                        std::lock_guard lk(manifestMutex);
+                        manifest[hashStr] = {
+                            { "file", imgPath.filename().string() },
+                            { "path", imgPath.string() },
+                            { "meta", {
+                                { "w", w },
+                                { "h", h }
+                            }},
+                            { "thumbnail", {
+                                { "generated", thumbWrote },
+                                { "w", tw },
+                                { "h", th }
+                            }}
+                        };
+                    }
+
+                    m_progress.completed++;
                 }
-
-                std::ofstream tout(thumbPath, std::ios::binary);
-                if (tout) {
-                    tout.write(reinterpret_cast<const char*>(&tw), 4);
-                    tout.write(reinterpret_cast<const char*>(&th), 4);
-                    tout.write(reinterpret_cast<const char*>(thumbBuf.data()), thumbBuf.size());
-                }
-            }
-
-            stbi_image_free(px);
-            LOG_PRINT("Cached {} ({}x{})", imgPath.filename().string(), w, h);
-
-            manifest[hashStr] = {
-                { "file", imgPath.filename().string() },
-                { "path", imgPath.string()            },
-                { "w",    w                           },
-                { "h",    h                           }
-            };
-
-            m_progress.completed++;
+            });
         }
+
+        for (auto& t : workers) t.join();
 
         writeManifest(cacheDir, manifest);
         LOG_PRINT("Warm complete");
