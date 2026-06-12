@@ -13,4 +13,6 @@ namespace Funkin::DebugManager {
     void shutdown();
     void toggleDebugStats();
     bool isEnabled();
+
+    bgfx::CallbackI* getCallBack();
 }

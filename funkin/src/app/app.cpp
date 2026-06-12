@@ -97,6 +97,7 @@ static bool initBgfx(HWND hwnd, uint32_t w, uint32_t h) {
     bgfx::renderFrame();
 
     bgfx::Init init{};
+    init.callback          = Funkin::DebugManager::getCallBack();
     init.platformData      = pd;
     init.resolution.width  = w;
     init.resolution.height = h;

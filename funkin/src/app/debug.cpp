@@ -53,6 +53,10 @@ namespace Funkin::DebugManager {
         // ImGui_SDL3::processEvent(e);
     }
 
+    bgfx::CallbackI* getCallBack() {
+        return &s_callback;
+    }
+
     void beginFrame() {
         ImGui_ImplWin32_NewFrame();
         ImGui_BGFX::newFrame();
