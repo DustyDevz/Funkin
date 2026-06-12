@@ -11,6 +11,22 @@ this is just here so my dumbass can rememeber
 
 ---
 ## Progress
+## 6 / 11 / 26
+* 200 commits
+* Caching
+* Filesystem
+* Qt support
+* Ui
+* Improved image loading
+* Camera
+
+https://github.com/user-attachments/assets/00efae1b-1653-4ca3-a925-cd88649b931d
+
+#
+
+<details>
+<summary>Archive</summary>
+
 ## 6 / 2 / 26
 * Shaders
 * Temp project manager
@@ -21,11 +37,6 @@ this is just here so my dumbass can rememeber
 * Debug
 
 https://github.com/user-attachments/assets/53cf796d-b558-4a2d-9065-84981c669147
-
-#
-<details>
-<summary>Archive</summary>
-
 
 ## 5 / 28 / 26
 * Rewrite
