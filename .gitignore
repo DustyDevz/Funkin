@@ -2,6 +2,8 @@
 .vscode
 .git
 .cmake
+.clion
+.idea
 **/.qtcreator/
 build
 export
