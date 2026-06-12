@@ -67,8 +67,29 @@ namespace Funkin::Assets {
     }
 
     void AssetManager::unloadAll() {
+        for (auto& [id, asset] : m_cache) {
+            if (!asset) continue;
+
+            if (auto tex = std::dynamic_pointer_cast<Texture>(asset)) {
+                if (bgfx::isValid(tex->handle)) {
+                    bgfx::destroy(tex->handle);
+                    tex->handle = BGFX_INVALID_HANDLE;
+                }
+            } else if (auto atlas = std::dynamic_pointer_cast<SparrowAtlas>(asset)) {
+                if (atlas->texture && bgfx::isValid(atlas->texture->handle)) {
+                    bgfx::destroy(atlas->texture->handle);
+                    atlas->texture->handle = BGFX_INVALID_HANDLE;
+                }
+            }
+        }
+
         m_cache.clear();
         m_groups.clear();
+
+        if (m_missingTexture && bgfx::isValid(m_missingTexture->handle)) {
+            bgfx::destroy(m_missingTexture->handle);
+            m_missingTexture->handle = BGFX_INVALID_HANDLE;
+        }
     }
 
     uint64_t AssetManager::totalBytesLoaded() const {

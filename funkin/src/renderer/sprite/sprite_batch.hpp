@@ -48,6 +48,7 @@ namespace Funkin::Renderer {
         void begin(uint16_t viewId, uint32_t screenWidth, uint32_t screenHeight);
         void draw(const SpriteQuad& quad);
         void setSamplerFlags(uint32_t flags) { m_samplerFlags = flags; }
+        void shutdown();
         void end();
 
         static SpriteBatch& get();

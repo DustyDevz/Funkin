@@ -391,16 +391,16 @@ int run(int argc, char** argv, QApplication& qtApp) {
     });
 
     int result = qtApp.exec();
-
-    Funkin::Audio::AudioManager::get().shutdown();
     Funkin::Assets::AssetManager::get().shutdown();
-    Funkin::DebugManager::shutdown();
+    Funkin::Renderer::SpriteBatch::get().shutdown();
     Funkin::Shader::Sprites::shutdown();
     Funkin::Shader::shutdownShaderJobs();
-    input.shutdown();
+    Funkin::DebugManager::shutdown();
     bgfx::shutdown();
-
     delete editorWindow;
+    Funkin::Audio::AudioManager::get().shutdown();
+    input.shutdown();
+
     return result;
 }
 

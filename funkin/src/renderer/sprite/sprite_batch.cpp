@@ -14,7 +14,7 @@ namespace Funkin::Renderer {
     }
 
     SpriteBatch::~SpriteBatch() {
-        if (bgfx::isValid(m_uTexture)) bgfx::destroy(m_uTexture);
+        shutdown();
     }
 
     SpriteBatch& SpriteBatch::get() {
@@ -144,6 +144,13 @@ namespace Funkin::Renderer {
 
         m_vertices.clear();
         m_indices.clear();
+    }
+
+    void SpriteBatch::shutdown() {
+        if (bgfx::isValid(m_uTexture)) {
+            bgfx::destroy(m_uTexture);
+            m_uTexture = { BGFX_INVALID_HANDLE };
+        }
     }
 
     void SpriteBatch::end() {
