@@ -22,10 +22,14 @@ namespace Funkin::Assets {
     };
 
     struct AudioClip : AssetBase {
-        std::vector<uint8_t> pcmData;
-        uint32_t             sampleRate = 44100;
-        uint32_t             channels   = 2;
+        std::string           id;
+        std::string           group;
+        uint32_t              sampleRate = 44100;
+        uint32_t              channels   = 2;
         uint64_t             frameCount = 0;
+        size_t                sizeBytes  = 0;
+        std::vector<float>    pcmData;
+        bool                  loaded     = false;
     };
 
     struct Font : AssetBase {

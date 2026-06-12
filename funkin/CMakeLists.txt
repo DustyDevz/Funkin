@@ -25,6 +25,7 @@ file(GLOB CACHE_SOURCES CONFIGURE_DEPENDS "src/cache/*.cpp")
 file(GLOB RENDERER_SOURCES CONFIGURE_DEPENDS 
     "src/renderer/sprite/*.cpp"
     "src/renderer/camera/*.cpp"
+    "src/renderer/audio/*.cpp"
 )
 
 file(GLOB SHADER_SOURCES CONFIGURE_DEPENDS 
@@ -79,6 +80,7 @@ target_include_directories(Funkin PRIVATE
     ${FUNKIN_3RD_PARTY_DIR}/bgfx/bgfx/examples/common
     ${FUNKIN_3RD_PARTY_DIR}/stb
     ${FUNKIN_3RD_PARTY_DIR}/miniaudio
+    ${FUNKIN_3RD_PARTY_DIR}/miniaudio/extras
     ${FUNKIN_3RD_PARTY_DIR}/xxhash
     ${FUNKIN_3RD_PARTY_DIR}/lz4/lib
     ${FUNKIN_3RD_PARTY_DIR}/bgfx/bgfx/3rdparty

@@ -2,8 +2,15 @@
 // Licensed under GNU GPL v3.0
 
 #include "audio_loader.hpp"
+
+#define STB_VORBIS_HEADER_ONLY
+#include <stb_vorbis.c>
+
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
+
+#undef STB_VORBIS_HEADER_ONLY
+#include <stb_vorbis.c>
 
 namespace Funkin::Assets::Loaders {
     std::shared_ptr<AudioClip> loadAudio(

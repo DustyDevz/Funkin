@@ -35,6 +35,8 @@
 #include "ui/ui_log.hpp"
 #include "settings.hpp"
 #include "cache/project_cache.hpp"
+#include "renderer/audio/audio_manager.hpp"
+#include "renderer/audio/audio_source.hpp"
 
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>
@@ -222,6 +224,7 @@ int run(int argc, char** argv, QApplication& qtApp) {
     Funkin::DebugManager::init(hwnd, 255);
     Funkin::Assets::AssetManager::get().init();
     Funkin::Shader::Sprites::init();
+    Funkin::Audio::AudioManager::get().init();
 
     auto& camera = Funkin::Renderer::Camera::CameraManager::get();
     camera.addLayer("editor", 0, &camera.editor());
@@ -249,6 +252,8 @@ int run(int argc, char** argv, QApplication& qtApp) {
     editorWindow->setWindowTitle(
         QString("FNF - %1").arg(Funkin::App::Project::get().getName().c_str()));
 
+
+    // SPRITE TEST
     bgTest.loadTexture("images/ui/thing.png");
     bgTest.setScale(5.f);
     bgTest.x -= 300;
@@ -270,7 +275,13 @@ int run(int argc, char** argv, QApplication& qtApp) {
             testSprite.play("idle");
     };
 
-    // TEMP DEBUGGING
+    // AUDIO TEST
+    Funkin::Audio::AudioSource audioTest;
+    audioTest.setLoop(true);
+    audioTest.load("audio/test.ogg");
+    audioTest.play();
+
+    // TEST DEBUGGING
     // QTimer* testTimer = new QTimer(&qtApp);
     // testTimer->setInterval(1000);
     // QObject::connect(testTimer, &QTimer::timeout, []() {
@@ -380,6 +391,7 @@ int run(int argc, char** argv, QApplication& qtApp) {
 
     int result = qtApp.exec();
 
+    Funkin::Audio::AudioManager::get().shutdown();
     Funkin::Assets::AssetManager::get().shutdown();
     Funkin::DebugManager::shutdown();
     Funkin::Shader::Sprites::shutdown();
