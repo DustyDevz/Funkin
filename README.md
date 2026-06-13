@@ -2,10 +2,11 @@
 I only have this repo public because why not, do not download this (it does NOTHING)
 
 > [!WARNING]
-> **This project is in very early development and is currently being worked on by one person. Currently, there’s NOTHING to do, it’s just ImGui**
+> **This project is in very early development and is currently being worked on by one person. It's NOT recommended to use VSC with this project as it's a pain in the ass to get it working (at least for me)**
+> 
 
 ## Dependencies
-this is just here so my dumbass can rememeber
+This is just here so my dumbass can remember
 * **Ccache:** [ccache.dev](https://ccache.dev) or `scoop install ccache`
 * **Qt 6.x:** [QT online installer](https://www.qt.io/download). Ensure you add **MSVC 2022** option during installation.
 
@@ -41,7 +42,7 @@ https://github.com/user-attachments/assets/53cf796d-b558-4a2d-9065-84981c669147
 ## 5 / 28 / 26
 * Rewrite
 * Input latency dropped from 0.1 -> 0.01
-* Using BGFX for rendering since im ass at this shit
+* Using BGFX for rendering since I'm ass at this shit
 * Using SDL3 for window handling
 * ImGui ported to work with BGFX + SDL3
 * Improved input
