@@ -253,11 +253,17 @@ int run(int argc, char** argv, QApplication& qtApp) {
     editorWindow->setWindowTitle(
         QString("FNF - %1").arg(Funkin::App::Project::get().getName().c_str()));
 
+    // CAMERA LAYER TEST
+    auto* testLayer = camera.addLayer("test", 1, &camera.editor());
+    // testLayer->scrollX = 1.55;
+    // testLayer->scrollY = 1.55;
 
     // SPRITE TEST
     bgTest.loadTexture("images/ui/thing.png");
     bgTest.setScale(5.f);
     bgTest.x -= 300;
+    //bgTest.flipY = true;
+    bgTest.viewId = testLayer->viewId;
 
     testSprite.loadAtlas("images/ui/bf.xml", "test");
     testSprite.addAnimation("idle",  "BF IDLE instance",       24.f, true);
@@ -280,6 +286,7 @@ int run(int argc, char** argv, QApplication& qtApp) {
     Funkin::Audio::AudioSource audioTest;
     audioTest.setLoop(true);
     audioTest.load("audio/test.ogg");
+    audioTest.setVolume(.1);
     audioTest.play();
 
     // TEST DEBUGGING

@@ -27,11 +27,11 @@ namespace Funkin::Renderer {
         m_screenWidth  = screenWidth;
         m_screenHeight = screenHeight;
 
-        bx::mtxOrtho(m_proj,
-            0.0f, (float)screenWidth,
-            (float)screenHeight, 0.0f,
-            0.0f, 1000.0f,
-            0.0f, bgfx::getCaps()->homogeneousDepth);
+        // bx::mtxOrtho(m_proj,
+        //     0.0f, (float)screenWidth,
+        //     (float)screenHeight, 0.0f,
+        //     0.0f, 1000.0f,
+        //     0.0f, bgfx::getCaps()->homogeneousDepth);
 
         // bgfx::setViewTransform(m_viewId, nullptr, m_proj);
         bgfx::setViewRect(m_viewId, 0, 0, (uint16_t)screenWidth, (uint16_t)screenHeight);
@@ -44,13 +44,15 @@ namespace Funkin::Renderer {
     void SpriteBatch::draw(const SpriteQuad& quad) {
         if (!quad.texture) return;
 
-        if (m_currentTex && m_currentTex.get() != quad.texture.get()) {
+        if (m_viewId != quad.viewId || (m_currentTex && m_currentTex.get() != quad.texture.get())) {
             flush(m_currentTex);
         }
+
         if (m_vertices.size() >= MAX_QUADS * 4) {
             flush(m_currentTex);
         }
 
+        m_viewId = quad.viewId;
         m_currentTex = quad.texture;
 
         float hw = quad.width  * quad.scaleX * 0.5f;

@@ -5,7 +5,6 @@
 #include "sprite_batch.hpp"
 #include "assets/assets_types.hpp"
 #include "assets/assets.hpp"
-#include "shared/log.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -30,6 +29,7 @@ namespace Funkin::Renderer {
         float    originX      = 0.0f;
         float    originY      = 0.0f;
         uint32_t color        = 0xFFFFFFFF;
+        uint16_t viewId       = 0;
         bool     visible      = true;
         float    width        = 0.0f;
         float    height       = 0.0f;
@@ -39,136 +39,29 @@ namespace Funkin::Renderer {
 
         std::function<void(const std::string&)> onAnimComplete;
 
-        void loadAtlas(const std::string& xmlId, const std::string& group = "") {
-            m_atlas = Assets::AssetManager::get().load<Assets::SparrowAtlas>(xmlId, group);
-            if (m_atlas && !m_atlas->frames.empty())
-                applyFrame(0);
-        }
-
-        void loadAtlasAsync(const std::string& xmlId, const std::string& group = "") {
-            Assets::AssetManager::get().loadAsync<Assets::SparrowAtlas>(xmlId, group,
-                [this](Assets::AssetHandle<Assets::SparrowAtlas> atlas) {
-                    m_atlas = atlas;
-                    if (m_atlas && !m_atlas->frames.empty())
-                        applyFrame(0);
-                });
-        }
+        void loadAtlas(const std::string& xmlId, const std::string& group = "");
+        void loadAtlasAsync(const std::string& xmlId, const std::string& group = "");
 
         void addAnimation(const std::string& name,
                           const std::string& prefix,
                           float fps      = 24.0f,
                           bool  loop     = true,
-                          int   loopFrom = 0) {
-            if (!m_atlas) { LOG_WARN("AnimatedSprite: no atlas loaded"); return; }
-            Animation anim;
-            anim.name     = name;
-            anim.fps      = fps;
-            anim.loop     = loop;
-            anim.loopFrom = loopFrom;
-            anim.frames   = m_atlas->framesWithPrefix(prefix);
-            if (anim.frames.empty()) {
-                LOG_WARN("AnimatedSprite: no frames for prefix '{}'", prefix);
-                return;
-            }
-            m_animIndex[name] = m_anims.size();
-            m_anims.push_back(std::move(anim));
-        }
+                          int   loopFrom = 0);
 
         void addAnimationByIndices(const std::string& name,
                                    const std::string& prefix,
                                    const std::vector<int>& indices,
                                    float fps  = 24.0f,
-                                   bool  loop = true) {
-            if (!m_atlas) return;
-            auto all = m_atlas->framesWithPrefix(prefix);
-            Animation anim;
-            anim.name = name;
-            anim.fps  = fps;
-            anim.loop = loop;
-            for (int i : indices)
-                if (i >= 0 && i < (int)all.size())
-                    anim.frames.push_back(all[i]);
-            if (anim.frames.empty()) return;
-            m_animIndex[name] = m_anims.size();
-            m_anims.push_back(std::move(anim));
-        }
+                                   bool  loop = true);
 
-        void play(const std::string& name, bool restart = false) {
-            auto it = m_animIndex.find(name);
-            if (it == m_animIndex.end()) {
-                LOG_WARN("AnimatedSprite: animation '{}' not found", name);
-                return;
-            }
-            if (m_currentAnim == it->second && !restart && !m_finished) return;
-            m_currentAnim  = it->second;
-            m_currentFrame = 0;
-            m_elapsed      = 0.0f;
-            m_finished     = false;
-            m_paused       = false;
-            if (!m_anims[m_currentAnim].frames.empty())
-                applyFrame(m_anims[m_currentAnim].frames[0]);
-        }
+        void play(const std::string& name, bool restart = false);
+        void pause();
+        void resume();
+        void stop();
 
-        void pause()  { m_paused = true;  }
-        void resume() { m_paused = false; }
-        void stop()   { m_paused = true; m_currentFrame = 0; m_elapsed = 0; }
-
-        void setFrame(const std::string& frameName) {
-            if (!m_atlas) return;
-            auto it = m_atlas->frameIndex.find(frameName);
-            if (it != m_atlas->frameIndex.end())
-                applyFrame(it->second);
-        }
-
-        void update(float dt) {
-            if (m_currentAnim >= m_anims.size() || m_paused || m_finished) return;
-            auto& anim = m_anims[m_currentAnim];
-            if (anim.frames.empty()) return;
-
-            m_elapsed += dt * playbackRate;
-            float frameDur = 1.0f / anim.fps;
-
-            while (m_elapsed >= frameDur) {
-                m_elapsed -= frameDur;
-                m_currentFrame++;
-
-                if (m_currentFrame >= anim.frames.size()) {
-                    if (anim.loop) {
-                        m_currentFrame = (size_t)anim.loopFrom;
-                    } else {
-                        m_currentFrame = anim.frames.size() - 1;
-                        m_finished     = true;
-                        if (onAnimComplete)
-                            onAnimComplete(anim.name);
-                        break;
-                    }
-                }
-            }
-
-            applyFrame(anim.frames[m_currentFrame]);
-        }
-
-        void draw() {
-            if (!visible || !m_atlas || !m_atlas->texture) return;
-            uint32_t c = (color & 0xFFFFFF00) | (uint32_t)(alpha * 255.0f);
-            uint32_t sampler = pixel
-                ? (BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT | BGFX_SAMPLER_MIP_POINT)
-                : 0;
-
-            SpriteBatch::get().setSamplerFlags(sampler);
-            SpriteBatch::get().draw({
-                m_atlas->texture,
-                x + m_frameOffsetX * scaleX,
-                y + m_frameOffsetY * scaleY,
-                m_srcW * scaleX,
-                m_srcH * scaleY,
-                originX, originY,
-                1.0f, 1.0f,
-                rotation,
-                c,
-                m_uvX, m_uvY, m_uvX + m_uvW, m_uvY + m_uvH
-            });
-        }
+        void setFrame(const std::string& frameName);
+        void update(float dt);
+        void draw();
 
         void setPosition(float px, float py)  { x = px; y = py; }
         void setScale(float sx, float sy)      { scaleX = sx; scaleY = sy; }
@@ -185,34 +78,14 @@ namespace Funkin::Renderer {
         bool hasAtlas()    const { return m_atlas.isValid(); }
         bool hasAnim(const std::string& name) const { return m_animIndex.count(name) > 0; }
 
-        const std::string& currentAnim() const {
-            static std::string empty;
-            if (m_currentAnim >= m_anims.size()) return empty;
-            return m_anims[m_currentAnim].name;
-        }
-
+        const std::string& currentAnim() const;
         size_t currentFrameIndex() const { return m_currentFrame; }
         size_t frameCount()        const { return m_atlas ? m_atlas->frames.size() : 0; }
 
         Assets::SparrowHandle atlas() const { return m_atlas; }
 
     private:
-        void applyFrame(size_t atlasIndex) {
-            if (!m_atlas || atlasIndex >= m_atlas->frames.size()) return;
-            auto& f    = m_atlas->frames[atlasIndex];
-            float texW = (float)m_atlas->texture->width;
-            float texH = (float)m_atlas->texture->height;
-            m_uvX          = f.x / texW;
-            m_uvY          = f.y / texH;
-            m_uvW          = f.w / texW;
-            m_uvH          = f.h / texH;
-            m_srcW         = f.w;
-            m_srcH         = f.h;
-            m_frameOffsetX = -f.frameX;
-            m_frameOffsetY = -f.frameY;
-            width          = f.frameW;
-            height         = f.frameH;
-        }
+        void applyFrame(size_t atlasIndex);
 
         Assets::SparrowHandle                   m_atlas;
         std::vector<Animation>                  m_anims;

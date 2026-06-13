@@ -38,6 +38,7 @@ namespace Funkin::Renderer {
         float rotation;
         uint32_t color;
         float u0, v0, u1, v1;
+        uint16_t viewId;
     };
 
     class SpriteBatch {

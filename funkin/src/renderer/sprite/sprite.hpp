@@ -9,45 +9,26 @@
 namespace Funkin::Renderer {
     class Sprite {
     public:
-        float    x        = 0.0f;
-        float    y        = 0.0f;
-        float    scaleX   = 1.0f;
-        float    scaleY   = 1.0f;
-        float    rotation = 0.0f;
-        float    originX  = 0.0f;
-        float    originY  = 0.0f;
-        uint32_t color    = 0xFFFFFFFF;
-        bool     visible  = true;
-        float    width    = 0.0f;
-        float    height   = 0.0f;
-        float    alpha    = 1.0f;
+        float    x             = 0.f;
+        float    y             = 0.f;
+        float    scaleX        = 1.f;
+        float    scaleY        = 1.f;
+        float    rotation      = 0.f;
+        float    originX       = 0.f;
+        float    originY       = 0.f;
+        float    width         = 0.f;
+        float    height        = 0.f;
+        float    alpha         = 1.f;
+        uint32_t color         = 0xFFFFFFFF;
+        uint16_t viewId        = 0;
+        bool     visible       = true;
+        bool     flipX         = false;
+        bool     flipY         = false;
 
-        void loadTexture(const std::string& id, const std::string& group = "") {
-            m_texture = Assets::AssetManager::get().load<Assets::Texture>(id, group);
-            if (m_texture) {
-                width  = (float)m_texture->width;
-                height = (float)m_texture->height;
-            }
-        }
-
-        void loadTextureAsync(const std::string& id, const std::string& group = "") {
-            Assets::AssetManager::get().loadAsync<Assets::Texture>(id, group,
-                [this, id](Assets::AssetHandle<Assets::Texture> tex) {
-                    m_texture = tex;
-                    if (m_texture && width == 0.0f && height == 0.0f) {
-                        width  = (float)m_texture->width;
-                        height = (float)m_texture->height;
-                    }
-                });
-        }
-
-        void setTexture(Assets::TextureHandle tex) {
-            m_texture = tex;
-            if (m_texture) {
-                width  = (float)m_texture->width;
-                height = (float)m_texture->height;
-            }
-        }
+        void loadTexture(const std::string& id, const std::string& group = "");
+        void loadTextureAsync(const std::string& id, const std::string& group = "");
+        void setTexture(Assets::TextureHandle tex);
+        void draw();
 
         void setSize(float w, float h)          { width = w; height = h; }
         void setPosition(float px, float py)    { x = px; y = py; }
@@ -60,25 +41,10 @@ namespace Funkin::Renderer {
         void setRotation(float r)               { rotation = r; }
 
         bool hasTexture() const { return m_texture.isValid(); }
-
         Assets::TextureHandle texture() const { return m_texture; }
-
-        void draw() {
-            if (!visible || !m_texture) return;
-            uint32_t c = (color & 0xFFFFFF00) | (uint32_t)(alpha * 255.0f);
-            SpriteBatch::get().draw({
-                m_texture,
-                x, y,
-                width, height,
-                originX, originY,
-                scaleX, scaleY,
-                rotation,
-                c,
-                0.0f, 0.0f, 1.0f, 1.0f
-            });
-        }
 
     private:
         Assets::TextureHandle m_texture;
+        uint64_t              m_currentTransactionId = 0;
     };
 }
