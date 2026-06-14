@@ -45,6 +45,10 @@ namespace Funkin::Assets {
     }
 
     std::filesystem::path AssetManager::resolvePath(const std::string& id) {
+        if (id.rfind("engine://", 0) == 0) {
+            return std::filesystem::path(id);
+        }
+
         auto loose = (Funkin::App::Project::get().getAssets() / id).make_preferred();
         if (std::filesystem::exists(loose)) return loose;
         return {};
@@ -99,12 +103,12 @@ namespace Funkin::Assets {
         return total;
     }
 
-    // Theres a cool book called 'I have no mouth and I must scream'
-    // In it "AM" the allied master supercomputer talks about being in hell
-    // THIS IS HELL
     template<>
     std::shared_ptr<Texture> AssetManager::loadFromDisk<Texture>(
         const std::string& id, const std::string& group) {
+        if (id.rfind("engine://", 0) == 0) {
+            return Loaders::loadTexture(id, id, group);
+        }
         auto path = resolvePath(id);
         if (path.empty()) return nullptr;
         return Loaders::loadTexture(path, id, group);

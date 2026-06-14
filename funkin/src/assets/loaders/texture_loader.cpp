@@ -45,11 +45,31 @@ namespace Funkin::Assets::Loaders {
             cacheDir / std::format("{:x}.ktx", hash)).make_preferred();
     }
 
+    std::optional<PendingTextureUpload> prepareTextureFromMemory(
+        const std::vector<uint8_t>& bytes,
+        const std::string& id,
+        const std::string& group) {
+
+        int w, h, channels;
+        uint8_t* pixels = stbi_load_from_memory(bytes.data(), (int)bytes.size(), &w, &h, &channels, 4);
+        if (!pixels) {
+            LOG_WARN("stb_image memory load failed for: {}", id);
+            return std::nullopt;
+        }
+
+        LOG_PRINT("Memory PNG decoded: {}x{}", w, h);
+
+        std::vector<uint8_t> raw(pixels, pixels + w * h * 4);
+        stbi_image_free(pixels);
+
+        return PendingTextureUpload{ id, group, std::move(raw), (uint32_t)w, (uint32_t)h, false };
+    }
+
     std::optional<PendingTextureUpload> prepareTexture(
         const std::filesystem::path& path,
         const std::string& id,
         const std::string& group) {
-            
+
         LOG_PRINT("prepareTexture: {}", path.string());
 
         int w, h, channels;
@@ -108,10 +128,22 @@ namespace Funkin::Assets::Loaders {
     }
 
     std::shared_ptr<Texture> loadTexture(
-        const std::filesystem::path& path,
+        const std::string& virtualPath,
         const std::string& id,
         const std::string& group) {
 
+        if (Funkin::Filesystem::isEngineResource(virtualPath)) {
+            auto bytes = Funkin::Filesystem::readBytes(virtualPath);
+            if (bytes.empty()) {
+                LOG_ERR("Failed to read engine resource: {}", virtualPath);
+                return nullptr;
+            }
+            auto pending = prepareTextureFromMemory(bytes, id, group);
+            if (!pending) return nullptr;
+            return uploadPendingTexture(*pending);
+        }
+
+        std::filesystem::path path(virtualPath);
         auto ext = path.extension().string();
         for (auto& c : ext) c = (char)tolower(c);
 
@@ -168,6 +200,13 @@ namespace Funkin::Assets::Loaders {
         auto pending = prepareTexture(path, id, group);
         if (!pending) return nullptr;
         return uploadPendingTexture(*pending);
+    }
+
+    std::shared_ptr<Texture> loadTexture(
+        const std::filesystem::path& path,
+        const std::string& id,
+        const std::string& group) {
+        return loadTexture(path.string(), id, group);
     }
 
     TextureHandle createMissingTexture() {

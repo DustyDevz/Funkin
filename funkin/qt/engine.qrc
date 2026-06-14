@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/engine">
+        <file alias="camera">../assets/images/camera.png</file>
+    </qresource>
+</RCC>

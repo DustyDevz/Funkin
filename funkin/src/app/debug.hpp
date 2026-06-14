@@ -12,6 +12,9 @@ namespace Funkin::DebugManager {
     void endFrame();
     void shutdown();
     void toggleDebugStats();
+
+    void setLogBgfx(bool enable);
+    bool shouldLogBgfx();
     bool isEnabled();
 
     bgfx::CallbackI* getCallBack();

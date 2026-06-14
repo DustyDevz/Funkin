@@ -52,6 +52,21 @@ namespace Funkin::Renderer::Camera {
         void update(float dt, float& outX, float& outY, float& outZoom);
     };
 
+    struct CameraFov {
+        float left, top, right, bottom;
+    };
+
+    inline CameraFov computeFov(const CameraState& state, float targetW, float targetH) {
+        float worldW = targetH / state.zoom;
+        float worldH = targetW / state.zoom;
+        return {
+            state.x - worldW * .5f,
+            state.y - worldH * .5f,
+            state.x + worldW * .5f,
+            state.y + worldH * .5f,
+        };
+    }
+
     class Camera {
     public:
         virtual ~Camera() = default;
@@ -121,6 +136,8 @@ namespace Funkin::Renderer::Camera {
         float        followLerp = 6.f;
         float        zoomLerp   = 5.f;
         float        baseZoom   = 1.f;
+        float        targetWidth = 1280.f;
+        float        targetHeight = 720.f;
         CameraBounds bounds;
 
     private:
@@ -174,5 +191,4 @@ namespace Funkin::Renderer::Camera {
         bool                     m_editorMode = true;
         std::vector<CameraLayer> m_layers;
     };
-
 }

@@ -13,6 +13,10 @@ struct BgfxCallback : public bgfx::CallbackI {
     }
 
     void traceVargs(const char* filePath, uint16_t line, const char* format, va_list argList) override {
+        if (!Funkin::DebugManager::shouldLogBgfx()) {
+            return;
+        }
+
         char buf[1024];
         vsnprintf(buf, sizeof(buf), format, argList);
         std::string_view sv = buf;
@@ -21,7 +25,7 @@ struct BgfxCallback : public bgfx::CallbackI {
         if (!sv.empty())
             LOG_PRINT("{}", sv);
     }
-    
+
     void profilerBegin(const char*, uint32_t, const char*, uint16_t) override {}
     void profilerBeginLiteral(const char*, uint32_t, const char*, uint16_t) override {}
     void profilerEnd() override {}
@@ -36,15 +40,16 @@ struct BgfxCallback : public bgfx::CallbackI {
 
 namespace Funkin::DebugManager {
     static BgfxCallback s_callback;
-    static bool s_enabled = false;
     static bgfx::ViewId s_viewId = 255;
+    static bool s_logBgfx = false;
+    static bool s_enabled = false;
 
     void init(HWND hwnd, bgfx::ViewId viewId) {
         s_viewId = viewId;
 
         ImGui::CreateContext();
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        
+
         ImGui_ImplWin32_Init(hwnd);
         ImGui_BGFX::init(s_viewId);
     }
@@ -80,6 +85,14 @@ namespace Funkin::DebugManager {
     void toggleDebugStats() {
         s_enabled = !s_enabled;
         bgfx::setDebug(s_enabled ? BGFX_DEBUG_TEXT | BGFX_DEBUG_STATS : 0);
+    }
+
+    void setLogBgfx(bool enable) {
+        s_logBgfx = enable;
+    }
+
+    bool shouldLogBgfx() {
+        return s_logBgfx;
     }
 
     bool isEnabled() {

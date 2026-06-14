@@ -51,6 +51,7 @@ set(THIRD_PARTY_SOURCES
     ${FUNKIN_3RD_PARTY_DIR}/imgui/imgui_demo.cpp
     ${FUNKIN_3RD_PARTY_DIR}/imgui/backends/imgui_impl_win32.cpp
     ${FUNKIN_3RD_PARTY_DIR}/lz4/lib/lz4.c
+    ${FUNKIN_3RD_PARTY_DIR}/bgfx/bgfx/examples/common/debugdraw/debugdraw.cpp
 )
 
 add_executable(Funkin

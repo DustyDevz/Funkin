@@ -37,9 +37,12 @@
 #include "cache/project_cache.hpp"
 #include "renderer/audio/audio_manager.hpp"
 #include "renderer/audio/audio_source.hpp"
+#include "renderer/camera/camera_gizmo.hpp"
 
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>
+
+#include "debugdraw/debugdraw.h"
 
 namespace Funkin::App {
 
@@ -219,9 +222,11 @@ int run(int argc, char** argv, QApplication& qtApp) {
         return 1;
     }
 
+    ddInit();
     editorWindow->setRendererLabel(bgfx::getRendererName(bgfx::getRendererType()));
     LOG_PRINT("bgfx using: {}", bgfx::getRendererName(bgfx::getRendererType()));
 
+    Funkin::DebugManager::setLogBgfx(false);
     Funkin::DebugManager::init(hwnd, 255);
     Funkin::Assets::AssetManager::get().init();
     Funkin::Shader::Sprites::init();
@@ -305,6 +310,16 @@ int run(int argc, char** argv, QApplication& qtApp) {
     // });
     // testTimer->start();
 
+    // CAMERA TEST
+    Funkin::Renderer::Camera::GameCamera testCamera;
+    testCamera.targetHeight = 1280.f;
+    testCamera.targetWidth = 720.f;
+
+    Funkin::Renderer::Sprite cameraSprite;
+    cameraSprite.loadTexture("engine://camera");
+    cameraSprite.setOriginCenter();
+    cameraSprite.viewId = testLayer->viewId;
+
     rawInputFilter.onRenderFrame = [&]() {
         if (!running || !editorWindow->isVisible()) return;
 
@@ -335,6 +350,7 @@ int run(int argc, char** argv, QApplication& qtApp) {
         }
 
         camera.update(dt);
+        Funkin::Renderer::Camera::CameraGizmo::draw(0, testCamera, cameraSprite);
 
         if (input.justDown("char_up"))    testSprite.play("up", true);
         if (input.justDown("char_down"))  testSprite.play("down", true);
@@ -352,6 +368,7 @@ int run(int argc, char** argv, QApplication& qtApp) {
             Funkin::Renderer::SpriteBatch::get().begin(0, w, h);
             bgTest.draw();
             testSprite.draw();
+            cameraSprite.draw();
             Funkin::Renderer::SpriteBatch::get().end();
         }
 
@@ -403,12 +420,12 @@ int run(int argc, char** argv, QApplication& qtApp) {
     Funkin::Shader::Sprites::shutdown();
     Funkin::Shader::shutdownShaderJobs();
     Funkin::DebugManager::shutdown();
+    ddShutdown();
     bgfx::shutdown();
     delete editorWindow;
     Funkin::Audio::AudioManager::get().shutdown();
     input.shutdown();
 
     return result;
-}
-
+    }
 }

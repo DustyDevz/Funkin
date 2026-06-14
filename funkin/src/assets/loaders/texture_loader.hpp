@@ -4,6 +4,9 @@
 #pragma once
 #include <filesystem>
 #include <memory>
+#include <string>
+#include <vector>
+#include <optional>
 #include "../assets_types.hpp"
 
 namespace Funkin::Assets::Loaders {
@@ -23,6 +26,12 @@ namespace Funkin::Assets::Loaders {
     );
 
     std::shared_ptr<Texture> uploadPendingTexture(PendingTextureUpload& pending);
+
+    std::shared_ptr<Texture> loadTexture(
+        const std::string& virtualPath,
+        const std::string& id,
+        const std::string& group
+    );
 
     std::shared_ptr<Texture> loadTexture(
         const std::filesystem::path& path,
