@@ -38,6 +38,7 @@
 #include "renderer/audio/audio_manager.hpp"
 #include "renderer/audio/audio_source.hpp"
 #include "renderer/camera/camera_gizmo.hpp"
+#include "ui/editor/tools/ui_transform_gizmo.hpp"
 
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>
@@ -320,6 +321,14 @@ int run(int argc, char** argv, QApplication& qtApp) {
     cameraSprite.setOriginCenter();
     cameraSprite.viewId = testLayer->viewId;
 
+    // TRANSFORM TEST
+    Funkin::UI::Editor::Tools::TransformGizmo testGizmo;
+    testGizmo.mode = Funkin::UI::Editor::Tools::GizmoMode::Move;
+
+    Funkin::UI::Editor::Tools::GizmoTarget camTarget;
+    camTarget.x = testCamera.state().x;
+    camTarget.y = testCamera.state().y;
+
     rawInputFilter.onRenderFrame = [&]() {
         if (!running || !editorWindow->isVisible()) return;
 
@@ -350,7 +359,31 @@ int run(int argc, char** argv, QApplication& qtApp) {
         }
 
         camera.update(dt);
+        QPoint mp = viewport->mapFromGlobal(QCursor::pos());
         Funkin::Renderer::Camera::CameraGizmo::draw(0, testCamera, cameraSprite);
+
+        // holy shit, this is so ass
+        bool mouseDown = input.state().mouseButtons[(size_t)Funkin::Input::MouseButton::Left];
+
+        if (mouseDown && !testGizmo.isDragging()) {
+            auto handle = testGizmo.hitTest(camera.editor(), camTarget, mp.x(), mp.y(), w, h);
+            if (handle != UI::Editor::Tools::GizmoHandle::None)
+                testGizmo.beginDrag(handle, camTarget, mp.x(), mp.y());
+        }
+
+        if (mouseDown && testGizmo.isDragging())
+            testGizmo.drag(camTarget, camera.editor(), mp.x(), mp.y(), w, h);
+
+        if (!mouseDown && testGizmo.isDragging())
+            testGizmo.endDrag();
+
+        testCamera.setTarget(camTarget.x, camTarget.y);
+        if (testGizmo.isDragging())
+            testCamera.snapToTarget();
+        else
+            testCamera.update(dt);
+
+        testGizmo.draw(0, camera.editor(), camTarget, w, h);
 
         if (input.justDown("char_up"))    testSprite.play("up", true);
         if (input.justDown("char_down"))  testSprite.play("down", true);

@@ -39,6 +39,7 @@ file(GLOB UI_SOURCES CONFIGURE_DEPENDS
     "src/ui/*.cpp"
     "src/ui/project/*.cpp"
     "src/ui/editor/*.cpp"
+	"src/ui/editor/tools/*"
 )
 
 file(GLOB QT_SOURCES CONFIGURE_DEPENDS "qt/*.qrc")
