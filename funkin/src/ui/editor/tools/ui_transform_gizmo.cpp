@@ -47,23 +47,24 @@ namespace Funkin::UI::Editor::Tools {
             float handleWorld = handleSize / zoom;
 
             if (mode == GizmoMode::Move) {
-                bx::Aabb xBox; xBox.min = bx::Vec3(xEnd.x - handleWorld, xEnd.y - handleWorld, -0.5f);
-                              xBox.max = bx::Vec3(xEnd.x + handleWorld, xEnd.y + handleWorld,  0.5f);
-                dde.setColor(m_activeHandle == GizmoHandle::AxisX ? COLOR_HOVER : COLOR_X);
-                dde.draw(xBox);
+                float arrowLength = handleWorld * 1.5f;
+                float arrowRadius = handleWorld * 0.7f;
 
-                bx::Aabb yBox; yBox.min = bx::Vec3(yEnd.x - handleWorld, yEnd.y - handleWorld, -0.5f);
-                              yBox.max = bx::Vec3(yEnd.x + handleWorld, yEnd.y + handleWorld,  0.5f);
+                dde.setColor(m_activeHandle == GizmoHandle::AxisX ? COLOR_HOVER : COLOR_X);
+                bx::Vec3 xTip = { xEnd.x + arrowLength, xEnd.y, 0.f };
+                dde.drawCone(xEnd, xTip, arrowRadius);
+
                 dde.setColor(m_activeHandle == GizmoHandle::AxisY ? COLOR_HOVER : COLOR_Y);
-                dde.draw(yBox);
+                bx::Vec3 yTip = { yEnd.x, yEnd.y + arrowLength, 0.f };
+                dde.drawCone(yEnd, yTip, arrowRadius);
             } else {
                 bx::Aabb xBox; xBox.min = bx::Vec3(xEnd.x - handleWorld, xEnd.y - handleWorld, -0.5f);
-                              xBox.max = bx::Vec3(xEnd.x + handleWorld, xEnd.y + handleWorld,  0.5f);
+                xBox.max = bx::Vec3(xEnd.x + handleWorld, xEnd.y + handleWorld,  0.5f);
                 dde.setColor(m_activeHandle == GizmoHandle::ScaleX ? COLOR_HOVER : COLOR_X);
                 dde.draw(xBox);
 
                 bx::Aabb yBox; yBox.min = bx::Vec3(yEnd.x - handleWorld, yEnd.y - handleWorld, -0.5f);
-                              yBox.max = bx::Vec3(yEnd.x + handleWorld, yEnd.y + handleWorld,  0.5f);
+                yBox.max = bx::Vec3(yEnd.x + handleWorld, yEnd.y + handleWorld,  0.5f);
                 dde.setColor(m_activeHandle == GizmoHandle::ScaleY ? COLOR_HOVER : COLOR_Y);
                 dde.draw(yBox);
             }

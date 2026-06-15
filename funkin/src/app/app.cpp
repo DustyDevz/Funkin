@@ -360,6 +360,15 @@ int run(int argc, char** argv, QApplication& qtApp) {
 
         camera.update(dt);
         QPoint mp = viewport->mapFromGlobal(QCursor::pos());
+
+        // TEMP
+        float currentZoom = camera.editor().state().zoom;
+        float s = 1.f / currentZoom;
+        if (s > 4.f) { // size limit
+            s = 4.f;
+        }
+
+        cameraSprite.setScale(s);
         Funkin::Renderer::Camera::CameraGizmo::draw(0, testCamera, cameraSprite);
 
         // holy shit, this is so ass
